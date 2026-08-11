@@ -1,0 +1,144 @@
+/**
+ * Stripe Checkout Session — Vercel Function
+ * ----------------------------------------------------------------------------
+ * Takes the cart from the browser, prices it SERVER-SIDE (never trust prices
+ * sent by the client), and returns a Stripe-hosted checkout URL.
+ *
+ * Full setup walkthrough: see STRIPE-SETUP.md in the project root.
+ *
+ * Quick version:
+ *   1. Vercel → Project → Settings → Environment Variables:
+ *        STRIPE_SECRET_KEY = sk_test_...  (swap to sk_live_... when ready)
+ *        SITE_URL          = https://blairsbiltong.co.nz
+ *   2. In index.html set CONFIG.checkoutMode = 'checkout-session'
+ *   3. Push, then test with card 4242 4242 4242 4242
+ */
+
+// Pinned so a future Stripe API release can't silently change behaviour.
+const STRIPE_API_VERSION = '2025-10-29.clover';
+
+/* ---------------------------------------------------------------------------
+   CATALOGUE — prices in CENTS. Must mirror PRODUCTS in index.html.
+   This is the source of truth for what a customer is charged.
+   --------------------------------------------------------------------------- */
+export const CATALOGUE = {
+  original: { name: "Blair's Biltong — Original (50g)", cents: 1250 },
+  dryheat:  { name: "Blair's Biltong — Dry Heat (50g)", cents: 1250 }
+};
+
+const FREE_SHIPPING_OVER_CENTS = 6000;   // $60.00
+const FLAT_SHIPPING_CENTS      = 750;    // $7.50
+const MAX_QTY_PER_LINE         = 20;
+const MAX_LINES                = 10;
+
+/* ---------------------------------------------------------------------------
+   Payload builder — exported so it can be unit tested without hitting Stripe
+   --------------------------------------------------------------------------- */
+export function buildSessionPayload(items, siteUrl) {
+  if (!Array.isArray(items) || items.length === 0) throw new Error('EMPTY_CART');
+  if (items.length > MAX_LINES) throw new Error('TOO_MANY_LINES');
+
+  // Collapse duplicate ids so someone can't sneak the same product through twice.
+  const merged = new Map();
+  for (const raw of items) {
+    const id = String(raw && raw.id);
+    if (!Object.prototype.hasOwnProperty.call(CATALOGUE, id)) {
+      throw new Error(`UNKNOWN_PRODUCT:${id}`);
+    }
+    const qty = Math.floor(Number(raw.qty));
+    if (!Number.isFinite(qty) || qty < 1) throw new Error(`BAD_QUANTITY:${id}`);
+    merged.set(id, Math.min(MAX_QTY_PER_LINE, (merged.get(id) || 0) + qty));
+  }
+
+  let subtotal = 0;
+  const line_items = [];
+  const summary = [];
+
+  for (const [id, quantity] of merged) {
+    const product = CATALOGUE[id];
+    subtotal += product.cents * quantity;
+    summary.push(`${quantity}x ${id}`);
+    line_items.push({
+      quantity,
+      price_data: {
+        currency: 'nzd',
+        unit_amount: product.cents,
+        product_data: { name: product.name, metadata: { sku: id } }
+      }
+    });
+  }
+
+  const shippingCents = subtotal >= FREE_SHIPPING_OVER_CENTS ? 0 : FLAT_SHIPPING_CENTS;
+
+  return {
+    mode: 'payment',
+    line_items,
+    allow_promotion_codes: true,
+    customer_creation: 'always',
+    shipping_address_collection: { allowed_countries: ['NZ'] },
+    phone_number_collection: { enabled: true },
+    shipping_options: [{
+      shipping_rate_data: {
+        type: 'fixed_amount',
+        display_name: shippingCents === 0 ? 'Free shipping' : 'NZ Post tracked',
+        fixed_amount: { amount: shippingCents, currency: 'nzd' },
+        delivery_estimate: {
+          minimum: { unit: 'business_day', value: 2 },
+          maximum: { unit: 'business_day', value: 5 }
+        }
+      }
+    }],
+    // Shows up on the Stripe dashboard order — handy when you're packing.
+    metadata: { pack_list: summary.join(', '), subtotal_cents: String(subtotal) },
+    success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url:  `${siteUrl}/#shop`
+  };
+}
+
+/* ---------------------------------------------------------------------------
+   Handler
+   --------------------------------------------------------------------------- */
+const json = (body, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+  });
+
+export async function POST(request) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.SITE_URL) {
+    console.error('Missing STRIPE_SECRET_KEY or SITE_URL');
+    return json({ error: 'Checkout is not configured' }, 500);
+  }
+
+  const siteUrl = process.env.SITE_URL.replace(/\/+$/, '');
+
+  let payload;
+  try {
+    const { items } = await request.json();
+    payload = buildSessionPayload(items, siteUrl);
+  } catch (err) {
+    // Client's fault — say so, but don't leak internals.
+    console.warn('Rejected cart:', err.message);
+    return json({ error: 'That cart looks invalid. Please refresh and try again.' }, 400);
+  }
+
+  try {
+    // Imported lazily so this file can be unit tested without installing Stripe,
+    // and so the cold start doesn't pay for it on a rejected cart.
+    const { default: Stripe } = await import('stripe');
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: STRIPE_API_VERSION,
+      maxNetworkRetries: 2,
+      timeout: 15000
+    });
+    const session = await stripe.checkout.sessions.create(payload);
+    return json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe error:', err && err.message);
+    return json({ error: 'Could not start checkout. Please try again shortly.' }, 502);
+  }
+}
+
+export async function GET() {
+  return json({ error: 'Method not allowed' }, 405);
+}

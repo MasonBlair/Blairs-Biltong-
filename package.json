@@ -1,0 +1,17 @@
+{
+  "name": "blairs-biltong",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Blair's Biltong — static site with Stripe Checkout via Vercel Functions",
+  "scripts": {
+    "dev": "vercel dev",
+    "test:checkout": "node test/checkout.test.js"
+  },
+  "dependencies": {
+    "stripe": "^22.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

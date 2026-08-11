@@ -1,0 +1,4 @@
+# Keeping the site out of search while the copy and legals are still being finished.
+# ON LAUNCH DAY: delete this file, and remove the noindex meta tag from index.html.
+User-agent: *
+Disallow: /

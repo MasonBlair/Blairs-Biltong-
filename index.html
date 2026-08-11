@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blair's Biltong — Air Dried. Mountain Made. | Premium NZ Biltong</title>
+<meta name="description" content="Premium biltong crafted in Queenstown, New Zealand using traditional methods and the finest ingredients. High protein, grass fed, no nasties.">
+<meta property="og:title" content="Blair's Biltong — Air Dried. Mountain Made.">
+<meta property="og:description" content="Premium biltong crafted in Queenstown, New Zealand.">
+<meta property="og:type" content="website">
+
+<!-- ⚠️ REMOVE THIS LINE ON LAUNCH DAY.
+     It keeps the site out of Google while the testimonials are still
+     placeholders and the shipping/returns/privacy pages don't exist yet.
+     Anyone with the link can still see it — this only hides it from search. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/blairs-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet">
+
+<!-- ==========================================================================
+     BLAIR'S BILTONG
+     Static site, no build step. Deployed on Vercel from a GitHub repo —
+     see GO-LIVE.md. The /api folder holds the serverless functions.
+
+     TO EDIT PRODUCTS / PRICES / STRIPE LINKS:
+       jump to the CONFIG block in the script at the bottom of this file.
+     ========================================================================== -->
+
+<style>
+:root{
+  --ink:#241b13;
+  --ink-2:#150e07;
+  --ink-3:#31251a;
+  --cream:#efe4d0;
+  --cream-2:#f7f1e4;
+  --cream-3:#e2d5bd;
+  --gold:#b9873c;
+  --gold-lt:#d4a556;
+  --kraft:#c9a878;
+  --kraft-2:#b08e5f;
+  --maxw:1240px;
+  --pad:clamp(20px,5vw,56px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Barlow',system-ui,-apple-system,sans-serif;
+  color:var(--ink);
+  background:var(--cream-2);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+h1,h2,h3,h4,.display{
+  font-family:'Oswald',Impact,sans-serif;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.01em;
+  line-height:1.02;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+.eyebrow{
+  font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.18em;font-size:.72rem;color:var(--gold);
+}
+.script{font-family:'Caveat',cursive;text-transform:none;letter-spacing:0}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.12em;font-size:.86rem;
+  padding:15px 30px;border-radius:2px;
+  transition:transform .15s ease, background .2s ease, color .2s ease, border-color .2s;
+  border:2px solid transparent;
+}
+.btn:active{transform:translateY(1px)}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{background:var(--gold-lt)}
+.btn-ghost{border-color:rgba(255,255,255,.85);color:#fff}
+.btn-ghost:hover{background:#fff;color:var(--ink)}
+.btn-dark{background:var(--ink);color:var(--cream)}
+.btn-dark:hover{background:var(--ink-3)}
+.btn-sm{padding:11px 22px;font-size:.78rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- header ---------- */
+header{
+  position:fixed;inset:0 0 auto 0;z-index:80;
+  transition:background .3s ease, box-shadow .3s ease, padding .3s ease;
+  padding:10px 0;
+}
+header.scrolled{background:rgba(21,14,7,.96);box-shadow:0 2px 24px rgba(0,0,0,.35);padding:2px 0}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.logo img{width:clamp(78px,9vw,118px);height:auto;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.55))}
+nav.main{display:flex;gap:clamp(18px,2.6vw,40px)}
+nav.main a{
+  font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;
+  letter-spacing:.14em;font-size:.78rem;color:var(--cream);
+  padding:8px 0;position:relative;
+}
+nav.main a::after{
+  content:'';position:absolute;left:0;right:100%;bottom:2px;height:1.5px;
+  background:var(--gold);transition:right .25s ease;
+}
+nav.main a:hover::after{right:0}
+.hdr-actions{display:flex;align-items:center;gap:18px}
+.icon-btn{color:var(--cream);position:relative;display:grid;place-items:center;
+  width:38px;height:38px;border-radius:50%;transition:background .2s}
+.icon-btn:hover{background:rgba(255,255,255,.12)}
+.icon-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7}
+.cart-count{
+  position:absolute;top:1px;right:0;min-width:18px;height:18px;padding:0 5px;
+  background:var(--gold);color:#fff;border-radius:9px;
+  font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;
+  display:grid;place-items:center;transform:scale(0);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.cart-count.on{transform:scale(1)}
+.burger{display:none;color:var(--cream)}
+.burger svg{width:26px;height:26px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:min(92vh,880px);display:flex;align-items:center;
+  padding:150px 0 130px;overflow:hidden;background:#0d0906}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:60% 55%}
+/* scrim — keeps the headline readable over a bright photo */
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(9,6,3,.55) 0%,rgba(9,6,3,0) 26%),
+    linear-gradient(100deg,rgba(9,6,3,.93) 0%,rgba(9,6,3,.80) 32%,rgba(9,6,3,.34) 62%,rgba(9,6,3,.58) 100%);
+}
+.hero .wrap{position:relative;z-index:2;width:100%}
+.hero-grid{max-width:660px}
+.hero h1{
+  color:var(--cream-2);font-size:clamp(2.9rem,7.4vw,5.4rem);
+  text-shadow:0 4px 26px rgba(0,0,0,.6);margin-bottom:22px;
+}
+.rule{width:66px;height:4px;background:var(--gold);margin-bottom:22px}
+.hero p.lede{color:rgba(239,228,208,.9);font-size:clamp(1rem,1.25vw,1.12rem);max-width:34ch;margin-bottom:32px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:56px}
+
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,2vw,28px);max-width:640px}
+.badge{text-align:center}
+.badge svg{width:34px;height:34px;margin:0 auto 10px;stroke:var(--cream);fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.badge strong{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.09em;font-size:.72rem;color:var(--gold-lt);margin-bottom:3px}
+.badge span{font-size:.76rem;color:rgba(239,228,208,.72);line-height:1.35;display:block}
+
+/* ---------- product photography ---------- */
+.shot{
+  width:100%;max-width:290px;height:auto;margin:0 auto;
+  filter:drop-shadow(0 22px 26px rgba(36,27,19,.28));
+  transition:transform .3s ease;
+}
+.card:hover .shot{transform:translateY(-4px) scale(1.02)}
+.shot-dark{filter:drop-shadow(0 34px 44px rgba(0,0,0,.6))}
+.ph-note{
+  position:absolute;top:8px;left:8px;z-index:3;
+  background:rgba(185,135,60,.94);color:#fff;font-family:'Oswald',sans-serif;
+  font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;padding:4px 8px;border-radius:2px;
+  pointer-events:none;
+}
+
+/* ---------- torn paper divider ---------- */
+.torn{display:block;width:100%;height:clamp(34px,4.5vw,68px);margin-bottom:-1px}
+.torn.flip{transform:rotate(180deg)}
+
+/* ---------- sections ---------- */
+section{position:relative}
+.sec-pad{padding:clamp(64px,8vw,104px) 0}
+.sec-cream{background:var(--cream)}
+.sec-dark{background:var(--ink-2);color:var(--cream)}
+.sec-head{text-align:center;margin-bottom:clamp(38px,5vw,60px)}
+.sec-head h2{font-size:clamp(1.7rem,3.4vw,2.5rem);display:inline-flex;align-items:center;gap:22px}
+.sec-head h2::before,.sec-head h2::after{content:'';width:clamp(22px,5vw,58px);height:2px;background:var(--gold)}
+
+/* difference */
+.diff{display:grid;grid-template-columns:repeat(4,1fr)}
+.diff > div{padding:0 clamp(14px,2.4vw,32px);text-align:center;border-left:1px solid rgba(36,27,19,.16)}
+.diff > div:first-child{border-left:none}
+.diff svg{width:40px;height:40px;margin:0 auto 18px;stroke:var(--ink);fill:none;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round}
+.diff h3{font-size:.95rem;letter-spacing:.06em;margin-bottom:10px}
+.diff p{font-size:.9rem;color:rgba(36,27,19,.72);max-width:22ch;margin:0 auto}
+
+/* subscribe split */
+.split{display:grid;grid-template-columns:1fr 1fr;min-height:520px}
+.split-img{position:relative;background:#0d0906;display:grid;place-items:center;overflow:hidden;padding:60px 40px}
+.split-img .bgsvg{position:absolute;inset:0}
+.split-img .bgsvg svg{width:100%;height:100%}
+.split-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,6,3,.35),rgba(9,6,3,.65))}
+.boxshot{position:relative;z-index:2;width:min(78%,340px);filter:drop-shadow(0 30px 45px rgba(0,0,0,.6))}
+.box{
+  aspect-ratio:1.5;border-radius:4px;
+  background:linear-gradient(105deg,rgba(255,255,255,.18),rgba(0,0,0,.18)),
+             linear-gradient(180deg,var(--kraft) 0%,var(--kraft-2) 100%);
+  display:grid;place-items:center;padding:14%;
+  box-shadow:inset 0 -14px 26px rgba(0,0,0,.15);
+}
+.box img{width:72%}
+.delivered{position:absolute;z-index:3;right:6%;top:16%;text-align:center;color:var(--cream)}
+.delivered span{font-family:'Caveat',cursive;font-size:clamp(1.05rem,2vw,1.5rem);display:block;line-height:1.15}
+.delivered svg{width:52px;height:44px;stroke:var(--cream);fill:none;stroke-width:1.6;margin:2px auto 0}
+.split-copy{background:var(--ink-2);display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(44px,5.5vw,76px)}
+.split-copy h2{font-size:clamp(1.8rem,3.6vw,2.7rem);color:var(--cream-2);margin:10px 0 16px}
+.split-copy > p{color:rgba(239,228,208,.75);max-width:44ch;margin-bottom:30px}
+.feat{display:flex;gap:16px;margin-bottom:22px;align-items:flex-start}
+.feat .ic{flex:0 0 42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);
+  display:grid;place-items:center}
+.feat .ic svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.feat strong{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.11em;font-size:.8rem;color:var(--gold-lt);margin-bottom:2px}
+.feat p{font-size:.9rem;color:rgba(239,228,208,.72)}
+
+/* signup inline */
+.signup{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.signup input{
+  flex:1 1 220px;min-width:0;background:rgba(255,255,255,.07);color:var(--cream);
+  border:1px solid rgba(239,228,208,.28);border-radius:2px;padding:14px 16px;font-size:.92rem}
+.signup input::placeholder{color:rgba(239,228,208,.45)}
+.signup input:focus{outline:none;border-color:var(--gold)}
+.form-msg{font-size:.84rem;color:var(--gold-lt);margin-top:12px;min-height:1.2em}
+
+/* shop */
+.shop-head{display:grid;grid-template-columns:minmax(230px,.8fr) 2fr;gap:clamp(28px,4vw,64px);
+  align-items:center;margin-bottom:clamp(34px,4vw,46px)}
+.shop-head h2{font-size:clamp(1.9rem,3.8vw,2.7rem);margin-bottom:18px}
+.shop-head p{color:rgba(36,27,19,.72);margin-bottom:24px;max-width:26ch}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(18px,2.6vw,40px);
+  max-width:880px;margin:0 auto}
+.card{
+  background:var(--cream-2);border:1px solid rgba(36,27,19,.1);border-radius:3px;
+  padding:26px 22px 24px;text-align:center;display:flex;flex-direction:column;
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s;
+}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 34px rgba(36,27,19,.13);border-color:rgba(185,135,60,.5)}
+.card .shot{margin:0 auto 22px;max-width:210px}
+.card h3{font-size:1.12rem;letter-spacing:.09em;margin-bottom:6px}
+.card .desc{font-size:.87rem;color:rgba(36,27,19,.68);margin-bottom:14px;min-height:2.6em}
+.card .price{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.28rem;margin-bottom:16px}
+.card .price small{font-size:.68rem;font-weight:500;letter-spacing:.12em;color:rgba(36,27,19,.55);
+  text-transform:uppercase;display:block;margin-top:2px}
+.qty{display:flex;align-items:center;justify-content:center;gap:0;margin:0 auto 14px;
+  border:1px solid rgba(36,27,19,.22);border-radius:2px;width:132px}
+.qty button{width:40px;height:40px;font-family:'Oswald',sans-serif;font-size:1.15rem;color:var(--ink);
+  transition:background .15s}
+.qty button:hover{background:rgba(36,27,19,.07)}
+.qty span{flex:1;text-align:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:1rem}
+.card .btn{width:100%;margin-top:auto}
+
+/* reviews */
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center}
+.reviews > div{padding:0 clamp(16px,3vw,42px);border-left:1px solid rgba(239,228,208,.18)}
+.reviews > div:first-child{border-left:none}
+.stars{color:var(--gold);letter-spacing:.22em;margin-bottom:16px;font-size:1rem}
+.reviews blockquote{color:rgba(239,228,208,.9);font-size:.98rem;margin-bottom:14px;font-style:italic}
+.reviews cite{font-style:normal;font-family:'Oswald',sans-serif;font-weight:500;font-size:.78rem;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--gold-lt)}
+
+/* story / ingredients */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:clamp(34px,5vw,76px);align-items:center}
+.two-col h2{font-size:clamp(1.7rem,3.2vw,2.4rem);margin-bottom:8px}
+.two-col p{margin-bottom:16px;color:rgba(36,27,19,.78)}
+.sec-dark .two-col p{color:rgba(239,228,208,.75)}
+.ing-list{list-style:none;display:grid;gap:12px;margin-top:8px}
+.ing-list li{display:flex;gap:12px;align-items:flex-start;font-size:.94rem;color:rgba(239,228,208,.82)}
+.ing-list li::before{content:'';flex:0 0 7px;height:7px;margin-top:9px;background:var(--gold);
+  transform:rotate(45deg)}
+.nutri{background:rgba(239,228,208,.06);border:1px solid rgba(239,228,208,.18);padding:26px 28px;border-radius:3px}
+.nutri h4{font-size:.85rem;letter-spacing:.14em;color:var(--gold-lt);margin-bottom:16px}
+.nutri table{width:100%;border-collapse:collapse;font-size:.9rem}
+.nutri td{padding:9px 0;border-bottom:1px solid rgba(239,228,208,.13);color:rgba(239,228,208,.82)}
+.nutri td:last-child{text-align:right;font-family:'Oswald',sans-serif;font-weight:600;color:var(--cream)}
+.nutri tr:last-child td{border-bottom:none}
+.nutri .disc{font-size:.72rem;color:rgba(239,228,208,.45);margin-top:14px}
+
+/* footer */
+footer{background:var(--ink-2);color:rgba(239,228,208,.72);padding:clamp(48px,6vw,72px) 0 0}
+.foot-grid{display:grid;grid-template-columns:1.1fr .7fr .7fr 1.3fr .8fr;gap:clamp(24px,3vw,44px);
+  padding-bottom:44px}
+footer h4{font-size:.8rem;letter-spacing:.16em;color:var(--cream);margin-bottom:16px}
+footer ul{list-style:none;display:grid;gap:9px}
+footer a{font-size:.88rem;transition:color .18s}
+footer a:hover{color:var(--gold-lt)}
+footer .logo img{width:104px}
+.foot-note{font-size:.85rem;margin-bottom:16px;max-width:30ch}
+.socials{display:flex;gap:12px;margin-top:4px}
+.socials a{width:36px;height:36px;border:1px solid rgba(239,228,208,.28);border-radius:50%;
+  display:grid;place-items:center;transition:border-color .2s,background .2s}
+.socials a:hover{border-color:var(--gold);background:rgba(185,135,60,.15)}
+.socials svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6}
+.foot-bar{border-top:1px solid rgba(239,228,208,.14);padding:20px 0;display:flex;
+  justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.8rem;color:rgba(239,228,208,.5)}
+
+/* ---------- cart drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,6,3,.6);opacity:0;pointer-events:none;
+  transition:opacity .3s;z-index:90;backdrop-filter:blur(2px)}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--cream-2);
+  z-index:100;transform:translateX(101%);transition:transform .34s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.3)}
+.drawer.on{transform:none}
+.drawer-hd{display:flex;align-items:center;justify-content:space-between;
+  padding:22px 24px;border-bottom:1px solid rgba(36,27,19,.14);background:var(--ink-2);color:var(--cream)}
+.drawer-hd h3{font-size:1rem;letter-spacing:.15em}
+.drawer-hd button{color:var(--cream);font-size:1.5rem;line-height:1;padding:0 4px}
+.drawer-body{flex:1;overflow-y:auto;padding:8px 24px}
+.empty{text-align:center;padding:64px 0;color:rgba(36,27,19,.55)}
+.empty svg{width:44px;height:44px;stroke:currentColor;fill:none;stroke-width:1.3;margin:0 auto 16px}
+.line{display:grid;grid-template-columns:58px 1fr auto;gap:14px;align-items:center;
+  padding:18px 0;border-bottom:1px solid rgba(36,27,19,.1)}
+.line .thumb{width:58px;aspect-ratio:.72;border-radius:3px;
+  background:var(--cream);display:grid;place-items:center;padding:4px}
+.line .thumb img{width:100%;height:auto;object-fit:contain}
+.line h4{font-size:.9rem;letter-spacing:.07em;margin-bottom:3px}
+.line .sub{font-size:.78rem;color:rgba(36,27,19,.6)}
+.line .qty{width:104px;margin:8px 0 0}
+.line .qty button{width:32px;height:32px;font-size:1rem}
+.line .amt{font-family:'Oswald',sans-serif;font-weight:600;font-size:.98rem;text-align:right}
+.line .rm{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(36,27,19,.5);
+  margin-top:8px;display:block;text-align:right}
+.line .rm:hover{color:#8a3020}
+.drawer-ft{padding:20px 24px 24px;border-top:1px solid rgba(36,27,19,.14);background:var(--cream)}
+.tot-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:9px;
+  color:rgba(36,27,19,.75)}
+.tot-row.grand{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.15rem;color:var(--ink);
+  padding-top:11px;margin-top:4px;border-top:1px solid rgba(36,27,19,.16)}
+.ship-bar{height:5px;background:rgba(36,27,19,.13);border-radius:3px;overflow:hidden;margin:4px 0 16px}
+.ship-bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .35s ease}
+.ship-msg{font-size:.78rem;color:var(--gold);margin-bottom:6px}
+.drawer-ft .btn{width:100%;margin-top:14px}
+.pay-note{font-size:.72rem;text-align:center;color:rgba(36,27,19,.5);margin-top:12px;line-height:1.5}
+
+/* ---------- mobile ---------- */
+@media(max-width:1000px){
+  .badges{max-width:none}
+  .split{grid-template-columns:1fr}
+  .split-img{min-height:340px}
+  .diff{grid-template-columns:1fr 1fr;gap:38px 0}
+  .diff > div:nth-child(3){border-left:none}
+  .diff > div:nth-child(-n+2){padding-bottom:34px;border-bottom:1px solid rgba(36,27,19,.16)}
+  .shop-head{grid-template-columns:1fr;text-align:center}
+  .shop-head p{max-width:none;margin-inline:auto}
+  .two-col{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:34px}
+}
+@media(max-width:760px){
+  nav.main{
+    position:fixed;inset:0 0 0 auto;width:min(300px,82%);background:var(--ink-2);
+    flex-direction:column;justify-content:center;gap:6px;padding:40px;
+    transform:translateX(101%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:95}
+  nav.main.on{transform:none}
+  nav.main a{font-size:1.05rem;padding:14px 0;border-bottom:1px solid rgba(239,228,208,.12)}
+  .burger{display:grid;place-items:center;width:38px;height:38px}
+  header{background:rgba(21,14,7,.94)}
+  .hero{padding:120px 0 80px;min-height:0}
+  .products{grid-template-columns:1fr;max-width:340px;margin:0 auto}
+  .reviews{grid-template-columns:1fr;gap:38px}
+  .reviews > div{border-left:none;padding:0}
+  .reviews > div + div{border-top:1px solid rgba(239,228,208,.18);padding-top:34px}
+  .badges{grid-template-columns:1fr 1fr;gap:26px 14px}
+  .foot-grid{grid-template-columns:1fr;text-align:center}
+  .socials{justify-content:center}
+  .foot-bar{justify-content:center;text-align:center}
+  .sec-head h2::before,.sec-head h2::after{width:20px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<!-- ============================== HEADER ============================== -->
+<header id="hdr">
+  <div class="wrap hdr">
+    <a href="#top" class="logo" aria-label="Blair's Biltong home">
+      <img src="assets/blairs-logo.png" alt="Blair's Biltong">
+    </a>
+
+    <nav class="main" id="nav">
+      <a href="#shop">Shop</a>
+      <a href="#subscribe">Subscribe</a>
+      <a href="#story">Our Story</a>
+      <a href="#ingredients">Ingredients</a>
+      <a href="#reviews">Reviews</a>
+    </nav>
+
+    <div class="hdr-actions">
+      <a href="#subscribe" class="icon-btn" aria-label="Account">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      </a>
+      <button class="icon-btn" id="cartBtn" aria-label="Open cart">
+        <svg viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 7z"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7"/></svg>
+        <em class="cart-count" id="cartCount" style="font-style:normal">0</em>
+      </button>
+      <button class="burger" id="burger" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== HERO ============================== -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <img src="assets/hero.jpg" alt="" fetchpriority="high">
+  </div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <h1>Air Dried.<br>Mountain Made.</h1>
+        <div class="rule"></div>
+        <p class="lede">Premium biltong crafted in Queenstown, New Zealand using traditional methods and the finest ingredients.</p>
+        <div class="hero-cta">
+          <a href="#shop" class="btn btn-gold">Shop Biltong</a>
+          <a href="#subscribe" class="btn btn-ghost">Subscribe &amp; Save</a>
+        </div>
+
+        <div class="badges">
+          <div class="badge">
+            <svg viewBox="0 0 24 24"><path d="M12 21c0-6 3-10 8-11-1 6-4 9-8 11z"/><path d="M12 21C9 15 6 12 3 11c1 6 4 9 9 10z"/><path d="M12 21v-5"/></svg>
+            <strong>High in Protein</strong><span>Low in carbs</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24"><path d="M4 8c0-2 1.5-3 3-3M20 8c0-2-1.5-3-3-3"/><path d="M4 8c0 5 3.6 9 8 9s8-4 8-9"/><circle cx="9.5" cy="10.5" r=".8" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10.5" r=".8" fill="currentColor" stroke="none"/></svg>
+            <strong>Grass Fed Beef</strong><span>Ethically sourced</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24"><path d="M2 19l6-11 4 7 3-5 7 9z"/><path d="M6.4 12.2l1.6-1 1.4 1"/></svg>
+            <strong>Made in Queenstown</strong><span>Proudly NZ made</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+            <strong>No Nasties</strong><span>No MSG or preservatives</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== DIFFERENCE ============================== -->
+<svg class="torn" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+  <path fill="#efe4d0" d="M0 34 C60 12 120 44 190 30 C265 15 320 46 400 34 C470 24 530 50 610 38 C690 26 740 52 820 40 C900 28 950 14 1030 30 C1105 45 1150 22 1200 32 L1200 60 L0 60Z"/>
+</svg>
+
+<section class="sec-cream sec-pad">
+  <div class="wrap">
+    <div class="sec-head rv"><h2>The Blair's Difference</h2></div>
+    <div class="diff">
+      <div class="rv">
+        <svg viewBox="0 0 24 24"><path d="M3 15l10-10 4 4-10 10H3v-4z"/><path d="M14 6l4 4"/><path d="M16 19h5"/></svg>
+        <h3>Traditional Recipe</h3><p>Hand seasoned and air dried to perfection.</p>
+      </div>
+      <div class="rv">
+        <svg viewBox="0 0 24 24"><path d="M12 21c0-6 3-10 8-11-1 6-4 9-8 11z"/><path d="M12 21C9 15 6 12 3 11c1 6 4 9 9 10z"/></svg>
+        <h3>Clean Ingredients</h3><p>No MSG, no preservatives, no nasties.</p>
+      </div>
+      <div class="rv">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <h3>Time &amp; Care</h3><p>Air dried for days, never rushed.</p>
+      </div>
+      <div class="rv">
+        <svg viewBox="0 0 24 24"><path d="M2 19l6-11 4 7 3-5 7 9z"/><path d="M6.4 12.2l1.6-1 1.4 1"/></svg>
+        <h3>Made Locally</h3><p>Proudly made in Queenstown, NZ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SUBSCRIBE (waitlist) ============================== -->
+<section class="split" id="subscribe">
+  <div class="split-img">
+    <div class="bgsvg">
+      <svg viewBox="0 0 800 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a2019"/><stop offset="60%" stop-color="#6d5236"/>
+          <stop offset="100%" stop-color="#b98b52"/></linearGradient></defs>
+        <rect width="800" height="620" fill="url(#sky2)"/>
+        <path fill="#3a2d20" d="M0 330 L120 220 L230 320 L360 200 L480 330 L610 235 L740 340 L800 300 L800 620 L0 620Z"/>
+        <g fill="#efe4d0" opacity=".7">
+          <path d="M360 200 L392 244 L374 236 L358 250 L342 234 L324 242Z"/>
+          <path d="M610 235 L640 278 L622 270 L607 284 L592 268 L575 276Z"/>
+        </g>
+        <path fill="#241b13" d="M0 440 L160 350 L320 440 L470 360 L640 460 L800 400 L800 620 L0 620Z"/>
+      </svg>
+    </div>
+    <div class="delivered">
+      <span>Delivered to<br>your door</span>
+      <svg viewBox="0 0 60 50"><path d="M6 4c14 2 26 12 30 26" stroke-linecap="round"/><path d="M30 30l6-8M30 30l-9-2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="boxshot">
+      <span class="ph-note">Placeholder</span>
+      <div class="box"><img src="assets/blairs-logo.png" alt=""></div>
+    </div>
+  </div>
+
+  <div class="split-copy">
+    <div class="eyebrow">Coming soon —</div>
+    <h2>Subscribe &amp; Save</h2>
+    <p>Never run out. Get your favourite biltong delivered automatically, and save 10% on every order. We're setting this up now — join the list and you'll be first in.</p>
+
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3zM16 10h3.5L22 13v4h-6z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg></div>
+      <div><strong>Delivered your way</strong><p>Choose your preferred flavours and frequency.</p></div>
+    </div>
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5L15.5 8.5"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></div>
+      <div><strong>Save 10%</strong><p>Ten percent off every subscription order.</p></div>
+    </div>
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M4 18h16"/></svg></div>
+      <div><strong>Flexible &amp; easy</strong><p>Pause, skip or cancel anytime.</p></div>
+    </div>
+
+    <form class="signup" id="waitlistForm" novalidate>
+      <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+      <button type="submit" class="btn btn-gold btn-sm">Join the list</button>
+    </form>
+    <div class="form-msg" id="waitlistMsg"></div>
+  </div>
+</section>
+
+<!-- ============================== SHOP ============================== -->
+<section class="sec-cream sec-pad" id="shop">
+  <div class="wrap">
+    <div class="shop-head">
+      <div class="rv">
+        <h2>Fuel your<br>next adventure</h2>
+        <div class="rule"></div>
+        <p>Explore our range of premium biltong flavours. Hand made in small batches.</p>
+      </div>
+      <div></div>
+    </div>
+    <div class="products" id="productGrid"><!-- rendered by JS --></div>
+  </div>
+</section>
+
+<!-- ============================== STORY ============================== -->
+<svg class="torn flip" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+  <path fill="#efe4d0" d="M0 34 C60 12 120 44 190 30 C265 15 320 46 400 34 C470 24 530 50 610 38 C690 26 740 52 820 40 C900 28 950 14 1030 30 C1105 45 1150 22 1200 32 L1200 60 L0 60Z"/>
+</svg>
+
+<section class="sec-pad" id="story" style="background:var(--cream-2)">
+  <div class="wrap two-col">
+    <div class="rv">
+      <div class="eyebrow">Our story</div>
+      <h2>Made for the mountains</h2>
+      <div class="rule"></div>
+      <p><em>[Placeholder copy — replace with the real story.]</em></p>
+      <p>Blair's Biltong started in a Queenstown kitchen, with a family recipe carried over from South Africa and a stubborn belief that good biltong can't be rushed. No shortcuts, no fillers, no ingredients you can't pronounce.</p>
+      <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
+      <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
+    </div>
+    <div class="rv" style="display:grid;place-items:center">
+      <img class="shot" src="assets/pouch-dryheat.png" alt="Blair's Biltong Dry Heat, 50g pouch"
+           style="max-width:260px" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ============================== INGREDIENTS ============================== -->
+<section class="sec-dark sec-pad" id="ingredients">
+  <div class="wrap two-col">
+    <div class="rv">
+      <div class="eyebrow">Ingredients</div>
+      <h2 style="color:var(--cream-2)">Nothing you can't pronounce</h2>
+      <div class="rule"></div>
+      <ul class="ing-list">
+        <li>100% New Zealand grass fed beef</li>
+        <li>Sea salt</li>
+        <li>Cracked black pepper</li>
+        <li>Coriander seed</li>
+        <li>Brown vinegar</li>
+        <li>Worcestershire sauce <em style="opacity:.6">(contains soy)</em></li>
+      </ul>
+      <p style="margin-top:22px;font-size:.86rem;opacity:.6">
+        <strong>Allergen note:</strong> placeholder only. Your final on-pack and on-site allergen
+        statement must be PEAL-compliant with allergens bolded — confirm against your actual recipe.
+      </p>
+    </div>
+
+    <div class="nutri rv">
+      <h4>Nutrition Information — per 100g</h4>
+      <table>
+        <tr><td>Energy</td><td>—</td></tr>
+        <tr><td>Protein</td><td>—</td></tr>
+        <tr><td>Fat, total</td><td>—</td></tr>
+        <tr><td>— saturated</td><td>—</td></tr>
+        <tr><td>Carbohydrate</td><td>—</td></tr>
+        <tr><td>— sugars</td><td>—</td></tr>
+        <tr><td>Sodium</td><td>—</td></tr>
+      </table>
+      <p class="disc">Values to be confirmed by nutritional analysis before launch. A compliant
+        Nutrition Information Panel is mandatory on packaged food sold at retail in New Zealand.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== REVIEWS ============================== -->
+<section class="sec-pad" id="reviews" style="background:var(--ink)">
+  <div class="wrap">
+    <div class="sec-head rv"><h2 style="color:var(--cream-2)">What our customers say</h2></div>
+    <div class="reviews">
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Best biltong I've had outside of South Africa. Proper flavour and perfect texture."</blockquote>
+        <cite>— Mike, Queenstown</cite>
+      </div>
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Clean ingredients, great taste and super high protein. My go-to snack."</blockquote>
+        <cite>— Sarah, Wanaka</cite>
+      </div>
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Blair's Biltong is always in my pack. Perfect for the mountains."</blockquote>
+        <cite>— Tom, Arrowtown</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="margin-bottom:16px"><img src="assets/blairs-logo.png" alt="Blair's Biltong"></div>
+        <p class="foot-note">Premium biltong, air dried in Queenstown, New Zealand.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="#shop">All Biltong</a></li>
+          <li><a href="#shop">Original</a></li>
+          <li><a href="#shop">Dry Heat</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Info</h4>
+        <ul>
+          <li><a href="#story">Our Story</a></li>
+          <li><a href="#ingredients">Ingredients</a></li>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Stay in the loop</h4>
+        <p class="foot-note">Be the first to know about new flavours, offers and adventures.</p>
+        <form class="signup" id="newsForm" style="margin-top:14px" novalidate>
+          <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+          <button type="submit" class="btn btn-gold btn-sm">Join</button>
+        </form>
+        <div class="form-msg" id="newsMsg"></div>
+      </div>
+      <div>
+        <h4>Follow us</h4>
+        <div class="socials">
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M14 8h2.5V4.5H14c-2.2 0-3.5 1.4-3.5 3.6V10H8v3.5h2.5V21H14v-7.5h2.6l.4-3.5H14V8.6c0-.4.2-.6.6-.6z" fill="currentColor" stroke="none"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© <span id="yr"></span> Blair's Biltong. All rights reserved.</span>
+      <span>Proudly made in Queenstown, New Zealand.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================== CART ============================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Shopping cart">
+  <div class="drawer-hd">
+    <h3>Your Cart</h3>
+    <button id="closeCart" aria-label="Close cart">&times;</button>
+  </div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-ft" id="cartFoot" hidden>
+    <div class="ship-msg" id="shipMsg"></div>
+    <div class="ship-bar"><i id="shipFill"></i></div>
+    <div class="tot-row"><span>Subtotal</span><span id="sub"></span></div>
+    <div class="tot-row"><span>Shipping</span><span id="ship"></span></div>
+    <div class="tot-row grand"><span>Total</span><span id="grand"></span></div>
+    <button class="btn btn-gold" id="checkoutBtn">Checkout</button>
+    <p class="pay-note">Secure payment via Stripe. Shipping within New Zealand.</p>
+  </div>
+</aside>
+
+<script>
+/* ============================================================================
+   CONFIG — this is the only block you normally need to edit
+   ========================================================================= */
+const CONFIG = {
+  currency: 'NZD',
+  shippingFlat: 7.50,
+  freeShippingOver: 60.00,
+
+  // 'payment-link'    → uses the stripeLinks below. Works today, no server needed.
+  // 'checkout-session'→ posts the cart to a serverless function that creates a
+  //                     Stripe Checkout Session. Gives shipping rates, promo
+  //                     codes, Apple/Google Pay, and mixed carts in one payment.
+  checkoutMode: 'payment-link',
+
+  // Paste your Stripe Payment Link URLs here (one per product).
+  // With 'payment-link' mode we open the link for whichever product has the
+  // largest line — a stopgap only. Move to 'checkout-session' before launch day.
+  stripeLinks: {
+    original: '',   // e.g. 'https://buy.stripe.com/xxxxxxxx'
+    dryheat:  ''
+  },
+
+  // Used when checkoutMode === 'checkout-session'
+  checkoutEndpoint: '/api/create-checkout-session',
+  subscribeEndpoint: '/api/subscribe'
+};
+
+// `img` is the cut-out product photo in assets/. Prices are placeholders.
+const PRODUCTS = [
+  { id:'original', name:'Original', desc:'Classic. Traditional. Delicious.',
+    price:12.50, weight:'50g', img:'assets/pouch-original.png' },
+  { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',
+    price:12.50, weight:'50g', img:'assets/pouch-dryheat.png' }
+];
+
+/* ============================================================================
+   Helpers
+   ========================================================================= */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const money = n => '$' + n.toFixed(2);
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- render product grid ---------- */
+function shotMarkup(p){
+  return `<img class="shot" src="${p.img}" loading="lazy"
+    alt="Blair's Biltong ${escapeHtml(p.name)}, ${escapeHtml(p.weight)} pouch">`;
+}
+
+function renderProducts(){
+  $('#productGrid').innerHTML = PRODUCTS.map(p => `
+    <article class="card rv" data-id="${p.id}">
+      ${shotMarkup(p)}
+      <h3>${escapeHtml(p.name)}</h3>
+      <p class="desc">${escapeHtml(p.desc)}</p>
+      <div class="price">${money(p.price)}<small>${escapeHtml(p.weight)} pack</small></div>
+      <div class="qty">
+        <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
+        <span data-qty>1</span>
+        <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+      </div>
+      <button class="btn btn-dark" data-add>Add to cart</button>
+    </article>`).join('');
+
+  $$('#productGrid .card').forEach(card => {
+    const qtyEl = $('[data-qty]', card);
+    $$('[data-step]', card).forEach(b => b.addEventListener('click', () => {
+      const next = Math.max(1, Math.min(20, +qtyEl.textContent + (+b.dataset.step)));
+      qtyEl.textContent = next;
+    }));
+    $('[data-add]', card).addEventListener('click', () => {
+      addToCart(card.dataset.id, +qtyEl.textContent);
+      qtyEl.textContent = 1;
+    });
+  });
+  observeReveals();
+}
+
+/* ============================================================================
+   Cart  (in-memory — see BUILD-PLAN.md, persistence lands with Checkout Sessions)
+   ========================================================================= */
+let cart = [];
+
+function addToCart(id, qty){
+  const line = cart.find(l => l.id === id);
+  if (line) line.qty = Math.min(99, line.qty + qty);
+  else cart.push({ id, qty });
+  renderCart();
+  openCart();
+}
+function setQty(id, qty){
+  const line = cart.find(l => l.id === id);
+  if (!line) return;
+  line.qty = qty;
+  if (line.qty < 1) cart = cart.filter(l => l.id !== id);
+  renderCart();
+}
+function totals(){
+  const sub = cart.reduce((t,l) => t + PRODUCTS.find(p => p.id===l.id).price * l.qty, 0);
+  const ship = cart.length === 0 ? 0 : (sub >= CONFIG.freeShippingOver ? 0 : CONFIG.shippingFlat);
+  return { sub, ship, grand: sub + ship, count: cart.reduce((t,l)=>t+l.qty,0) };
+}
+
+function renderCart(){
+  const t = totals();
+  const badge = $('#cartCount');
+  badge.textContent = t.count;
+  badge.classList.toggle('on', t.count > 0);
+
+  if (!cart.length){
+    $('#cartBody').innerHTML = `
+      <div class="empty">
+        <svg viewBox="0 0 24 24"><path d="M6 7h12l-1.2 12.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 7z"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7"/></svg>
+        <p>Your cart is empty.</p>
+      </div>`;
+    $('#cartFoot').hidden = true;
+    return;
+  }
+
+  $('#cartBody').innerHTML = cart.map(l => {
+    const p = PRODUCTS.find(x => x.id === l.id);
+    return `
+      <div class="line" data-id="${p.id}">
+        <div class="thumb"><img src="${p.img}" alt=""></div>
+        <div>
+          <h4>${escapeHtml(p.name)}</h4>
+          <div class="sub">${escapeHtml(p.weight)} · ${money(p.price)} each</div>
+          <div class="qty">
+            <button type="button" data-step="-1" aria-label="Decrease">−</button>
+            <span>${l.qty}</span>
+            <button type="button" data-step="1" aria-label="Increase">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="amt">${money(p.price * l.qty)}</div>
+          <button class="rm" data-rm>Remove</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  $$('#cartBody .line').forEach(row => {
+    const id = row.dataset.id;
+    const cur = cart.find(l => l.id === id).qty;
+    $$('[data-step]', row).forEach(b =>
+      b.addEventListener('click', () => setQty(id, cur + (+b.dataset.step))));
+    $('[data-rm]', row).addEventListener('click', () => setQty(id, 0));
+  });
+
+  const toFree = Math.max(0, CONFIG.freeShippingOver - t.sub);
+  $('#shipMsg').textContent = toFree > 0
+    ? `Add ${money(toFree)} more for free shipping`
+    : 'You’ve unlocked free shipping';
+  $('#shipFill').style.width = Math.min(100, (t.sub / CONFIG.freeShippingOver) * 100) + '%';
+  $('#sub').textContent   = money(t.sub);
+  $('#ship').textContent  = t.ship === 0 ? 'FREE' : money(t.ship);
+  $('#grand').textContent = money(t.grand);
+  $('#cartFoot').hidden = false;
+}
+
+/* ---------- drawer ---------- */
+const openCart  = () => { $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); };
+const closeCart = () => { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); };
+$('#cartBtn').addEventListener('click', openCart);
+$('#closeCart').addEventListener('click', closeCart);
+$('#scrim').addEventListener('click', () => { closeCart(); closeNav(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeCart(); closeNav(); } });
+
+/* ============================================================================
+   Checkout
+   ========================================================================= */
+$('#checkoutBtn').addEventListener('click', async () => {
+  if (!cart.length) return;
+  const btn = $('#checkoutBtn');
+
+  if (CONFIG.checkoutMode === 'payment-link'){
+    const biggest = [...cart].sort((a,b) => b.qty - a.qty)[0];
+    const url = CONFIG.stripeLinks[biggest.id];
+    if (!url){
+      alert('Stripe Payment Link not set yet.\n\nOpen index.html, find the CONFIG block near the '
+        + 'bottom, and paste your buy.stripe.com links into CONFIG.stripeLinks.');
+      return;
+    }
+    window.location.href = url;
+    return;
+  }
+
+  // checkout-session mode
+  btn.disabled = true; btn.textContent = 'Redirecting…';
+  try {
+    const res = await fetch(CONFIG.checkoutEndpoint, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ items: cart })
+    });
+    const data = await res.json();
+    if (!data.url) throw new Error('No checkout URL returned');
+    window.location.href = data.url;
+  } catch (err){
+    console.error(err);
+    alert('Sorry — checkout is unavailable right now. Please try again shortly.');
+    btn.disabled = false; btn.textContent = 'Checkout';
+  }
+});
+
+/* ============================================================================
+   Email signup — posts to /api/subscribe (see api/subscribe.js)
+   ========================================================================= */
+function wireForm(formId, msgId, source, successText){
+  const form = $('#' + formId);
+  if (!form) return;
+  const msg = $('#' + msgId);
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = form.querySelector('input[type=email]').value.trim();
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    msg.textContent = '';
+
+    try {
+      const res = await fetch(CONFIG.subscribeEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Something went wrong.');
+      }
+      form.reset();
+      msg.textContent = successText;
+    } catch (err) {
+      // Opening index.html straight off disk has no API to talk to — say so
+      // rather than looking broken.
+      msg.textContent = location.protocol === 'file:'
+        ? 'Signup only works on the deployed site.'
+        : err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+wireForm('waitlistForm', 'waitlistMsg', 'subscribe-waitlist',
+         'You’re on the list — we’ll be in touch.');
+wireForm('newsForm',     'newsMsg',     'footer-newsletter',
+         'Thanks — you’re subscribed.');
+
+/* ============================================================================
+   Nav / scroll / reveals
+   ========================================================================= */
+const nav = $('#nav');
+const closeNav = () => { nav.classList.remove('on'); if(!$('#drawer').classList.contains('on')) $('#scrim').classList.remove('on'); };
+$('#burger').addEventListener('click', () => {
+  nav.classList.toggle('on');
+  $('#scrim').classList.toggle('on', nav.classList.contains('on'));
+});
+$$('nav.main a').forEach(a => a.addEventListener('click', closeNav));
+
+const hdr = $('#hdr');
+const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 40);
+window.addEventListener('scroll', onScroll, { passive:true });
+onScroll();
+
+let io;
+function observeReveals(){
+  if (!('IntersectionObserver' in window)){ $$('.rv').forEach(el => el.classList.add('in')); return; }
+  io = io || new IntersectionObserver(entries => {
+    entries.forEach((en, i) => {
+      if (en.isIntersecting){
+        setTimeout(() => en.target.classList.add('in'), i * 70);
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+  $$('.rv:not(.in)').forEach(el => io.observe(el));
+}
+
+$('#yr').textContent = new Date().getFullYear();
+renderProducts();
+renderCart();
+observeReveals();
+</script>
+</body>
+</html>

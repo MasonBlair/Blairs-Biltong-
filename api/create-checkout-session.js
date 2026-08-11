@@ -22,12 +22,12 @@ const STRIPE_API_VERSION = '2025-10-29.clover';
    This is the source of truth for what a customer is charged.
    --------------------------------------------------------------------------- */
 export const CATALOGUE = {
-  original: { name: "Blair's Biltong — Original (50g)", cents: 1250 },
-  dryheat:  { name: "Blair's Biltong — Dry Heat (50g)", cents: 1250 }
+  original: { name: "Blair's Biltong — Original (50g)", cents: 750 },
+  dryheat:  { name: "Blair's Biltong — Dry Heat (50g)", cents: 750 }
 };
 
-const FREE_SHIPPING_OVER_CENTS = 6000;   // $60.00
-const FLAT_SHIPPING_CENTS      = 750;    // $7.50
+const FREE_SHIPPING_OVER_CENTS = 5000;   // $50.00
+const FLAT_SHIPPING_CENTS      = 500;    // $5.00
 const MAX_QTY_PER_LINE         = 20;
 const MAX_LINES                = 10;
 

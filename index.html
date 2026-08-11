@@ -712,8 +712,8 @@ footer .logo img{width:104px}
    ========================================================================= */
 const CONFIG = {
   currency: 'NZD',
-  shippingFlat: 7.50,
-  freeShippingOver: 60.00,
+  shippingFlat: 5.00,
+  freeShippingOver: 50.00,
 
   // 'payment-link'    → uses the stripeLinks below. Works today, no server needed.
   // 'checkout-session'→ posts the cart to a serverless function that creates a
@@ -737,9 +737,9 @@ const CONFIG = {
 // `img` is the cut-out product photo in assets/. Prices are placeholders.
 const PRODUCTS = [
   { id:'original', name:'Original', desc:'Classic. Traditional. Delicious.',
-    price:12.50, weight:'50g', img:'assets/pouch-original.png' },
+    price:7.50, weight:'50g', img:'assets/pouch-original.png' },
   { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',
-    price:12.50, weight:'50g', img:'assets/pouch-dryheat.png' }
+    price:7.50, weight:'50g', img:'assets/pouch-dryheat.png' }
 ];
 
 /* ============================================================================

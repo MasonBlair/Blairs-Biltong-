@@ -92,7 +92,10 @@ h1,h2,h3,h4,.display{
 
 /* ---------- header ---------- */
 header{
-  position:fixed;inset:0 0 auto 0;z-index:80;
+  /* Must sit ABOVE .scrim (110). The header is a stacking context, so the nav
+     menu inside it can never out-rank the scrim on its own z-index — that's
+     what made the open mobile menu blurred and untappable. */
+  position:fixed;inset:0 0 auto 0;z-index:120;
   transition:background .3s ease, box-shadow .3s ease, padding .3s ease;
   padding:10px 0;
 }
@@ -305,11 +308,11 @@ footer .logo img{width:104px}
 
 /* ---------- cart drawer ---------- */
 .scrim{position:fixed;inset:0;background:rgba(10,6,3,.6);opacity:0;pointer-events:none;
-  transition:opacity .3s;z-index:90;backdrop-filter:blur(2px)}
+  transition:opacity .3s;z-index:110;backdrop-filter:blur(2px)}
 .scrim.on{opacity:1;pointer-events:auto}
 .drawer{
   position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--cream-2);
-  z-index:100;transform:translateX(101%);transition:transform .34s cubic-bezier(.4,0,.2,1);
+  z-index:130;transform:translateX(101%);transition:transform .34s cubic-bezier(.4,0,.2,1);
   display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.3)}
 .drawer.on{transform:none}
 .drawer-hd{display:flex;align-items:center;justify-content:space-between;

@@ -180,9 +180,10 @@ nav.main a:hover::after{right:0}
 /* ---------- sections ---------- */
 section{position:relative}
 /* The header is fixed, so an anchor jump would park the heading underneath it.
-   scroll-margin-top tells the browser to stop this far short of the target.
-   Roughly header height + a bit of breathing room. */
-section[id]{scroll-margin-top:130px}
+   scroll-margin-top stops the browser short by exactly the header's height, so
+   the section lands flush beneath it. --header-h is measured at runtime (see
+   the script) — hard-coding it goes wrong as soon as the logo size changes. */
+section[id]{scroll-margin-top:var(--header-h,84px)}
 .sec-pad{padding:clamp(64px,8vw,104px) 0}
 .sec-cream{background:var(--cream)}
 .sec-dark{background:var(--ink-2);color:var(--cream)}
@@ -387,7 +388,6 @@ footer .logo img{width:104px}
   nav.main a{font-size:1.05rem;padding:14px 0;border-bottom:1px solid rgba(239,228,208,.12)}
   .burger{display:grid;place-items:center;width:38px;height:38px}
   header{background:var(--ink-2)}
-  section[id]{scroll-margin-top:96px}   /* header is shorter on mobile */
   /* A landscape photo loses ~63% of its width on a phone. At the desktop
      position the hiker lands half-cropped on the right edge, which reads as a
      mistake — shift left to the lake and peaks instead. */
@@ -1056,8 +1056,20 @@ $('#burger').addEventListener('click', () => {
 $$('nav.main a').forEach(a => a.addEventListener('click', closeNav));
 
 const hdr = $('#hdr');
-const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 40);
+
+// Publish the header's real height so anchor jumps land flush beneath it
+// rather than under it. Re-measured on scroll because the header shrinks once
+// you've scrolled, and on resize because the logo scales with viewport width.
+function syncHeaderHeight(){
+  document.documentElement.style.setProperty('--header-h', hdr.offsetHeight + 'px');
+}
+const onScroll = () => {
+  hdr.classList.toggle('scrolled', window.scrollY > 40);
+  syncHeaderHeight();
+};
 window.addEventListener('scroll', onScroll, { passive:true });
+window.addEventListener('resize', syncHeaderHeight);
+window.addEventListener('load', syncHeaderHeight);
 onScroll();
 
 let io;

@@ -14,6 +14,8 @@
  *   3. Push, then test with card 4242 4242 4242 4242
  */
 
+import { checkCode } from './local-codes.js';
+
 // Pinned so a future Stripe API release can't silently change behaviour.
 const STRIPE_API_VERSION = '2025-10-29.clover';
 
@@ -34,7 +36,7 @@ const MAX_LINES                = 10;
 /* ---------------------------------------------------------------------------
    Payload builder — exported so it can be unit tested without hitting Stripe
    --------------------------------------------------------------------------- */
-export function buildSessionPayload(items, siteUrl) {
+export function buildSessionPayload(items, siteUrl, rawCode) {
   if (!Array.isArray(items) || items.length === 0) throw new Error('EMPTY_CART');
   if (items.length > MAX_LINES) throw new Error('TOO_MANY_LINES');
 
@@ -68,7 +70,26 @@ export function buildSessionPayload(items, siteUrl) {
     });
   }
 
-  const shippingCents = subtotal >= FREE_SHIPPING_OVER_CENTS ? 0 : FLAT_SHIPPING_CENTS;
+  // Local pickup code: no freight, because you're handing it over in person.
+  const localCode = checkCode(rawCode);
+  const shippingCents = localCode ? 0
+    : (subtotal >= FREE_SHIPPING_OVER_CENTS ? 0 : FLAT_SHIPPING_CENTS);
+
+  const shippingName = localCode ? 'Local pickup — no delivery'
+    : (shippingCents === 0 ? 'Free shipping' : 'NZ Post tracked');
+
+  const shippingRate = {
+    type: 'fixed_amount',
+    display_name: shippingName,
+    fixed_amount: { amount: shippingCents, currency: 'nzd' }
+  };
+  // A pickup order isn't being posted, so a delivery estimate would be a lie.
+  if (!localCode) {
+    shippingRate.delivery_estimate = {
+      minimum: { unit: 'business_day', value: 2 },
+      maximum: { unit: 'business_day', value: 5 }
+    };
+  }
 
   return {
     mode: 'payment',
@@ -77,19 +98,15 @@ export function buildSessionPayload(items, siteUrl) {
     customer_creation: 'always',
     shipping_address_collection: { allowed_countries: ['NZ'] },
     phone_number_collection: { enabled: true },
-    shipping_options: [{
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        display_name: shippingCents === 0 ? 'Free shipping' : 'NZ Post tracked',
-        fixed_amount: { amount: shippingCents, currency: 'nzd' },
-        delivery_estimate: {
-          minimum: { unit: 'business_day', value: 2 },
-          maximum: { unit: 'business_day', value: 5 }
-        }
-      }
-    }],
+    shipping_options: [{ shipping_rate_data: shippingRate }],
     // Shows up on the Stripe dashboard order — handy when you're packing.
-    metadata: { pack_list: summary.join(', '), subtotal_cents: String(subtotal) },
+    // fulfilment makes it obvious at a glance whether to post it or not.
+    metadata: {
+      pack_list: summary.join(', '),
+      subtotal_cents: String(subtotal),
+      fulfilment: localCode ? `LOCAL PICKUP (${localCode}) — DO NOT POST` : 'Post',
+      ...(localCode ? { local_code: localCode } : {})
+    },
     success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:  `${siteUrl}/#shop`
   };
@@ -114,8 +131,8 @@ export async function POST(request) {
 
   let payload;
   try {
-    const { items } = await request.json();
-    payload = buildSessionPayload(items, siteUrl);
+    const { items, code } = await request.json();
+    payload = buildSessionPayload(items, siteUrl, code);
   } catch (err) {
     // Client's fault — say so, but don't leak internals.
     console.warn('Rejected cart:', err.message);

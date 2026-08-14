@@ -96,7 +96,7 @@ header{
   transition:background .3s ease, box-shadow .3s ease, padding .3s ease;
   padding:10px 0;
 }
-header.scrolled{background:rgba(21,14,7,.96);box-shadow:0 2px 24px rgba(0,0,0,.35);padding:2px 0}
+header.scrolled{background:var(--ink-2);box-shadow:0 2px 24px rgba(0,0,0,.35);padding:2px 0}
 .hdr{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .logo img{width:clamp(78px,9vw,118px);height:auto;
   filter:drop-shadow(0 3px 10px rgba(0,0,0,.55))}
@@ -379,7 +379,11 @@ footer .logo img{width:104px}
   nav.main.on{transform:none}
   nav.main a{font-size:1.05rem;padding:14px 0;border-bottom:1px solid rgba(239,228,208,.12)}
   .burger{display:grid;place-items:center;width:38px;height:38px}
-  header{background:rgba(21,14,7,.94)}
+  header{background:var(--ink-2)}
+  /* A landscape photo loses ~63% of its width on a phone. At the desktop
+     position the hiker lands half-cropped on the right edge, which reads as a
+     mistake — shift left to the lake and peaks instead. */
+  .hero-bg img{object-position:32% 55%}
   .hero{padding:120px 0 80px;min-height:0}
   .products{grid-template-columns:1fr;max-width:340px;margin:0 auto}
   .reviews{grid-template-columns:1fr;gap:38px}
@@ -584,7 +588,7 @@ footer .logo img{width:104px}
       <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
     </div>
     <div class="rv" style="display:grid;place-items:center">
-      <img class="shot" src="assets/pouch-dryheat.png" alt="Blair's Biltong Dry Heat, 50g pouch"
+      <img class="shot" src="assets/pouch-dryheat.webp" alt="Blair's Biltong Dry Heat, 50g pouch"
            style="max-width:260px" loading="lazy">
     </div>
   </div>
@@ -713,7 +717,7 @@ footer .logo img{width:104px}
   <div class="drawer-ft" id="cartFoot" hidden>
     <form class="code-row" id="codeForm">
       <input id="codeInput" placeholder="Free shipping code" autocomplete="off"
-       aria-label="Free shipping code">
+             aria-label="Free shipping code">
       <button type="submit">Apply</button>
     </form>
     <div class="code-msg" id="codeMsg"></div>
@@ -759,9 +763,9 @@ const CONFIG = {
 // `img` is the cut-out product photo in assets/. Prices are placeholders.
 const PRODUCTS = [
   { id:'original', name:'Original', desc:'Classic. Traditional. Delicious.',
-    price:7.50, weight:'50g', img:'assets/pouch-original.png' },
+    price:7.50, weight:'50g', img:'assets/pouch-original.webp' },
   { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',
-    price:7.50, weight:'50g', img:'assets/pouch-dryheat.png' }
+    price:7.50, weight:'50g', img:'assets/pouch-dryheat.webp' }
 ];
 
 /* ============================================================================

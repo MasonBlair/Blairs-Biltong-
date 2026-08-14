@@ -398,7 +398,13 @@ footer .logo img{width:104px}
   .reviews > div{border-left:none;padding:0}
   .reviews > div + div{border-top:1px solid rgba(239,228,208,.18);padding-top:34px}
   .badges{grid-template-columns:1fr 1fr;gap:26px 14px}
-  .foot-grid{grid-template-columns:1fr;text-align:center}
+  /* Centring text doesn't centre an image or a max-width block — the footer
+     logo and tagline need margin-inline:auto or they stay stubbornly left. */
+  .foot-grid{grid-template-columns:1fr;text-align:center;gap:32px}
+  footer .logo img{margin-inline:auto;width:86px}
+  .foot-note{margin-inline:auto}
+  footer h4{margin-bottom:12px}
+  footer ul{gap:11px}
   .socials{justify-content:center}
   .foot-bar{justify-content:center;text-align:center}
   .sec-head h2::before,.sec-head h2::after{width:20px}

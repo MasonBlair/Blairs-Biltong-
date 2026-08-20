@@ -36,6 +36,10 @@ a.btn:hover{background:#d4a556}
   <div class="ref" id="ref"></div>
 </main>
 <script>
+  // The order went through, so the saved cart is stale — clear it or the items
+  // reappear next time they open the shop.
+  try { localStorage.removeItem('bb_cart_v1'); } catch {}
+
   const params = new URLSearchParams(location.search);
   const id = params.get('session_id');
   if (id) document.getElementById('ref').textContent = 'Reference: ' + id.slice(-12);

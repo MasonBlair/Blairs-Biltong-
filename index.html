@@ -347,11 +347,28 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .nutri td.pending{font-weight:500;font-size:.78rem;color:rgba(239,228,208,.42);letter-spacing:.02em}
 .ing-aside{font-size:.9rem;color:rgba(239,228,208,.55);margin:-10px 0 20px;font-style:italic}
 /* Story image — softer corners and a diffuse shadow, so it settles onto the
-   cream rather than sitting on it as a hard-edged card. */
-.story-img{display:grid;place-items:center}
-.story-img img{width:100%;max-width:430px;height:auto;border-radius:14px;
-  box-shadow:0 40px 70px -34px rgba(36,27,19,.42),
-             0 10px 24px -12px rgba(36,27,19,.16)}
+   cream rather than sitting on it as a hard-edged card. The warm glow behind it
+   stops the dark photo reading as a cut-out on a pale background. */
+.story-img{display:grid;place-items:center;position:relative;isolation:isolate}
+.story-img::before{
+  content:'';position:absolute;z-index:-1;inset:-6% -4%;
+  background:radial-gradient(ellipse at 50% 50%,
+    rgba(185,135,60,.20) 0%, rgba(185,135,60,.09) 42%, rgba(185,135,60,0) 72%);
+  filter:blur(6px);
+}
+.story-img img{
+  width:100%;max-width:430px;height:auto;border-radius:14px;
+  box-shadow:0 46px 80px -38px rgba(36,27,19,.48),
+             0 16px 34px -18px rgba(36,27,19,.22),
+             0 2px 5px rgba(36,27,19,.06);
+}
+/* a whisper of cream over the top edge so it melts into the section behind */
+.story-img picture{position:relative;display:block;width:100%;max-width:430px}
+.story-img picture::after{
+  content:'';position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(247,241,228,.16) 0%,rgba(247,241,228,0) 22%,
+    rgba(36,27,19,0) 78%,rgba(36,27,19,.10) 100%);
+}
 /* Allergens must read clearly — this is the one bit of small print that matters */
 .allergen-note{margin-top:24px;padding:14px 16px;font-size:.84rem;line-height:1.55;
   color:rgba(239,228,208,.72);background:rgba(239,228,208,.05);
@@ -596,9 +613,8 @@ footer .logo img{width:104px}
       <div class="eyebrow">Our story</div>
       <h2>Made for the mountains</h2>
       <div class="rule"></div>
-      <p><em>[Placeholder copy — replace with the real story.]</em></p>
-      <p>Blair's Biltong started in a Queenstown kitchen, with a family recipe carried over from South Africa and a stubborn belief that good biltong can't be rushed. No shortcuts, no fillers, no ingredients you can't pronounce.</p>
-      <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
+      <p>With roots in South Africa, Blair's Biltong began with a family recipe and the belief that good biltong shouldn't be rushed. When shop-bought biltong stopped hitting the mark, the Blairs added their own twist and started making it properly.</p>
+      <p>Born in Queenstown and crafted in New Zealand's Southern Alps, every batch brings together South African tradition, quality ingredients and a taste made for adventure.</p>
       <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
     </div>
     <div class="rv story-img">

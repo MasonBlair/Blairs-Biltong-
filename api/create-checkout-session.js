@@ -96,9 +96,14 @@ export function buildSessionPayload(items, siteUrl, rawCode) {
     line_items,
     allow_promotion_codes: true,
     customer_creation: 'always',
-    shipping_address_collection: { allowed_countries: ['NZ'] },
+    // Pickup orders aren't posted anywhere, so don't make the customer type a
+    // delivery address they'd never use — and don't record one that would make
+    // the order look postable. Delivery orders collect it as normal.
+    ...(localCode ? {} : {
+      shipping_address_collection: { allowed_countries: ['NZ'] },
+      shipping_options: [{ shipping_rate_data: shippingRate }]
+    }),
     phone_number_collection: { enabled: true },
-    shipping_options: [{ shipping_rate_data: shippingRate }],
     // Shows up on the Stripe dashboard order — handy when you're packing.
     // fulfilment makes it obvious at a glance whether to post it or not.
     metadata: {
@@ -107,7 +112,9 @@ export function buildSessionPayload(items, siteUrl, rawCode) {
       fulfilment: localCode ? `LOCAL PICKUP (${localCode}) — DO NOT POST` : 'Post',
       ...(localCode ? { local_code: localCode } : {})
     },
-    success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+    // The pickup flag is cosmetic — it only swaps the wording on the success
+    // page. Nothing is trusted from it, so it doesn't matter that it's visible.
+    success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}${localCode ? '&pickup=1' : ''}`,
     cancel_url:  `${siteUrl}/#shop`
   };
 }

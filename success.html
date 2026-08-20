@@ -31,13 +31,20 @@ a.btn:hover{background:#d4a556}
   <h1>Order confirmed</h1>
   <div class="rule"></div>
   <p>Thanks for the order — proper legend. A confirmation email is on its way to you.</p>
-  <p>We hand pack every order in Queenstown. Yours will be on its way within one to two business days.</p>
+  <p id="fulfilMsg">We hand pack every order in Queenstown. Yours will be on its way within one to two business days.</p>
   <a class="btn" href="/">Back to the shop</a>
   <div class="ref" id="ref"></div>
 </main>
 <script>
-  const id = new URLSearchParams(location.search).get('session_id');
+  const params = new URLSearchParams(location.search);
+  const id = params.get('session_id');
   if (id) document.getElementById('ref').textContent = 'Reference: ' + id.slice(-12);
+
+  // Local pickup orders aren't posted — swap the delivery line for collection wording.
+  if (params.get('pickup') === '1') {
+    document.getElementById('fulfilMsg').textContent =
+      "This one's a local pickup, so there's nothing to post. We'll be in touch shortly to sort a time and place to hand it over.";
+  }
 </script>
 </body>
 </html>

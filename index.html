@@ -738,8 +738,8 @@ footer .logo img{width:104px}
   <div class="drawer-body" id="cartBody"></div>
   <div class="drawer-ft" id="cartFoot" hidden>
     <form class="code-row" id="codeForm">
-      <input id="codeInput" placeholder="Free shipping code" autocomplete="off"
-             aria-label="Free shipping code">
+      <input id="codeInput" placeholder="Local pickup code" autocomplete="off"
+             aria-label="Local pickup code">
       <button type="submit">Apply</button>
     </form>
     <div class="code-msg" id="codeMsg"></div>
@@ -999,7 +999,7 @@ $('#codeForm').addEventListener('submit', async e => {
     if (data.valid){
       localCode = data.code;
       msg.className = 'code-msg ok';
-      msg.textContent = `${data.label} applied — no delivery charge.`;
+      msg.textContent = `${data.label} applied — no delivery address needed. We'll be in touch to arrange collection.`;
       input.value = data.code; input.disabled = true;
     } else {
       localCode = null;

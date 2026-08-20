@@ -25,13 +25,38 @@
 const STRIPE_API_VERSION = '2025-10-29.clover';
 const money = cents => '$' + (cents / 100).toFixed(2);
 
+/** True when the order came through with a local pickup code. */
+export function isPickup(session) {
+  return String(session?.metadata?.fulfilment || '').startsWith('LOCAL PICKUP');
+}
+
 export function formatOrder(session, lineItems) {
   const d = session.shipping_details || session.customer_details || {};
   const a = (d && d.address) || {};
   const lines = lineItems.map(li => `  ${li.quantity} x ${li.description}   ${money(li.amount_total)}`);
+  const pickup = isPickup(session);
+
+  // Pickup orders have no shipping address — say so loudly rather than printing
+  // an empty SHIP TO block that looks like missing data.
+  const destination = pickup
+    ? [
+        '*** LOCAL PICKUP — DO NOT POST ***',
+        `  ${session.metadata?.local_code ? `Code: ${session.metadata.local_code}` : ''}`,
+        `  ${session.customer_details?.name || d.name || '—'}`,
+        '  Contact them to arrange collection.'
+      ]
+    : [
+        'SHIP TO',
+        `  ${d.name || '—'}`,
+        `  ${a.line1 || ''}`,
+        a.line2 ? `  ${a.line2}` : null,
+        `  ${a.city || ''} ${a.postal_code || ''}`,
+        `  ${a.country || ''}`
+      ];
 
   return [
     `NEW ORDER — ${session.id.slice(-12)}`,
+    pickup ? 'FULFILMENT: LOCAL PICKUP' : 'FULFILMENT: POST',
     '',
     'ITEMS',
     ...lines,
@@ -41,12 +66,7 @@ export function formatOrder(session, lineItems) {
     `Discount   ${money(session.total_details?.amount_discount || 0)}`,
     `TOTAL      ${money(session.amount_total)}`,
     '',
-    'SHIP TO',
-    `  ${d.name || '—'}`,
-    `  ${a.line1 || ''}`,
-    a.line2 ? `  ${a.line2}` : null,
-    `  ${a.city || ''} ${a.postal_code || ''}`,
-    `  ${a.country || ''}`,
+    ...destination,
     '',
     'CONTACT',
     `  ${session.customer_details?.email || '—'}`,
@@ -101,7 +121,8 @@ export async function POST(request) {
     const text = formatOrder(session, items.data);
 
     console.log(text);                       // always visible in the Vercel logs
-    await sendEmail(`New order — ${money(session.amount_total)}`, text);
+    const tag = isPickup(session) ? 'PICKUP' : 'POST';
+    await sendEmail(`New order (${tag}) — ${money(session.amount_total)}`, text);
   } catch (err) {
     // Log it, but still 200 — otherwise Stripe retries and you get duplicates.
     console.error('Order handling failed:', err && err.message);

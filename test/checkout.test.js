@@ -27,20 +27,20 @@ console.log('\nCheckout payload');
 
 test('single pack charges flat shipping', () => {
   const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
-  assert.strictEqual(subtotalOf(p), 1250);
-  assert.strictEqual(shippingOf(p), 750);
+  assert.strictEqual(subtotalOf(p), 750);
+  assert.strictEqual(shippingOf(p), 500);
   assert.strictEqual(p.line_items.length, 1);
 });
 
-test('four packs still under the free-shipping threshold', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 4 }], SITE);
-  assert.strictEqual(subtotalOf(p), 5000);
-  assert.strictEqual(shippingOf(p), 750);
+test('six packs still under the free-shipping threshold', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 6 }], SITE);
+  assert.strictEqual(subtotalOf(p), 4500);
+  assert.strictEqual(shippingOf(p), 500);
 });
 
-test('five packs unlocks free shipping', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 5 }], SITE);
-  assert.strictEqual(subtotalOf(p), 6250);
+test('seven packs unlocks free shipping', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 7 }], SITE);
+  assert.strictEqual(subtotalOf(p), 5250);
   assert.strictEqual(shippingOf(p), 0);
   assert.strictEqual(p.shipping_options[0].shipping_rate_data.display_name, 'Free shipping');
 });
@@ -48,9 +48,46 @@ test('five packs unlocks free shipping', () => {
 test('mixed cart totals correctly', () => {
   const p = buildSessionPayload(
     [{ id: 'original', qty: 2 }, { id: 'dryheat', qty: 3 }], SITE);
-  assert.strictEqual(subtotalOf(p), 6250);
-  assert.strictEqual(shippingOf(p), 0);
+  assert.strictEqual(subtotalOf(p), 3750);
+  assert.strictEqual(shippingOf(p), 500);
   assert.strictEqual(p.line_items.length, 2);
+});
+
+console.log('\nLocal pickup');
+
+test('pickup code skips the delivery address entirely', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  assert.strictEqual(p.shipping_address_collection, undefined);
+  assert.strictEqual(p.shipping_options, undefined);
+});
+
+test('pickup code still collects a phone number', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  assert.strictEqual(p.phone_number_collection.enabled, true);
+});
+
+test('pickup order is tagged do-not-post', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  assert.ok(p.metadata.fulfilment.startsWith('LOCAL PICKUP'));
+  assert.strictEqual(p.metadata.local_code, 'LOCAL');
+});
+
+test('pickup success url carries the pickup flag', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  assert.ok(p.success_url.includes('pickup=1'));
+});
+
+test('delivery orders are unaffected by the pickup path', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
+  assert.deepStrictEqual(p.shipping_address_collection, { allowed_countries: ['NZ'] });
+  assert.strictEqual(p.metadata.fulfilment, 'Post');
+  assert.ok(!p.success_url.includes('pickup=1'));
+});
+
+test('an unrecognised code is treated as a normal delivery', () => {
+  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'NOTACODE');
+  assert.deepStrictEqual(p.shipping_address_collection, { allowed_countries: ['NZ'] });
+  assert.strictEqual(shippingOf(p), 500);
 });
 
 test('duplicate lines are merged, not doubled up', () => {

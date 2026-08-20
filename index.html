@@ -346,10 +346,28 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   color:rgba(239,228,208,.62);width:26%;white-space:nowrap}
 .nutri td.pending{font-weight:500;font-size:.78rem;color:rgba(239,228,208,.42);letter-spacing:.02em}
 .ing-aside{font-size:.9rem;color:rgba(239,228,208,.55);margin:-10px 0 20px;font-style:italic}
-/* Story image — portrait, so cap the height or it dwarfs the copy beside it */
-.story-img{display:grid;place-items:center}
-.story-img img{width:100%;max-width:430px;height:auto;border-radius:3px;
-  box-shadow:0 22px 48px rgba(36,27,19,.28)}
+/* ---------- story: full-bleed split ----------
+   The photo runs off the right edge of the screen rather than sitting in a box,
+   so it reads as part of the page instead of an image dropped onto it. */
+.story-split{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;
+  background:var(--cream-2);min-height:min(78vh,720px)}
+.story-copy{display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(56px,7vw,96px) clamp(24px,5vw,72px);
+  /* line the text up with the wrap on the rest of the page */
+  padding-left:max(var(--pad),calc((100vw - var(--maxw)) / 2 + var(--pad)))}
+.story-copy > div{max-width:46ch}
+.story-img{position:relative;overflow:hidden;background:var(--ink-2)}
+.story-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:52% 50%}
+/* feather the join so the photo doesn't butt against the cream with a hard line */
+.story-img::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,rgba(247,241,228,.9) 0%,rgba(247,241,228,0) 16%)}
+@media(max-width:900px){
+  .story-split{grid-template-columns:1fr;min-height:0}
+  .story-img{min-height:380px}
+  .story-copy{padding:clamp(48px,8vw,72px) var(--pad)}
+  .story-img::before{background:linear-gradient(180deg,rgba(247,241,228,.9) 0%,rgba(247,241,228,0) 18%)}
+}
 /* Allergens must read clearly — this is the one bit of small print that matters */
 .allergen-note{margin-top:24px;padding:14px 16px;font-size:.84rem;line-height:1.55;
   color:rgba(239,228,208,.72);background:rgba(239,228,208,.05);
@@ -588,8 +606,8 @@ footer .logo img{width:104px}
   <path fill="#efe4d0" d="M0 34 C60 12 120 44 190 30 C265 15 320 46 400 34 C470 24 530 50 610 38 C690 26 740 52 820 40 C900 28 950 14 1030 30 C1105 45 1150 22 1200 32 L1200 60 L0 60Z"/>
 </svg>
 
-<section class="sec-pad" id="story" style="background:var(--cream-2)">
-  <div class="wrap two-col">
+<section class="story-split" id="story">
+  <div class="story-copy">
     <div class="rv">
       <div class="eyebrow">Our story</div>
       <h2>Made for the mountains</h2>
@@ -599,14 +617,15 @@ footer .logo img{width:104px}
       <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
       <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
     </div>
-    <div class="rv story-img">
-      <picture>
-        <source srcset="assets/story-recipe.webp" type="image/webp">
-        <img src="assets/story-recipe.jpg" width="900" height="1125" loading="lazy"
-             alt="The family biltong recipe on a kitchen table in Queenstown, with coriander seeds,
-                  a pestle and mortar, and the mountains through the window">
-      </picture>
-    </div>
+  </div>
+
+  <div class="story-img">
+    <picture>
+      <source srcset="assets/story-recipe.webp" type="image/webp">
+      <img src="assets/story-recipe.jpg" width="1400" height="1749" loading="lazy"
+           alt="The family biltong recipe on a kitchen table in Queenstown, with coriander seeds,
+                a pestle and mortar, and the mountains through the window">
+    </picture>
   </div>
 </section>
 

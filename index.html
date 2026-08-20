@@ -346,6 +346,10 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   color:rgba(239,228,208,.62);width:26%;white-space:nowrap}
 .nutri td.pending{font-weight:500;font-size:.78rem;color:rgba(239,228,208,.42);letter-spacing:.02em}
 .ing-aside{font-size:.9rem;color:rgba(239,228,208,.55);margin:-10px 0 20px;font-style:italic}
+/* Story image — portrait, so cap the height or it dwarfs the copy beside it */
+.story-img{display:grid;place-items:center}
+.story-img img{width:100%;max-width:430px;height:auto;border-radius:3px;
+  box-shadow:0 22px 48px rgba(36,27,19,.28)}
 /* Allergens must read clearly — this is the one bit of small print that matters */
 .allergen-note{margin-top:24px;padding:14px 16px;font-size:.84rem;line-height:1.55;
   color:rgba(239,228,208,.72);background:rgba(239,228,208,.05);
@@ -595,9 +599,13 @@ footer .logo img{width:104px}
       <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
       <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
     </div>
-    <div class="rv" style="display:grid;place-items:center">
-      <img class="shot" src="assets/pouch-dryheat.webp" alt="Blair's Biltong Dry Heat, 50g pouch"
-           style="max-width:260px" loading="lazy">
+    <div class="rv story-img">
+      <picture>
+        <source srcset="assets/story-recipe.webp" type="image/webp">
+        <img src="assets/story-recipe.jpg" width="900" height="1125" loading="lazy"
+             alt="The family biltong recipe on a kitchen table in Queenstown, with coriander seeds,
+                  a pestle and mortar, and the mountains through the window">
+      </picture>
     </div>
   </div>
 </section>

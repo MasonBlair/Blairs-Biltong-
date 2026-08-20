@@ -348,13 +348,20 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .ing-aside{font-size:.9rem;color:rgba(239,228,208,.55);margin:-10px 0 20px;font-style:italic}
 /* Story — no image, so the copy is centred and given room. Reads as a deliberate
    editorial break between the shop and the rest of the page. */
-.story-centred{max-width:720px;text-align:center}
-.story-centred .eyebrow{display:block;margin-bottom:10px}
-.story-centred h2{font-size:clamp(2rem,4.4vw,3rem)}
-.story-centred .rule{margin-left:auto;margin-right:auto}
-.story-centred p{margin-bottom:18px;font-size:clamp(1rem,1.15vw,1.08rem);
-  color:rgba(36,27,19,.78)}
-.story-centred p:last-of-type{margin-bottom:26px}
+#story.sec-pad{padding:clamp(56px,6.5vw,88px) 0}
+.story-centred{max-width:680px;text-align:center}
+.story-centred .eyebrow{display:block;margin-bottom:12px}
+.story-centred h2{font-size:clamp(1.9rem,4vw,2.7rem);margin-bottom:0;text-wrap:balance}
+/* the heading has a 1.02 line-height, so the rule needs its own breathing room
+   or it sits tight under the text and reads as an underline */
+.story-centred .rule{margin:24px auto 28px}
+/* a narrower measure than the container. 64ch is deliberate — it's the width
+   where neither paragraph ends on a lone word, which is what makes centred
+   copy look accidental. Worth rechecking if the story text changes. */
+.story-centred p{max-width:64ch;margin:0 auto 16px;line-height:1.72;
+  font-size:clamp(1rem,1.15vw,1.07rem);color:rgba(36,27,19,.76);
+  text-wrap:pretty}
+.story-centred p:last-of-type{margin-bottom:30px}
 /* Allergens must read clearly — this is the one bit of small print that matters */
 .allergen-note{margin-top:24px;padding:14px 16px;font-size:.84rem;line-height:1.55;
   color:rgba(239,228,208,.72);background:rgba(239,228,208,.05);

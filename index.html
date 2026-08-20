@@ -267,6 +267,22 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .qty span{flex:1;text-align:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:1rem}
 .card .btn{width:100%;margin-top:auto}
 
+/* Week pack — a bag a day for seven days, which clears the free-shipping line */
+.weekpack{margin-top:42px;border:1.5px dashed rgba(185,135,60,.55);background:rgba(185,135,60,.07);
+  border-radius:3px;padding:30px clamp(20px,4vw,40px);text-align:center}
+.weekpack h3{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;font-size:1.18rem;margin-bottom:8px}
+.weekpack .wp-sub{font-size:.92rem;color:rgba(36,27,19,.7);max-width:52ch;margin:0 auto 6px}
+.weekpack .wp-price{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.15rem;margin-bottom:18px}
+.weekpack .wp-price em{font-style:normal;color:#3f7a3f;font-size:.82rem;letter-spacing:.08em;
+  text-transform:uppercase;margin-left:8px}
+.wp-opts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.wp-opts button{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:.1em;font-size:.78rem;padding:13px 22px;border:1.5px solid var(--ink);
+  background:transparent;color:var(--ink);cursor:pointer;border-radius:2px;transition:all .2s}
+.wp-opts button:hover{background:var(--ink);color:var(--cream-2)}
+@media(max-width:520px){.wp-opts{flex-direction:column}.wp-opts button{width:100%}}
+
 /* reviews */
 .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center}
 .reviews > div{padding:0 clamp(16px,3vw,42px);border-left:1px solid rgba(239,228,208,.18)}
@@ -579,11 +595,23 @@ footer .logo img{width:104px}
       <div class="rv">
         <h2>Fuel your<br>next adventure</h2>
         <div class="rule"></div>
-        <p>Explore our range of premium biltong flavours. Hand made in small batches.</p>
+        <p>Explore our range of full flavoured biltong. Hand made in small batches.</p>
       </div>
       <div></div>
     </div>
     <div class="products" id="productGrid"><!-- rendered by JS --></div>
+
+    <div class="weekpack rv">
+      <h3>The Week Pack</h3>
+      <p class="wp-sub">A bag a day, seven days. Enough to actually get you through the week —
+        and it clears our free shipping threshold.</p>
+      <p class="wp-price" id="wpPrice"><em>Free shipping</em></p>
+      <div class="wp-opts">
+        <button type="button" data-week="original">7 × Original</button>
+        <button type="button" data-week="dryheat">7 × Dry Heat</button>
+        <button type="button" data-week="mixed">Mixed — 4 &amp; 3</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -840,9 +868,18 @@ function renderProducts(){
 let cart = [];
 
 function addToCart(id, qty){
+  addLine(id, qty);
+  renderCart();
+  openCart();
+}
+/** Mutates the cart without re-rendering — so multi-item adds only redraw once. */
+function addLine(id, qty){
   const line = cart.find(l => l.id === id);
   if (line) line.qty = Math.min(99, line.qty + qty);
   else cart.push({ id, qty });
+}
+function addManyToCart(pairs){
+  pairs.forEach(([id, qty]) => addLine(id, qty));
   renderCart();
   openCart();
 }
@@ -1100,9 +1137,33 @@ function observeReveals(){
   $$('.rv:not(.in)').forEach(el => io.observe(el));
 }
 
+/* ============================================================================
+   Week pack — 7 bags, one a day. Priced off PRODUCTS so it can never drift
+   out of step with the shop, and the server re-prices it anyway.
+   ========================================================================= */
+const WEEK_PACKS = {
+  original: [['original', 7]],
+  dryheat:  [['dryheat', 7]],
+  mixed:    [['original', 4], ['dryheat', 3]]
+};
+
+function initWeekPack(){
+  const priceEl = $('#wpPrice');
+  const unit = PRODUCTS[0] ? PRODUCTS[0].price : 0;
+  if (priceEl) {
+    const total = unit * 7;
+    priceEl.innerHTML = `${money(total)} for seven` +
+      (total >= CONFIG.freeShippingOver ? ' <em>Free shipping</em>' : '');
+  }
+  $$('[data-week]').forEach(btn => {
+    btn.addEventListener('click', () => addManyToCart(WEEK_PACKS[btn.dataset.week]));
+  });
+}
+
 $('#yr').textContent = new Date().getFullYear();
 renderProducts();
 renderCart();
+initWeekPack();
 observeReveals();
 </script>
 </body>

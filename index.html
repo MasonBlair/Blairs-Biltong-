@@ -244,12 +244,9 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 /* Jumping to #shop should land on something you can buy from, so this header is
    deliberately short — heading and intro sit side by side rather than stacked. */
 #shop.sec-pad{padding-top:clamp(44px,5vw,66px)}
-.shop-head{display:grid;grid-template-columns:minmax(230px,.9fr) 1.6fr;gap:clamp(24px,4vw,56px);
-  align-items:end;margin-bottom:clamp(24px,2.6vw,34px)}
+.shop-head{margin-bottom:clamp(22px,2.4vw,30px)}
 .shop-head h2{font-size:clamp(1.75rem,3.2vw,2.35rem);margin-bottom:14px}
 .shop-head .rule{margin-bottom:0}
-.shop-head p{color:rgba(36,27,19,.72);margin-bottom:0;max-width:40ch}
-.shop-head .ship-hint{margin-top:8px;font-size:.82rem;color:rgba(36,27,19,.55)}
 .products{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(18px,2.6vw,40px);
   max-width:880px;margin:0 auto}
 .card{
@@ -398,8 +395,7 @@ footer .logo img{width:104px}
   .diff{grid-template-columns:1fr 1fr;gap:38px 0}
   .diff > div:nth-child(3){border-left:none}
   .diff > div:nth-child(-n+2){padding-bottom:34px;border-bottom:1px solid rgba(36,27,19,.16)}
-  .shop-head{grid-template-columns:1fr;text-align:center}
-  .shop-head p{max-width:none;margin-inline:auto}
+  .shop-head{text-align:center}
   .two-col{grid-template-columns:1fr}
   .foot-grid{grid-template-columns:1fr 1fr;gap:34px}
 }
@@ -601,10 +597,6 @@ footer .logo img{width:104px}
       <div class="rv">
         <h2>Fuel your<br>next adventure</h2>
         <div class="rule"></div>
-      </div>
-      <div class="rv shop-head-note">
-        <p>Explore our range of full flavoured biltong. Hand made in small batches.</p>
-        <p class="ship-hint">Free shipping on orders over $50 — that's seven bags.</p>
       </div>
     </div>
     <div class="products" id="productGrid"><!-- rendered by JS --></div>

@@ -471,10 +471,10 @@ footer .logo img{width:104px}
 
     <nav class="main" id="nav">
       <a href="#shop">Shop</a>
-      <a href="#subscribe">Subscribe</a>
       <a href="#story">Our Story</a>
-      <a href="#ingredients">Ingredients</a>
       <a href="#reviews">Reviews</a>
+      <a href="#ingredients">Ingredients</a>
+      <a href="#subscribe">Subscribe</a>
     </nav>
 
     <div class="hdr-actions">
@@ -561,56 +561,26 @@ footer .logo img{width:104px}
   </div>
 </section>
 
-<!-- ============================== SUBSCRIBE (waitlist) ============================== -->
-<section class="split" id="subscribe">
-  <div class="split-img">
-    <div class="bgsvg">
-      <svg viewBox="0 0 800 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2a2019"/><stop offset="60%" stop-color="#6d5236"/>
-          <stop offset="100%" stop-color="#b98b52"/></linearGradient></defs>
-        <rect width="800" height="620" fill="url(#sky2)"/>
-        <path fill="#3a2d20" d="M0 330 L120 220 L230 320 L360 200 L480 330 L610 235 L740 340 L800 300 L800 620 L0 620Z"/>
-        <g fill="#efe4d0" opacity=".7">
-          <path d="M360 200 L392 244 L374 236 L358 250 L342 234 L324 242Z"/>
-          <path d="M610 235 L640 278 L622 270 L607 284 L592 268 L575 276Z"/>
-        </g>
-        <path fill="#241b13" d="M0 440 L160 350 L320 440 L470 360 L640 460 L800 400 L800 620 L0 620Z"/>
-      </svg>
-    </div>
-    <div class="delivered">
-      <span>Delivered to<br>your door</span>
-      <svg viewBox="0 0 60 50"><path d="M6 4c14 2 26 12 30 26" stroke-linecap="round"/><path d="M30 30l6-8M30 30l-9-2" stroke-linecap="round"/></svg>
-    </div>
-    <div class="boxshot">
-      <span class="ph-note">Placeholder</span>
-      <div class="box"><img src="assets/blairs-logo.png" alt=""></div>
-    </div>
-  </div>
+<!-- ============================== STORY ============================== -->
+<svg class="torn flip" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+  <path fill="#efe4d0" d="M0 34 C60 12 120 44 190 30 C265 15 320 46 400 34 C470 24 530 50 610 38 C690 26 740 52 820 40 C900 28 950 14 1030 30 C1105 45 1150 22 1200 32 L1200 60 L0 60Z"/>
+</svg>
 
-  <div class="split-copy">
-    <div class="eyebrow">Coming soon —</div>
-    <h2>Subscribe &amp; Save</h2>
-    <p>Never run out. Get your favourite biltong delivered automatically, and save 10% on every order. We're setting this up now — join the list and you'll be first in.</p>
-
-    <div class="feat">
-      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3zM16 10h3.5L22 13v4h-6z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg></div>
-      <div><strong>Delivered your way</strong><p>Choose your preferred flavours and frequency.</p></div>
+<section class="sec-pad" id="story" style="background:var(--cream-2)">
+  <div class="wrap two-col">
+    <div class="rv">
+      <div class="eyebrow">Our story</div>
+      <h2>Made for the mountains</h2>
+      <div class="rule"></div>
+      <p><em>[Placeholder copy — replace with the real story.]</em></p>
+      <p>Blair's Biltong started in a Queenstown kitchen, with a family recipe carried over from South Africa and a stubborn belief that good biltong can't be rushed. No shortcuts, no fillers, no ingredients you can't pronounce.</p>
+      <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
+      <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
     </div>
-    <div class="feat">
-      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5L15.5 8.5"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></div>
-      <div><strong>Save 10%</strong><p>Ten percent off every subscription order.</p></div>
+    <div class="rv" style="display:grid;place-items:center">
+      <img class="shot" src="assets/pouch-dryheat.webp" alt="Blair's Biltong Dry Heat, 50g pouch"
+           style="max-width:260px" loading="lazy">
     </div>
-    <div class="feat">
-      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M4 18h16"/></svg></div>
-      <div><strong>Flexible &amp; easy</strong><p>Pause, skip or cancel anytime.</p></div>
-    </div>
-
-    <form class="signup" id="waitlistForm" novalidate>
-      <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
-      <button type="submit" class="btn btn-gold btn-sm">Join the list</button>
-    </form>
-    <div class="form-msg" id="waitlistMsg"></div>
   </div>
 </section>
 
@@ -639,25 +609,26 @@ footer .logo img{width:104px}
   </div>
 </section>
 
-<!-- ============================== STORY ============================== -->
-<svg class="torn flip" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
-  <path fill="#efe4d0" d="M0 34 C60 12 120 44 190 30 C265 15 320 46 400 34 C470 24 530 50 610 38 C690 26 740 52 820 40 C900 28 950 14 1030 30 C1105 45 1150 22 1200 32 L1200 60 L0 60Z"/>
-</svg>
-
-<section class="sec-pad" id="story" style="background:var(--cream-2)">
-  <div class="wrap two-col">
-    <div class="rv">
-      <div class="eyebrow">Our story</div>
-      <h2>Made for the mountains</h2>
-      <div class="rule"></div>
-      <p><em>[Placeholder copy — replace with the real story.]</em></p>
-      <p>Blair's Biltong started in a Queenstown kitchen, with a family recipe carried over from South Africa and a stubborn belief that good biltong can't be rushed. No shortcuts, no fillers, no ingredients you can't pronounce.</p>
-      <p>Every batch is hand seasoned and air dried for days — the way it's always been done. It's the snack we take up the hill, into the truck, and out on the water. We think you'll want it there too.</p>
-      <a href="#shop" class="btn btn-dark" style="margin-top:8px">Try a pack</a>
-    </div>
-    <div class="rv" style="display:grid;place-items:center">
-      <img class="shot" src="assets/pouch-dryheat.webp" alt="Blair's Biltong Dry Heat, 50g pouch"
-           style="max-width:260px" loading="lazy">
+<!-- ============================== REVIEWS ============================== -->
+<section class="sec-pad" id="reviews" style="background:var(--ink)">
+  <div class="wrap">
+    <div class="sec-head rv"><h2 style="color:var(--cream-2)">What our customers say</h2></div>
+    <div class="reviews">
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Best biltong I've had outside of South Africa. Proper flavour and perfect texture."</blockquote>
+        <cite>— Mike, Queenstown</cite>
+      </div>
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Clean ingredients, great taste and super high protein. My go-to snack."</blockquote>
+        <cite>— Sarah, Wanaka</cite>
+      </div>
+      <div class="rv">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Blair's Biltong is always in my pack. Perfect for the mountains."</blockquote>
+        <cite>— Tom, Arrowtown</cite>
+      </div>
     </div>
   </div>
 </section>
@@ -715,27 +686,56 @@ footer .logo img{width:104px}
   </div>
 </section>
 
-<!-- ============================== REVIEWS ============================== -->
-<section class="sec-pad" id="reviews" style="background:var(--ink)">
-  <div class="wrap">
-    <div class="sec-head rv"><h2 style="color:var(--cream-2)">What our customers say</h2></div>
-    <div class="reviews">
-      <div class="rv">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Best biltong I've had outside of South Africa. Proper flavour and perfect texture."</blockquote>
-        <cite>— Mike, Queenstown</cite>
-      </div>
-      <div class="rv">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Clean ingredients, great taste and super high protein. My go-to snack."</blockquote>
-        <cite>— Sarah, Wanaka</cite>
-      </div>
-      <div class="rv">
-        <div class="stars">★★★★★</div>
-        <blockquote>"Blair's Biltong is always in my pack. Perfect for the mountains."</blockquote>
-        <cite>— Tom, Arrowtown</cite>
-      </div>
+<!-- ============================== SUBSCRIBE (waitlist) ============================== -->
+<section class="split" id="subscribe">
+  <div class="split-img">
+    <div class="bgsvg">
+      <svg viewBox="0 0 800 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2a2019"/><stop offset="60%" stop-color="#6d5236"/>
+          <stop offset="100%" stop-color="#b98b52"/></linearGradient></defs>
+        <rect width="800" height="620" fill="url(#sky2)"/>
+        <path fill="#3a2d20" d="M0 330 L120 220 L230 320 L360 200 L480 330 L610 235 L740 340 L800 300 L800 620 L0 620Z"/>
+        <g fill="#efe4d0" opacity=".7">
+          <path d="M360 200 L392 244 L374 236 L358 250 L342 234 L324 242Z"/>
+          <path d="M610 235 L640 278 L622 270 L607 284 L592 268 L575 276Z"/>
+        </g>
+        <path fill="#241b13" d="M0 440 L160 350 L320 440 L470 360 L640 460 L800 400 L800 620 L0 620Z"/>
+      </svg>
     </div>
+    <div class="delivered">
+      <span>Delivered to<br>your door</span>
+      <svg viewBox="0 0 60 50"><path d="M6 4c14 2 26 12 30 26" stroke-linecap="round"/><path d="M30 30l6-8M30 30l-9-2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="boxshot">
+      <span class="ph-note">Placeholder</span>
+      <div class="box"><img src="assets/blairs-logo.png" alt=""></div>
+    </div>
+  </div>
+
+  <div class="split-copy">
+    <div class="eyebrow">Coming soon —</div>
+    <h2>Subscribe &amp; Save</h2>
+    <p>Never run out. Get your favourite biltong delivered automatically, and save 10% on every order. We're setting this up now — join the list and you'll be first in.</p>
+
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3zM16 10h3.5L22 13v4h-6z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg></div>
+      <div><strong>Delivered your way</strong><p>Choose your preferred flavours and frequency.</p></div>
+    </div>
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5L15.5 8.5"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></div>
+      <div><strong>Save 10%</strong><p>Ten percent off every subscription order.</p></div>
+    </div>
+    <div class="feat">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M4 18h16"/></svg></div>
+      <div><strong>Flexible &amp; easy</strong><p>Pause, skip or cancel anytime.</p></div>
+    </div>
+
+    <form class="signup" id="waitlistForm" novalidate>
+      <input type="email" name="email" placeholder="Enter your email" required aria-label="Email address">
+      <button type="submit" class="btn btn-gold btn-sm">Join the list</button>
+    </form>
+    <div class="form-msg" id="waitlistMsg"></div>
   </div>
 </section>
 

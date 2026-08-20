@@ -302,6 +302,20 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .wp-opts button:hover{background:var(--ink);color:var(--cream-2)}
 @media(max-width:520px){.wp-opts{flex-direction:column}.wp-opts button{width:100%}}
 
+/* Week pack locked off while the first batches go out — we don't want anyone
+   ordering seven bags before the product is proven. TO SWITCH ON: drop the
+   .locked class, delete the .locked-veil div, remove `inert` from .wp-inner. */
+.weekpack.locked{position:relative;isolation:isolate;overflow:hidden}
+.weekpack.locked .wp-inner{filter:blur(6px) saturate(.85);pointer-events:none;user-select:none}
+/* the veil styling further up is built for the dark subscribe section — this one
+   sits on cream, so it needs a light wash and dark type instead */
+.weekpack.locked .locked-veil{background:rgba(239,228,208,.62)}
+.weekpack.locked .locked-veil b{color:var(--ink);text-shadow:none;
+  font-size:clamp(1.15rem,2.4vw,1.6rem);margin-bottom:8px}
+.weekpack.locked .locked-veil span{color:rgba(36,27,19,.66);text-shadow:none;
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:.74rem}
+.weekpack.locked .locked-veil .lv-rule{margin-bottom:14px}
+
 /* reviews */
 .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center}
 .reviews > div{padding:0 clamp(16px,3vw,42px);border-left:1px solid rgba(239,228,208,.18)}
@@ -624,15 +638,24 @@ footer .logo img{width:104px}
     </div>
     <div class="products" id="productGrid"><!-- rendered by JS --></div>
 
-    <div class="weekpack rv">
-      <h3>The Week Pack</h3>
-      <p class="wp-sub">A bag a day, seven days. Enough to actually get you through the week —
-        and it clears our free shipping threshold.</p>
-      <p class="wp-price" id="wpPrice"><em>Free shipping</em></p>
-      <div class="wp-opts">
-        <button type="button" data-week="original">7 × Original</button>
-        <button type="button" data-week="dryheat">7 × Dry Heat</button>
-        <button type="button" data-week="mixed">Mixed — 4 &amp; 3</button>
+    <div class="weekpack rv locked">
+      <div class="locked-veil">
+        <div>
+          <div class="lv-rule"></div>
+          <b>Blair's Bundles</b>
+          <span>Coming soon.</span>
+        </div>
+      </div>
+      <div class="wp-inner" inert>
+        <h3>The Week Pack</h3>
+        <p class="wp-sub">A bag a day, seven days. Enough to actually get you through the week —
+          and it clears our free shipping threshold.</p>
+        <p class="wp-price" id="wpPrice"><em>Free shipping</em></p>
+        <div class="wp-opts">
+          <button type="button" data-week="original">7 × Original</button>
+          <button type="button" data-week="dryheat">7 × Dry Heat</button>
+          <button type="button" data-week="mixed">Mixed — 4 &amp; 3</button>
+        </div>
       </div>
     </div>
   </div>

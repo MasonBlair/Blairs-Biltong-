@@ -304,6 +304,9 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .ing-list li{display:flex;gap:12px;align-items:flex-start;font-size:.94rem;color:rgba(239,228,208,.82)}
 .ing-list li::before{content:'';flex:0 0 7px;height:7px;margin-top:9px;background:var(--gold);
   transform:rotate(45deg)}
+/* The li is a flex row, so every inline child would otherwise pick up the 12px
+   gap — wrapping the label in a span keeps it a single flex item. */
+.ing-list li > span{flex:1}
 .nutri{background:rgba(239,228,208,.06);border:1px solid rgba(239,228,208,.18);padding:26px 28px;border-radius:3px}
 .nutri h4{font-size:.85rem;letter-spacing:.14em;color:var(--gold-lt);margin-bottom:16px}
 .nutri table{width:100%;border-collapse:collapse;font-size:.9rem}
@@ -668,12 +671,12 @@ footer .logo img{width:104px}
       <div class="rule"></div>
       <p class="ing-aside">Except Worcestershire. Nobody can.</p>
       <ul class="ing-list">
-        <li>100% New Zealand grass fed beef</li>
-        <li>Sea salt</li>
-        <li>Cracked black pepper</li>
-        <li>Coriander seed</li>
-        <li>Malt vinegar (from <strong>barley</strong>)</li>
-        <li>Worcestershire sauce (contains <strong>sulphites</strong>)</li>
+        <li><span>100% New Zealand grass fed beef</span></li>
+        <li><span>Salt</span></li>
+        <li><span>Pepper</span></li>
+        <li><span>Coriander</span></li>
+        <li><span>Malt vinegar (from <strong>barley</strong>)</span></li>
+        <li><span>Worcestershire sauce (contains <strong>sulphites</strong>)</span></li>
       </ul>
       <p class="allergen-note">
         <strong>Contains gluten and sulphites.</strong>

@@ -284,8 +284,18 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .sizes{display:flex;justify-content:center;gap:6px;margin:0 auto 12px}
 .sizes button{font-family:'Oswald',sans-serif;font-weight:600;font-size:.82rem;letter-spacing:.06em;
   min-width:56px;padding:9px 10px;border:1.5px solid rgba(36,27,19,.25);border-radius:2px;
-  background:transparent;color:var(--ink);cursor:pointer;transition:all .15s}
-.sizes button:hover{border-color:var(--ink)}
+  background:transparent;color:var(--ink);cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s, border-color .18s, color .18s}
+/* Hover: lift, warm gold edge and tint. Only on real mouse pointers, so taps on a
+   phone don't leave a button stuck looking hovered. */
+@media (hover:hover){
+  .sizes button:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(36,27,19,.14)}
+  .sizes button:not([aria-pressed="true"]):hover{border-color:var(--gold);background:rgba(185,135,60,.12)}
+  .sizes button[aria-pressed="true"]:hover{background:var(--ink-3)}
+  .qty button:hover{background:rgba(185,135,60,.16)}
+}
+.sizes button:active{transform:translateY(0);box-shadow:none}
+.sizes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .sizes button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--cream-2)}
 .card.sold-out .shot{filter:grayscale(.85) opacity(.55)}
 .card.sold-out .price{color:rgba(36,27,19,.5)}
@@ -948,8 +958,8 @@ function shotMarkup(p){
 }
 
 function sizeInfo(z){
-  // Gold line: the bag's name, or the popular badge for the best seller.
-  const tag = z.popular ? '★ Most popular' : z.label;
+  // Gold line: the bag's name.
+  const tag = z.label;
   return `<div class="price" data-price>${money(z.price)}<small>${z.grams}g bag</small></div>
       <p class="size-note" data-note><span class="pop-tag">${escapeHtml(tag)}</span>${escapeHtml(z.note)}</p>`;
 }

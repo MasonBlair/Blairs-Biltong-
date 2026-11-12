@@ -31,12 +31,13 @@ const FLAVOURS = {
   dryheat:  { label: 'Dry Heat', soldOut: true }
 };
 const SIZES = { 50: 750, 100: 1500, 200: 3000 };   // grams → cents (linear for now)
+const SIZE_LABELS = { 50: 'Snack Pack', 100: 'Regular', 200: 'Share Bag' };
 
 export const CATALOGUE = Object.fromEntries(
   Object.entries(FLAVOURS).flatMap(([flavour, f]) =>
     Object.entries(SIZES).map(([grams, cents]) => [
       `${flavour}-${grams}`,
-      { name: `Blair's Biltong — ${f.label} (${grams}g)`, cents: Number(cents), soldOut: f.soldOut }
+      { name: `Blair's Biltong — ${f.label} ${grams}g ${SIZE_LABELS[grams]}`, cents: Number(cents), soldOut: f.soldOut }
     ])));
 
 const FREE_SHIPPING_OVER_CENTS = 5000;   // $50.00

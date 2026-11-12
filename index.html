@@ -294,6 +294,14 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   letter-spacing:.18em;text-transform:uppercase;font-size:.95rem;padding:8px 16px;border:2px solid var(--gold);
   white-space:nowrap}
 .card .btn[disabled]{opacity:.45;cursor:not-allowed}
+.sizes button{position:relative}
+.pop-dot{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-style:normal;
+  font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--gold);color:var(--ink-2);padding:2px 6px;border-radius:2px;white-space:nowrap;line-height:1.2}
+.sizes{margin-top:8px}
+.size-note{font-size:.82rem;color:rgba(36,27,19,.66);margin:-6px 0 14px;min-height:2.6em}
+.pop-tag{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:2px}
 .so-note{font-size:.8rem;color:rgba(36,27,19,.6);margin:10px 0 0}
 
 /* Week pack — a bag a day for seven days, which clears the free-shipping line */
@@ -908,15 +916,20 @@ const FLAVOURS = [
   { id:'original', name:'Original', desc:'The original. Coriander, black pepper, and time.', soldOut:false },
   { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',                        soldOut:true  }
 ];
+// `label` names the bag; `note` is the line under the price; `popular` adds the badge.
 const SIZES = [
-  { grams:50,  price:7.50,  img:'assets/pouch-50g.webp'  },
-  { grams:100, price:15.00, img:'assets/pouch-100g.webp' },
-  { grams:200, price:30.00, img:'assets/pouch-200g.webp' }
+  { grams:50,  price:7.50,  img:'assets/pouch-50g.webp',  label:'Snack Pack',
+    note:'One serve. One sitting. No regrets.' },
+  { grams:100, price:15.00, img:'assets/pouch-100g.webp', label:'Regular', popular:true,
+    note:'The sweet spot. Our most popular bag.' },
+  { grams:200, price:30.00, img:'assets/pouch-200g.webp', label:'Share Bag',
+    note:'Built for sharing. Nobody\'s checking.' }
 ];
+const DEFAULT_GRAMS = 100;   // the size each card opens on
 // Flat list the cart works from — one entry per flavour × size, id like "original-100".
 const PRODUCTS = FLAVOURS.flatMap(f => SIZES.map(z => ({
   id:`${f.id}-${z.grams}`, flavour:f.id, name:f.name, desc:f.desc, soldOut:f.soldOut,
-  price:z.price, grams:z.grams, weight:`${z.grams}g`, img:z.img
+  price:z.price, grams:z.grams, weight:`${z.grams}g ${z.label}`, img:z.img
 })));
 
 /* ============================================================================
@@ -934,8 +947,15 @@ function shotMarkup(p){
     alt="Blair's Biltong ${escapeHtml(p.name)}, ${escapeHtml(p.weight)} pouch">`;
 }
 
+function sizeInfo(z){
+  // Gold line: the bag's name, or the popular badge for the best seller.
+  const tag = z.popular ? '★ Most popular' : z.label;
+  return `<div class="price" data-price>${money(z.price)}<small>${z.grams}g bag</small></div>
+      <p class="size-note" data-note><span class="pop-tag">${escapeHtml(tag)}</span>${escapeHtml(z.note)}</p>`;
+}
+
 function renderProducts(){
-  const first = SIZES[0];
+  const first = SIZES.find(z => z.grams === DEFAULT_GRAMS) || SIZES[0];
   $('#productGrid').innerHTML = FLAVOURS.map(f => {
     const p = PRODUCTS.find(x => x.id === `${f.id}-${first.grams}`);
     return `
@@ -944,9 +964,9 @@ function renderProducts(){
       <h3>${escapeHtml(f.name)}</h3>
       <p class="desc">${escapeHtml(f.desc)}</p>
       <div class="sizes" role="group" aria-label="Bag size">
-        ${SIZES.map((z, i) => `<button type="button" data-grams="${z.grams}" aria-pressed="${i === 0}">${z.grams}g</button>`).join('')}
+        ${SIZES.map(z => `<button type="button" data-grams="${z.grams}" aria-pressed="${z === first}">${z.popular ? '<i class="pop-dot">Popular</i>' : ''}${z.grams}g</button>`).join('')}
       </div>
-      <div class="price" data-price>${money(first.price)}<small>${first.grams}g pack</small></div>
+      ${sizeInfo(first)}
       ${f.soldOut ? `
       <button class="btn btn-dark" disabled>Sold out</button>
       <p class="so-note">Back soon.</p>` : `
@@ -969,7 +989,8 @@ function renderProducts(){
       const img = $('img.shot', card);
       img.src = z.img;
       img.alt = img.alt.replace(/\d+g pouch/, `${z.grams}g pouch`);
-      $('[data-price]', card).innerHTML = `${money(z.price)}<small>${z.grams}g pack</small>`;
+      $('[data-price]', card).outerHTML = '';
+      $('[data-note]', card).outerHTML = sizeInfo(z);
     }));
     if (!qtyEl) return;                                   // sold out — nothing to add
     $$('[data-step]', card).forEach(b => b.addEventListener('click', () => {

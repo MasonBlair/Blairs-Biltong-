@@ -31,7 +31,7 @@ const FLAVOURS = {
   dryheat:  { label: 'Dry Heat', soldOut: true }
 };
 const SIZES = { 50: 750, 100: 1500, 200: 3000 };   // grams → cents (linear for now)
-const SIZE_LABELS = { 50: 'Snack Pack', 100: 'Regular', 200: 'Share Bag' };
+const SIZE_LABELS = { 50: 'Snack Pack', 100: 'Large', 200: 'Share Bag' };
 
 export const CATALOGUE = Object.fromEntries(
   Object.entries(FLAVOURS).flatMap(([flavour, f]) =>

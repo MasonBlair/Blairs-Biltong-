@@ -266,7 +266,9 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   transition:transform .22s ease, box-shadow .22s ease, border-color .22s;
 }
 .card:hover{transform:translateY(-5px);box-shadow:0 18px 34px rgba(36,27,19,.13);border-color:rgba(185,135,60,.5)}
-.card .shot{margin:0 auto 14px;max-width:165px}
+/* Every bag photo shares one 620×900 canvas, and the box is locked to that
+   shape, so switching sizes never changes the card's height. */
+.card .shot{margin:0 auto 14px;width:100%;max-width:165px;aspect-ratio:620/900;object-fit:contain}
 .card h3{font-size:1.12rem;letter-spacing:.09em;margin-bottom:6px}
 .card .desc{font-size:.87rem;color:rgba(36,27,19,.68);margin-bottom:12px;min-height:2.4em}
 .card .price{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.28rem;margin-bottom:14px}
@@ -937,7 +939,7 @@ const FLAVOURS = [
 const SIZES = [
   { grams:50,  price:7.50,  img:'assets/pouch-50g.webp',  label:'Snack Pack',
     note:'One serve. One sitting.' },
-  { grams:100, price:15.00, img:'assets/pouch-100g.webp', label:'Regular', popular:true,
+  { grams:100, price:15.00, img:'assets/pouch-100g.webp', label:'Large', popular:true,
     note:'The sweet spot. Our most popular bag.' },
   { grams:200, price:30.00, img:'assets/pouch-200g.webp', label:'Share Bag',
     note:'Made for sharing... but nobody\'s checking.' }
@@ -960,7 +962,7 @@ const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
 
 /* ---------- render product grid ---------- */
 function shotMarkup(p){
-  return `<img class="shot" src="${p.img}" loading="lazy"
+  return `<img class="shot" src="${p.img}" loading="lazy" width="620" height="900"
     alt="Blair's Biltong ${escapeHtml(p.name)}, ${escapeHtml(p.weight)} pouch">`;
 }
 

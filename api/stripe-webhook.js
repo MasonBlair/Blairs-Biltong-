@@ -31,7 +31,7 @@ export function isPickup(session) {
 }
 
 export function formatOrder(session, lineItems) {
-  const d = session.shipping_details || session.customer_details || {};
+  const d = session.shipping_details || session.collected_information?.shipping_details || session.customer_details || {};
   const a = (d && d.address) || {};
   const lines = lineItems.map(li => `  ${li.quantity} x ${li.description}   ${money(li.amount_total)}`);
   const pickup = isPickup(session);

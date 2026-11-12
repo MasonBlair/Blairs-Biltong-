@@ -291,18 +291,16 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 @media (hover:hover){
   .sizes button:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(36,27,19,.14)}
   .sizes button:not([aria-pressed="true"]):hover{border-color:var(--gold);background:rgba(185,135,60,.12)}
-  .sizes button[aria-pressed="true"]:hover{background:rgba(185,135,60,.12);
-    box-shadow:inset 0 0 0 .5px var(--gold), inset 0 -3px 0 var(--gold), 0 6px 14px rgba(36,27,19,.14)}
+  .sizes button[aria-pressed="true"]:hover{background:var(--gold-lt);border-color:var(--gold-lt)}
   .qty button:hover{background:rgba(185,135,60,.16)}
 }
 .sizes button:active{transform:translateY(0);box-shadow:none}
 .sizes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-/* Selected size — option C: gold outline + underline on cream.
-   To try option B (gold fill) instead, swap this rule for:
-   .sizes button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
-   and give .pop-dot a dark background (background:var(--ink);color:var(--cream-2)). */
-.sizes button[aria-pressed="true"]{background:var(--cream-2);border-color:var(--gold);color:var(--ink);
-  box-shadow:inset 0 0 0 .5px var(--gold), inset 0 -3px 0 var(--gold)}
+/* Selected size — option B: gold fill. The Popular tag goes dark so it doesn't
+   disappear into the gold. (Option C was: cream with gold border + inset
+   0 -3px 0 gold underline.) */
+.sizes button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
+.pop-dot{background:var(--ink)!important;color:var(--cream-2)!important}
 .card.sold-out .shot{filter:grayscale(.85) opacity(.55)}
 .card.sold-out .price{color:rgba(36,27,19,.5)}
 .so-badge{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);

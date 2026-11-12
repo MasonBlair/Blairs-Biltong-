@@ -309,7 +309,10 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;
   background:var(--gold);color:var(--ink-2);padding:2px 6px;border-radius:2px;white-space:nowrap;line-height:1.2}
 .sizes{margin-top:8px}
-.size-note{font-size:.82rem;color:rgba(36,27,19,.66);margin:-6px 0 14px;min-height:2.6em}
+.size-info{display:grid}
+.size-info .si{grid-area:1/1;visibility:hidden}
+.size-info .si.on{visibility:visible}
+.size-note{font-size:.82rem;color:rgba(36,27,19,.66);margin:-6px 0 14px}
 .pop-tag{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gold);margin-bottom:2px}
 .so-note{font-size:.8rem;color:rgba(36,27,19,.6);margin:10px 0 0}
@@ -957,11 +960,17 @@ function shotMarkup(p){
     alt="Blair's Biltong ${escapeHtml(p.name)}, ${escapeHtml(p.weight)} pouch">`;
 }
 
-function sizeInfo(z){
-  // Gold line: the bag's name.
-  const tag = z.label;
-  return `<div class="price" data-price>${money(z.price)}<small>${z.grams}g bag</small></div>
-      <p class="size-note" data-note><span class="pop-tag">${escapeHtml(tag)}</span>${escapeHtml(z.note)}</p>`;
+/* Price + bag name + line for every size, stacked on top of each other in one
+   grid cell. Only the chosen one is visible, but the box is always as tall as
+   the longest one, so switching sizes can never make the page jump, whatever
+   the screen width. */
+function sizeInfo(on){
+  return `<div class="size-info">${SIZES.map(z => `
+      <div class="si${z === on ? ' on' : ''}" data-si="${z.grams}"${z === on ? '' : ' aria-hidden="true"'}>
+        <div class="price">${money(z.price)}<small>${z.grams}g bag</small></div>
+        <p class="size-note"><span class="pop-tag">${escapeHtml(z.label)}</span>${escapeHtml(z.note)}</p>
+      </div>`).join('')}
+    </div>`;
 }
 
 function renderProducts(){
@@ -999,8 +1008,11 @@ function renderProducts(){
       const img = $('img.shot', card);
       img.src = z.img;
       img.alt = img.alt.replace(/\d+g pouch/, `${z.grams}g pouch`);
-      $('[data-price]', card).outerHTML = '';
-      $('[data-note]', card).outerHTML = sizeInfo(z);
+      $$('.si', card).forEach(el => {
+        const on = +el.dataset.si === z.grams;
+        el.classList.toggle('on', on);
+        on ? el.removeAttribute('aria-hidden') : el.setAttribute('aria-hidden', 'true');
+      });
     }));
     if (!qtyEl) return;                                   // sold out — nothing to add
     $$('[data-step]', card).forEach(b => b.addEventListener('click', () => {

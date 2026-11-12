@@ -26,20 +26,20 @@ const subtotalOf = p => p.line_items.reduce(
 console.log('\nCheckout payload');
 
 test('single pack charges flat shipping', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE);
   assert.strictEqual(subtotalOf(p), 750);
   assert.strictEqual(shippingOf(p), 500);
   assert.strictEqual(p.line_items.length, 1);
 });
 
 test('six packs still under the free-shipping threshold', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 6 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 6 }], SITE);
   assert.strictEqual(subtotalOf(p), 4500);
   assert.strictEqual(shippingOf(p), 500);
 });
 
 test('seven packs unlocks free shipping', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 7 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 7 }], SITE);
   assert.strictEqual(subtotalOf(p), 5250);
   assert.strictEqual(shippingOf(p), 0);
   assert.strictEqual(p.shipping_options[0].shipping_rate_data.display_name, 'Free shipping');
@@ -47,8 +47,8 @@ test('seven packs unlocks free shipping', () => {
 
 test('mixed cart totals correctly', () => {
   const p = buildSessionPayload(
-    [{ id: 'original', qty: 2 }, { id: 'dryheat', qty: 3 }], SITE);
-  assert.strictEqual(subtotalOf(p), 3750);
+    [{ id: 'original-50', qty: 2 }, { id: 'original-100', qty: 1 }], SITE);
+  assert.strictEqual(subtotalOf(p), 3000);
   assert.strictEqual(shippingOf(p), 500);
   assert.strictEqual(p.line_items.length, 2);
 });
@@ -56,57 +56,57 @@ test('mixed cart totals correctly', () => {
 console.log('\nLocal pickup');
 
 test('pickup code skips the delivery address entirely', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE, 'LOCAL');
   assert.strictEqual(p.shipping_address_collection, undefined);
   assert.strictEqual(p.shipping_options, undefined);
 });
 
 test('pickup code still collects a phone number', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE, 'LOCAL');
   assert.strictEqual(p.phone_number_collection.enabled, true);
 });
 
 test('pickup order is tagged do-not-post', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE, 'LOCAL');
   assert.ok(p.metadata.fulfilment.startsWith('LOCAL PICKUP'));
   assert.strictEqual(p.metadata.local_code, 'LOCAL');
 });
 
 test('pickup success url carries the pickup flag', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'LOCAL');
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE, 'LOCAL');
   assert.ok(p.success_url.includes('pickup=1'));
 });
 
 test('delivery orders are unaffected by the pickup path', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE);
   assert.deepStrictEqual(p.shipping_address_collection, { allowed_countries: ['NZ'] });
   assert.strictEqual(p.metadata.fulfilment, 'Post');
   assert.ok(!p.success_url.includes('pickup=1'));
 });
 
 test('an unrecognised code is treated as a normal delivery', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE, 'NOTACODE');
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE, 'NOTACODE');
   assert.deepStrictEqual(p.shipping_address_collection, { allowed_countries: ['NZ'] });
   assert.strictEqual(shippingOf(p), 500);
 });
 
 test('duplicate lines are merged, not doubled up', () => {
   const p = buildSessionPayload(
-    [{ id: 'dryheat', qty: 1 }, { id: 'dryheat', qty: 2 }], SITE);
+    [{ id: 'original-100', qty: 1 }, { id: 'original-100', qty: 2 }], SITE);
   assert.strictEqual(p.line_items.length, 1);
   assert.strictEqual(p.line_items[0].quantity, 3);
 });
 
 test('quantity is capped at 20', () => {
-  const p = buildSessionPayload([{ id: 'dryheat', qty: 999 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-100', qty: 999 }], SITE);
   assert.strictEqual(p.line_items[0].quantity, 20);
 });
 
 console.log('\nPrices come from the server, not the browser');
 
 test('a price sent by the client is ignored', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1, price: 0.01 }], SITE);
-  assert.strictEqual(p.line_items[0].price_data.unit_amount, CATALOGUE.original.cents);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1, price: 0.01 }], SITE);
+  assert.strictEqual(p.line_items[0].price_data.unit_amount, CATALOGUE['original-50'].cents);
 });
 
 console.log('\nBad input is rejected');
@@ -115,11 +115,11 @@ const rejects = [
   ['empty cart',        []],
   ['not an array',      null],
   ['unknown product',   [{ id: 'wagyu', qty: 1 }]],
-  ['zero quantity',     [{ id: 'original', qty: 0 }]],
-  ['negative quantity', [{ id: 'original', qty: -5 }]],
-  ['non-numeric qty',   [{ id: 'original', qty: 'lots' }]],
+  ['zero quantity',     [{ id: 'original-50', qty: 0 }]],
+  ['negative quantity', [{ id: 'original-50', qty: -5 }]],
+  ['non-numeric qty',   [{ id: 'original-50', qty: 'lots' }]],
   ['prototype key',     [{ id: 'constructor', qty: 1 }]],
-  ['too many lines',    Array.from({ length: 11 }, () => ({ id: 'original', qty: 1 }))]
+  ['too many lines',    Array.from({ length: 11 }, () => ({ id: 'original-50', qty: 1 }))]
 ];
 
 for (const [name, cart] of rejects) {
@@ -131,13 +131,13 @@ for (const [name, cart] of rejects) {
 console.log('\nURLs and shipping config');
 
 test('success url carries the session placeholder', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE);
   assert.strictEqual(p.success_url, `${SITE}/success.html?session_id={CHECKOUT_SESSION_ID}`);
   assert.strictEqual(p.cancel_url, `${SITE}/#shop`);
 });
 
 test('ships to New Zealand only', () => {
-  const p = buildSessionPayload([{ id: 'original', qty: 1 }], SITE);
+  const p = buildSessionPayload([{ id: 'original-50', qty: 1 }], SITE);
   assert.deepStrictEqual(p.shipping_address_collection.allowed_countries, ['NZ']);
   assert.strictEqual(p.phone_number_collection.enabled, true);
   assert.strictEqual(p.allow_promotion_codes, true);
@@ -145,8 +145,28 @@ test('ships to New Zealand only', () => {
 
 test('pack list metadata is readable', () => {
   const p = buildSessionPayload(
-    [{ id: 'original', qty: 2 }, { id: 'dryheat', qty: 1 }], SITE);
-  assert.strictEqual(p.metadata.pack_list, '2x original, 1x dryheat');
+    [{ id: 'original-50', qty: 2 }, { id: 'original-100', qty: 1 }], SITE);
+  assert.strictEqual(p.metadata.pack_list, '2x original-50, 1x original-100');
+});
+
+console.log('\nSizes and stock');
+
+test('100g and 200g are priced server-side', () => {
+  assert.strictEqual(CATALOGUE['original-100'].cents, 1500);
+  assert.strictEqual(CATALOGUE['original-200'].cents, 3000);
+  const p = buildSessionPayload([{ id: 'original-200', qty: 1 }], SITE);
+  assert.strictEqual(p.line_items[0].price_data.unit_amount, 3000);
+  assert.match(p.line_items[0].price_data.product_data.name, /200g/);
+});
+
+test('sold-out flavour is refused at checkout', () => {
+  for (const id of ['dryheat-50', 'dryheat-100', 'dryheat-200']) {
+    assert.throws(() => buildSessionPayload([{ id, qty: 1 }], SITE), /SOLD_OUT/);
+  }
+});
+
+test('old single-size ids are no longer accepted', () => {
+  assert.throws(() => buildSessionPayload([{ id: 'original', qty: 1 }], SITE), /UNKNOWN_PRODUCT/);
 });
 
 console.log(`\n${passed} checks passed${process.exitCode ? ' (with failures above)' : ''}\n`);

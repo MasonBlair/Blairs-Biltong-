@@ -279,6 +279,22 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .qty button:hover{background:rgba(36,27,19,.07)}
 .qty span{flex:1;text-align:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:1rem}
 .card .btn{width:100%;margin-top:auto}
+.card .shot-wrap{position:relative}
+.card .shot{transition:opacity .2s}
+.sizes{display:flex;justify-content:center;gap:6px;margin:0 auto 12px}
+.sizes button{font-family:'Oswald',sans-serif;font-weight:600;font-size:.82rem;letter-spacing:.06em;
+  min-width:56px;padding:9px 10px;border:1.5px solid rgba(36,27,19,.25);border-radius:2px;
+  background:transparent;color:var(--ink);cursor:pointer;transition:all .15s}
+.sizes button:hover{border-color:var(--ink)}
+.sizes button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--cream-2)}
+.card.sold-out .shot{filter:grayscale(.85) opacity(.55)}
+.card.sold-out .price{color:rgba(36,27,19,.5)}
+.so-badge{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);
+  background:var(--ink);color:var(--cream-2);font-family:'Oswald',sans-serif;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;font-size:.95rem;padding:8px 16px;border:2px solid var(--gold);
+  white-space:nowrap}
+.card .btn[disabled]{opacity:.45;cursor:not-allowed}
+.so-note{font-size:.8rem;color:rgba(36,27,19,.6);margin:10px 0 0}
 
 /* Week pack — a bag a day for seven days, which clears the free-shipping line */
 .weekpack{margin-top:30px;border:1.5px dashed rgba(185,135,60,.55);background:rgba(185,135,60,.07);
@@ -633,26 +649,7 @@ footer .logo img{width:104px}
     </div>
     <div class="products" id="productGrid"><!-- rendered by JS --></div>
 
-    <div class="weekpack rv locked">
-      <div class="locked-veil">
-        <div>
-          <div class="lv-rule"></div>
-          <b>Blair's Bundles</b>
-          <span>Coming soon.</span>
-        </div>
-      </div>
-      <div class="wp-inner" inert>
-        <h3>The Week Pack</h3>
-        <p class="wp-sub">A bag a day, seven days. Enough to actually get you through the week —
-          and it clears our free shipping threshold.</p>
-        <p class="wp-price" id="wpPrice"><em>Free shipping</em></p>
-        <div class="wp-opts">
-          <button type="button" data-week="original">7 × Original</button>
-          <button type="button" data-week="dryheat">7 × Dry Heat</button>
-          <button type="button" data-week="mixed">Mixed — 4 &amp; 3</button>
-        </div>
-      </div>
-    </div>
+    <!-- Week pack removed for now — rebuild once stock is up. -->
   </div>
 </section>
 
@@ -903,13 +900,23 @@ const CONFIG = {
   checkCodeEndpoint: '/api/check-code'
 };
 
-// `img` is the cut-out product photo in assets/. Prices are placeholders.
-const PRODUCTS = [
-  { id:'original', name:'Original', desc:'The original. Coriander, black pepper, and time.',
-    price:7.50, weight:'50g', img:'assets/pouch-original.webp' },
-  { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',
-    price:7.50, weight:'50g', img:'assets/pouch-dryheat.webp' }
+// Flavours × bag sizes. Must mirror FLAVOURS/SIZES in api/create-checkout-session.js
+// (the server is what actually charges — these are display prices).
+// soldOut: true greys the card out and blocks adding it; flip to false when stock is back.
+const FLAVOURS = [
+  { id:'original', name:'Original', desc:'The original. Coriander, black pepper, and time.', soldOut:false },
+  { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',                        soldOut:true  }
 ];
+const SIZES = [
+  { grams:50,  price:7.50,  img:'assets/pouch-50g.webp'  },
+  { grams:100, price:15.00, img:'assets/pouch-100g.webp' },
+  { grams:200, price:30.00, img:'assets/pouch-200g.webp' }
+];
+// Flat list the cart works from — one entry per flavour × size, id like "original-100".
+const PRODUCTS = FLAVOURS.flatMap(f => SIZES.map(z => ({
+  id:`${f.id}-${z.grams}`, flavour:f.id, name:f.name, desc:f.desc, soldOut:f.soldOut,
+  price:z.price, grams:z.grams, weight:`${z.grams}g`, img:z.img
+})));
 
 /* ============================================================================
    Helpers
@@ -927,28 +934,49 @@ function shotMarkup(p){
 }
 
 function renderProducts(){
-  $('#productGrid').innerHTML = PRODUCTS.map(p => `
-    <article class="card rv" data-id="${p.id}">
-      ${shotMarkup(p)}
-      <h3>${escapeHtml(p.name)}</h3>
-      <p class="desc">${escapeHtml(p.desc)}</p>
-      <div class="price">${money(p.price)}<small>${escapeHtml(p.weight)} pack</small></div>
+  const first = SIZES[0];
+  $('#productGrid').innerHTML = FLAVOURS.map(f => {
+    const p = PRODUCTS.find(x => x.id === `${f.id}-${first.grams}`);
+    return `
+    <article class="card rv${f.soldOut ? ' sold-out' : ''}" data-flavour="${f.id}" data-grams="${first.grams}">
+      <div class="shot-wrap">${shotMarkup(p)}${f.soldOut ? '<span class="so-badge">Sold out</span>' : ''}</div>
+      <h3>${escapeHtml(f.name)}</h3>
+      <p class="desc">${escapeHtml(f.desc)}</p>
+      <div class="sizes" role="group" aria-label="Bag size">
+        ${SIZES.map((z, i) => `<button type="button" data-grams="${z.grams}" aria-pressed="${i === 0}">${z.grams}g</button>`).join('')}
+      </div>
+      <div class="price" data-price>${money(first.price)}<small>${first.grams}g pack</small></div>
+      ${f.soldOut ? `
+      <button class="btn btn-dark" disabled>Sold out</button>
+      <p class="so-note">Back soon.</p>` : `
       <div class="qty">
         <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
         <span data-qty>1</span>
         <button type="button" data-step="1" aria-label="Increase quantity">+</button>
       </div>
-      <button class="btn btn-dark" data-add>Add to cart</button>
-    </article>`).join('');
+      <button class="btn btn-dark" data-add>Add to cart</button>`}
+    </article>`;
+  }).join('');
 
   $$('#productGrid .card').forEach(card => {
     const qtyEl = $('[data-qty]', card);
+    // Size picker: swap photo + price, remember the choice on the card.
+    $$('.sizes button', card).forEach(b => b.addEventListener('click', () => {
+      const z = SIZES.find(s => s.grams === +b.dataset.grams);
+      card.dataset.grams = z.grams;
+      $$('.sizes button', card).forEach(x => x.setAttribute('aria-pressed', x === b));
+      const img = $('img.shot', card);
+      img.src = z.img;
+      img.alt = img.alt.replace(/\d+g pouch/, `${z.grams}g pouch`);
+      $('[data-price]', card).innerHTML = `${money(z.price)}<small>${z.grams}g pack</small>`;
+    }));
+    if (!qtyEl) return;                                   // sold out — nothing to add
     $$('[data-step]', card).forEach(b => b.addEventListener('click', () => {
       const next = Math.max(1, Math.min(20, +qtyEl.textContent + (+b.dataset.step)));
       qtyEl.textContent = next;
     }));
     $('[data-add]', card).addEventListener('click', () => {
-      addToCart(card.dataset.id, +qtyEl.textContent);
+      addToCart(`${card.dataset.flavour}-${card.dataset.grams}`, +qtyEl.textContent);
       qtyEl.textContent = 1;
     });
   });
@@ -1021,7 +1049,7 @@ function loadCart(){
     // Re-validate against the current catalogue: a product we've since removed
     // or renamed must not linger in someone's cart.
     cart = saved.items
-      .filter(l => l && PRODUCTS.some(p => p.id === l.id))
+      .filter(l => l && PRODUCTS.some(p => p.id === l.id && !p.soldOut))
       .map(l => ({ id: l.id, qty: Math.max(1, Math.min(99, Math.floor(Number(l.qty)) || 1)) }))
       .slice(0, 10);
   } catch {
@@ -1294,7 +1322,6 @@ $('#yr').textContent = new Date().getFullYear();
 renderProducts();
 loadCart();
 renderCart();
-initWeekPack();
 observeReveals();
 </script>
 </body>

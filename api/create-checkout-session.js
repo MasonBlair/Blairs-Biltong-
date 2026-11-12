@@ -23,10 +23,21 @@ const STRIPE_API_VERSION = '2025-10-29.clover';
    CATALOGUE — prices in CENTS. Must mirror PRODUCTS in index.html.
    This is the source of truth for what a customer is charged.
    --------------------------------------------------------------------------- */
-export const CATALOGUE = {
-  original: { name: "Blair's Biltong — Original (50g)", cents: 750 },
-  dryheat:  { name: "Blair's Biltong — Dry Heat (50g)", cents: 750 }
+// One entry per flavour × bag size. Ids look like "original-100".
+// soldOut: true → checkout refuses it, whatever the browser sends.
+// Flip soldOut to false (here AND in index.html FLAVOURS) when stock is back.
+const FLAVOURS = {
+  original: { label: 'Original', soldOut: false },
+  dryheat:  { label: 'Dry Heat', soldOut: true }
 };
+const SIZES = { 50: 750, 100: 1500, 200: 3000 };   // grams → cents (linear for now)
+
+export const CATALOGUE = Object.fromEntries(
+  Object.entries(FLAVOURS).flatMap(([flavour, f]) =>
+    Object.entries(SIZES).map(([grams, cents]) => [
+      `${flavour}-${grams}`,
+      { name: `Blair's Biltong — ${f.label} (${grams}g)`, cents: Number(cents), soldOut: f.soldOut }
+    ])));
 
 const FREE_SHIPPING_OVER_CENTS = 5000;   // $50.00
 const FLAT_SHIPPING_CENTS      = 500;    // $5.00
@@ -47,6 +58,7 @@ export function buildSessionPayload(items, siteUrl, rawCode) {
     if (!Object.prototype.hasOwnProperty.call(CATALOGUE, id)) {
       throw new Error(`UNKNOWN_PRODUCT:${id}`);
     }
+    if (CATALOGUE[id].soldOut) throw new Error(`SOLD_OUT:${id}`);
     const qty = Math.floor(Number(raw.qty));
     if (!Number.isFinite(qty) || qty < 1) throw new Error(`BAD_QUANTITY:${id}`);
     merged.set(id, Math.min(MAX_QTY_PER_LINE, (merged.get(id) || 0) + qty));
@@ -143,6 +155,9 @@ export async function POST(request) {
   } catch (err) {
     // Client's fault — say so, but don't leak internals.
     console.warn('Rejected cart:', err.message);
+    if (String(err.message).startsWith('SOLD_OUT:')) {
+      return json({ error: 'Sorry, something in your cart has just sold out. Please remove it and try again.' }, 400);
+    }
     return json({ error: 'That cart looks invalid. Please refresh and try again.' }, 400);
   }
 

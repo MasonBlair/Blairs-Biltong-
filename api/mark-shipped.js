@@ -2,8 +2,10 @@
  * Private: send the "on its way" email and mark the order shipped — Vercel Function
  * ----------------------------------------------------------------------------
  * POST /api/mark-shipped   (header x-dispatch-key: <DISPATCH_PASSWORD>)
- * body: { sessionId, tracking, note?, test?, resend? }
+ * body: { sessionId, tracking, note?, test?, resend?, markOnly? }
  *
+ *   markOnly: true → no email; just marks the order shipped (for orders you
+ *                    posted before this page existed). Tracking is optional.
  *   test: true   → sends the email to ORDER_EMAIL_TO (you) only, marks nothing.
  *   resend: true → allows sending again for an order already marked shipped.
  *
@@ -58,6 +60,19 @@ export async function POST(request) {
   }
 
   if (!sessionId.startsWith('cs_')) return json({ error: 'Missing order' }, 400);
+
+  // Already posted some other way: mark it shipped without emailing anyone.
+  if (body.markOnly === true) {
+    if (tracking && !/^[A-Z0-9]{8,30}$/.test(tracking)) return json({ error: 'That tracking number doesn’t look right' }, 400);
+    const stripe = await stripeClient();
+    const s = await stripe.checkout.sessions.retrieve(sessionId);
+    if (s.payment_status !== 'paid' || !s.payment_intent) return json({ error: 'That order isn’t paid' }, 400);
+    const piId = typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent.id;
+    const shippedAt = new Date().toISOString();
+    await stripe.paymentIntents.update(piId, { metadata: { shipped_at: shippedAt, tracking: tracking || 'sent-manually' } });
+    return json({ ok: true, markOnly: true, shippedAt });
+  }
+
   if (!/^[A-Z0-9]{8,30}$/.test(tracking)) return json({ error: 'That tracking number doesn’t look right' }, 400);
 
   const stripe = await stripeClient();

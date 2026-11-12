@@ -2,16 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Dispatch — Blair's Biltong</title>
 <link rel="icon" href="assets/blairs-logo.png">
+<link rel="apple-touch-icon" href="assets/dispatch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dispatch">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#241b13">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#241b13;--ink-2:#150e07;--cream:#efe4d0;--cream-2:#f7f1e4;--cream-3:#e2d5bd;--gold:#b9873c;--kraft:#c9a878;--muted:#6b5b49;--ok:#3f6b3a;--bad:#9a3324}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream-3);color:var(--ink);font:400 16px/1.5 'Barlow',Helvetica,Arial,sans-serif}
-header{background:var(--ink);border-bottom:4px solid var(--gold);padding:14px 16px;display:flex;align-items:center;gap:12px}
+header{background:var(--ink);border-bottom:4px solid var(--gold);padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;align-items:center;gap:12px}
 header img{width:44px;height:auto}
 header h1{margin:0;font:600 18px/1 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-2)}
 header button{margin-left:auto}

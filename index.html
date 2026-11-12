@@ -266,9 +266,7 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
   transition:transform .22s ease, box-shadow .22s ease, border-color .22s;
 }
 .card:hover{transform:translateY(-5px);box-shadow:0 18px 34px rgba(36,27,19,.13);border-color:rgba(185,135,60,.5)}
-/* Every bag photo shares one 620×900 canvas, and the box is locked to that
-   shape, so switching sizes never changes the card's height. */
-.card .shot{margin:0 auto 14px;width:100%;max-width:165px;aspect-ratio:620/900;object-fit:contain}
+.card .shot{margin:0 auto 14px;max-width:165px}
 .card h3{font-size:1.12rem;letter-spacing:.09em;margin-bottom:6px}
 .card .desc{font-size:.87rem;color:rgba(36,27,19,.68);margin-bottom:12px;min-height:2.4em}
 .card .price{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.28rem;margin-bottom:14px}
@@ -663,17 +661,19 @@ footer .logo img{width:104px}
       <h2 style="color:var(--cream-2)">Nothing you can't pronounce</h2>
       <div class="rule"></div>
       <p class="ing-aside">Except Worcestershire. Nobody can.</p>
+      <!-- Mirrors the back-of-pack label (back_label.py v3.0). Same order, same
+           wording. If the label changes, change this too. -->
       <ul class="ing-list">
-        <li><span>100% New Zealand grass fed beef</span></li>
-        <li><span>Salt</span></li>
-        <li><span>Pepper</span></li>
-        <li><span>Coriander</span></li>
+        <li><span>Beef</span></li>
         <li><span>Malt vinegar (from <strong>barley</strong>)</span></li>
-        <li><span>Worcestershire sauce (contains <strong>sulphites</strong>)</span></li>
+        <li><span>Worcestershire sauce (contains <strong>barley</strong>, <strong>fish</strong>)</span></li>
+        <li><span>Iodised salt</span></li>
+        <li><span>Coriander</span></li>
+        <li><span>Black pepper</span></li>
       </ul>
       <p class="allergen-note">
-        <strong>Contains gluten and sulphites.</strong>
-        Our malt vinegar is brewed from barley. Everything else is exactly what it says.
+        <strong>Contains: Gluten, Fish.</strong>
+        The malt vinegar is brewed from barley, and the Worcestershire sauce contains barley and anchovies.
       </p>
     </div>
 
@@ -681,29 +681,28 @@ footer .logo img{width:104px}
       <h4>Nutrition Information</h4>
 
       <div class="hero-stat">
-        <b>20g+</b>
-        <span>Protein<br>per 50g bag</span>
+        <b>19.4g</b>
+        <span>Protein<br>per 50g serve</span>
       </div>
 
       <table>
         <thead>
-          <tr><td></td><td class="col1">Per 50g bag</td><td class="col2">Per 100g</td></tr>
+          <tr><td></td><td class="col1">Per serve (50g)</td><td class="col2">Per 100g</td></tr>
         </thead>
         <tbody>
-          <tr><td>Energy</td><td class="col1">585 kJ</td><td class="col2">1170 kJ</td></tr>
-          <tr><td>Protein</td><td class="col1">25.0 g</td><td class="col2">50.0 g</td></tr>
-          <tr><td>Fat, total</td><td class="col1">3.4 g</td><td class="col2">6.7 g</td></tr>
-          <tr><td>— saturated</td><td class="col1">1.4 g</td><td class="col2">2.7 g</td></tr>
-          <tr><td>Carbohydrate</td><td class="col1">2.1 g</td><td class="col2">4.2 g</td></tr>
-          <tr><td>— sugars</td><td class="col1">1.3 g</td><td class="col2">2.5 g</td></tr>
-          <tr><td>Sodium</td><td class="col1 pending" colspan="2">Pending laboratory analysis</td></tr>
+          <tr><td>Energy</td><td class="col1">518 kJ</td><td class="col2">1040 kJ</td></tr>
+          <tr><td>Protein</td><td class="col1">19.4 g</td><td class="col2">38.9 g</td></tr>
+          <tr><td>Fat, total</td><td class="col1">3.3 g</td><td class="col2">6.6 g</td></tr>
+          <tr><td>— saturated</td><td class="col1">1.0 g</td><td class="col2">2.0 g</td></tr>
+          <tr><td>Carbohydrate</td><td class="col1">2.4 g</td><td class="col2">4.9 g</td></tr>
+          <tr><td>— sugars</td><td class="col1">1.1 g</td><td class="col2">2.3 g</td></tr>
+          <tr><td>Sodium</td><td class="col1">1380 mg</td><td class="col2">2750 mg</td></tr>
         </tbody>
       </table>
 
-      <p class="disc">Estimated values, calculated from our recipe and typical composition data for
-        New Zealand lean beef. Biltong is a dried product, so figures vary between batches — the
-        table shows a typical batch. Sodium is being confirmed by laboratory analysis and a full
-        Nutrition Information Panel will appear on pack.</p>
+      <p class="disc">The same panel that's printed on every pack. Serving size 50g: one serve in a
+        50g bag, two in a 100g bag, four in a 200g bag. Average values; biltong is a dried product,
+        so figures vary a little between batches.</p>
     </div>
   </div>
 </section>
@@ -931,7 +930,7 @@ const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
 
 /* ---------- render product grid ---------- */
 function shotMarkup(p){
-  return `<img class="shot" src="${p.img}" loading="lazy" width="620" height="900"
+  return `<img class="shot" src="${p.img}" loading="lazy"
     alt="Blair's Biltong ${escapeHtml(p.name)}, ${escapeHtml(p.weight)} pouch">`;
 }
 

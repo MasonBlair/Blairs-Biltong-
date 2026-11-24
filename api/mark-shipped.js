@@ -2,7 +2,10 @@
  * Private: send the "on its way" email and mark the order shipped — Vercel Function
  * ----------------------------------------------------------------------------
  * POST /api/mark-shipped   (header x-dispatch-key: <DISPATCH_PASSWORD>)
- * body: { sessionId, tracking, note?, test?, resend?, markOnly? }
+ * body: { sessionId, tracking, note?, test?, resend?, markOnly?, postage? }
+ *
+ *   postage: what you paid NZ Post, in dollars ("6.50"). Saved for the
+ *            Numbers tab when stock/money tracking is set up.
  *
  *   markOnly: true → no email; just marks the order shipped (for orders you
  *                    posted before this page existed). Tracking is optional.
@@ -18,6 +21,27 @@
  */
 import { json, authorised, stripeClient, shippingOf, isPickup } from './_lib/admin.js';
 import { buildShippedEmail } from './_lib/shipped-email.js';
+import { hasDb } from './_lib/db.js';
+import { recordFinance, setPostage } from './_lib/finance.js';
+
+/** "6.50" → 650. Null if blank or not a sensible amount. */
+export function postageCents(v) {
+  const s = String(v ?? '').replace(/[$\s]/g, '');
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isFinite(n) && n >= 0 && n < 1000 ? Math.round(n * 100) : undefined;
+}
+
+/** Save postage against the order, creating its money record first if needed. */
+export async function savePostage(stripe, sessionOrId, cents) {
+  if (!hasDb() || cents == null) return;
+  const id = typeof sessionOrId === 'string' ? sessionOrId : sessionOrId.id;
+  if (!(await setPostage(id, cents))) {
+    const s = typeof sessionOrId === 'string' ? await stripe.checkout.sessions.retrieve(id) : sessionOrId;
+    await recordFinance(stripe, s);
+    await setPostage(id, cents);
+  }
+}
 
 const SAMPLE_SESSION = {
   id: 'cs_sample_000000SAMPLE1', amount_total: 3250,
@@ -44,6 +68,8 @@ export async function POST(request) {
   const tracking = String(body.tracking || '').replace(/\s+/g, '').toUpperCase();
   const note = String(body.note || '').trim().slice(0, 300);
   const test = body.test === true;
+  const postage = postageCents(body.postage);
+  if (postage === undefined) return json({ error: 'Check the postage amount' }, 400);
 
   const send = (to, subject, e) => fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -70,6 +96,7 @@ export async function POST(request) {
     const piId = typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent.id;
     const shippedAt = new Date().toISOString();
     await stripe.paymentIntents.update(piId, { metadata: { shipped_at: shippedAt, tracking: tracking || 'sent-manually' } });
+    await savePostage(stripe, s, postage).catch(err => console.error('Postage save failed:', err.message));
     return json({ ok: true, markOnly: true, shippedAt });
   }
 
@@ -107,5 +134,7 @@ export async function POST(request) {
   if (pi) {
     await stripe.paymentIntents.update(pi.id, { metadata: { shipped_at: shippedAt, tracking } });
   }
+  await savePostage(stripe, { ...session, payment_intent: pi?.id || session.payment_intent }, postage)
+    .catch(err => console.error('Postage save failed:', err.message));
   return json({ ok: true, sentTo: customer, shippedAt, tracking });
 }

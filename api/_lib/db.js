@@ -151,6 +151,23 @@ const MIGRATIONS = [
   );
   CREATE INDEX IF NOT EXISTS fs_kind_at_idx ON fs_records (kind, at);
   CREATE INDEX IF NOT EXISTS fs_batch_idx   ON fs_records (batch_id, section);
+  `,
+  // 3 — real money per online order (from Stripe) and postage you paid
+  `
+  CREATE TABLE IF NOT EXISTS order_finance (
+    session_id     text PRIMARY KEY,       -- Stripe checkout id
+    at             timestamptz NOT NULL,
+    paid_cents     int NOT NULL,           -- what the customer paid, all in
+    subtotal_cents int NOT NULL DEFAULT 0, -- products before discount and shipping
+    discount_cents int NOT NULL DEFAULT 0,
+    shipping_cents int NOT NULL DEFAULT 0, -- shipping the customer paid
+    fee_cents      int,                    -- Stripe's fee (null until Stripe settles it)
+    refunded_cents int NOT NULL DEFAULT 0,
+    postage_cents  int,                    -- what you paid NZ Post (entered on dispatch)
+    pickup         boolean NOT NULL DEFAULT false,
+    customer       text
+  );
+  CREATE INDEX IF NOT EXISTS order_finance_at_idx ON order_finance (at);
   `
 ];
 

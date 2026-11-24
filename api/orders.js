@@ -9,6 +9,7 @@
  */
 import { json, authorised, stripeClient, shippingOf, isPickup } from './_lib/admin.js';
 import { hasDb, batchesForOrders } from './_lib/stock.js';
+import { postageFor } from './_lib/finance.js';
 
 export async function GET(request) {
   if (!authorised(request)) return json({ error: 'Wrong password' }, 401);
@@ -48,7 +49,8 @@ export async function GET(request) {
   if (hasDb()) {
     try {
       const map = await batchesForOrders(orders.map(o => o.id));
-      for (const o of orders) o.batches = map[o.id] || [];
+      const post = await postageFor(orders.map(o => o.id));
+      for (const o of orders) { o.batches = map[o.id] || []; o.postage = post[o.id] ?? null; }
     } catch (err) { console.error('Batch lookup failed:', err.message); }
   }
 

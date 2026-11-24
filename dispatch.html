@@ -384,9 +384,10 @@ async function loadAll(first) {
   await loadOrders();
   $('#refresh').classList.remove('spin'); state.loading = false;
   // Catch any paid orders the webhook missed, then refresh if it found some.
-  if (first && state.data?.settings.live) {
+  if (first && state.data) {
     const s = await post({ action: 'sync-orders' });
-    if (s.ok && s.data.added) { toast(`Picked up ${plural(s.data.added, 'order')} from Stripe`); await refreshBoss(); }
+    if (s.ok && s.data.added) toast(`Picked up ${plural(s.data.added, 'order')} from Stripe`);
+    if (s.ok && (s.data.added || s.data.money?.added || s.data.money?.updated)) await refreshBoss();
   }
 }
 async function refreshBoss() { await loadBoss(); render(); }
@@ -490,9 +491,13 @@ function orderCard(o) {
     <div class="addr">${o.address.map(esc).join('<br>')}</div>
     ${batches ? `<div class="row mt small muted">From batch ${batches}</div>` : ''}
     ${shipped
-      ? `<div class="row mt"><span class="chip ok">Shipped ${new Date(o.shippedAt).toLocaleDateString('en-NZ')}</span><span class="small muted">${esc(o.tracking || '')}</span></div>`
+      ? `<div class="row mt"><span class="chip ok">Shipped ${new Date(o.shippedAt).toLocaleDateString('en-NZ')}</span><span class="small muted">${esc(o.tracking || '')}</span></div>
+         ${state.data ? `<div class="row mt postage-row"><span class="small muted">Postage</span>${o.postage != null ? `<b>${money(o.postage)}</b>` : '<span class="chip warn">Not entered</span>'}
+           <input class="in post-in" inputmode="decimal" placeholder="${o.postage != null ? (o.postage / 100).toFixed(2) : '6.50'}" style="max-width:100px;min-height:38px;padding:6px 10px;margin-left:auto">
+           <button class="btn sec2 sm" data-postage>${o.postage != null ? 'Change' : 'Save'}</button></div>` : ''}`
       : `<label class="f">NZ Post tracking number</label>
          <input class="in trk" placeholder="LY123456789NZ" autocapitalize="characters" autocomplete="off">
+         ${state.data ? `<label class="f">Postage you paid ($)</label><input class="in post-in" inputmode="decimal" placeholder="6.50" style="max-width:160px"><p class="hint" style="margin-top:4px">For your profit numbers. Optional.</p>` : ''}
          <label class="f">Personal note (optional)</label>
          <textarea class="in note-in" placeholder="Threw in an extra 50 g, enjoy!"></textarea>
          <div class="btns mt"><button class="btn sec2" data-ship="test">Test to me</button><button class="btn" data-ship="send">Send to customer</button></div>
@@ -507,7 +512,8 @@ async function shipAction(btn) {
   if ((act === 'send' || act === 'mark') && !arm(btn, act === 'send' ? 'Tap again to send' : 'Tap again to mark shipped (no email)', act === 'send' ? 'btn dark' : null)) return;
   $$('button', el).forEach(b => b.disabled = true);
   msg.className = 'msg'; msg.textContent = 'Sending…';
-  const r = await api('/api/mark-shipped', { method: 'POST', body: JSON.stringify({ sessionId: el.dataset.id, tracking, note, test: act === 'test', markOnly: act === 'mark' }) });
+  const postage = $('.post-in', el)?.value.trim() || '';
+  const r = await api('/api/mark-shipped', { method: 'POST', body: JSON.stringify({ sessionId: el.dataset.id, tracking, note, postage: act === 'test' ? '' : postage, test: act === 'test', markOnly: act === 'mark' }) });
   $$('button', el).forEach(b => b.disabled = false);
   if (r.ok) {
     msg.className = 'msg ok';
@@ -632,6 +638,28 @@ function viewNumbers() {
     <div class="stat"><span class="k">Bags sold</span><span class="v">${p.units}</span><span class="s">${n1(p.grams / 1000)} kg of biltong</span></div>
   </div>`;
 
+  const m = p.money;
+  if (m && (m.orders || m.offline)) {
+    const line = (label, v, opts = {}) => `<div class="between ${opts.cls || ''}" style="padding:7px 0;${opts.top ? 'border-top:1px solid var(--line);margin-top:4px;padding-top:11px' : ''}"><span class="${opts.strong ? '' : 'muted'}">${label}</span><b style="${opts.big ? 'font:600 22px/1 Oswald,sans-serif' : ''}">${v}</b></div>`;
+    h += `<div class="sec"><h2>Money</h2><span class="small muted">${plural(m.orders, 'online order')}</span></div><div class="card">
+      ${line('Online, what customers paid', money(m.online))}
+      ${m.offline ? line('Honesty box, pickups, wholesale', money(m.offline)) : ''}
+      ${line('Stripe fees', '−' + money(m.fees) + (m.feesPending ? ` <span class="faint small">(${m.feesPending} pending)</span>` : ''))}
+      ${line('Received', money(m.received), { top: true, strong: true })}
+      ${line('Postage paid', '−' + money(m.postage))}
+      ${m.productCost != null ? line('Cost to make the biltong', '−' + money(m.productCost)) : ''}
+      ${m.profit != null ? line('Profit', `${money(m.profit)}${m.margin != null ? ` <span class="muted small">${m.margin}%</span>` : ''}`, { top: true, strong: true, big: true, cls: m.profit < 0 ? 'bad-t' : '' })
+        : `<p class="hint">Profit shows once a packed batch has its meat cost entered.</p>`}
+      ${m.postageMissing ? `<div class="note" style="margin-top:10px">${plural(m.postageMissing, 'posted order')} without postage entered. <button class="btn quiet sm" data-tab-go="orders" style="padding:0;min-height:24px">Add it on Orders ›</button></div>` : ''}
+      <div class="grid2 mt">
+        <div class="stat" style="padding:10px 12px"><span class="k">Average order</span><span class="v" style="font-size:19px">${m.avgOrder != null ? money(m.avgOrder) : '—'}</span></div>
+        <div class="stat" style="padding:10px 12px"><span class="k">Average postage</span><span class="v" style="font-size:19px">${m.avgPostage != null ? money(m.avgPostage) : '—'}</span></div>
+        <div class="stat" style="padding:10px 12px"><span class="k">Shipping charged</span><span class="v" style="font-size:19px">${money(m.shippingIn)}</span><span class="s">${m.postage ? `vs ${money(m.postage)} paid` : ''}</span></div>
+        <div class="stat" style="padding:10px 12px"><span class="k">Discounts given</span><span class="v" style="font-size:19px">${money(m.discounts)}</span>${m.refunds ? `<span class="s">Refunds ${money(m.refunds)}</span>` : ''}</div>
+      </div>
+      <p class="hint">Online figures come straight from Stripe, so they match your Stripe account. Cost to make uses your recent batches’ cost per 100 g.</p></div>`;
+  }
+
   const maxW = Math.max(1, ...n.weeks.map(w => w.cents));
   h += `<div class="sec"><h2>Weekly sales</h2><span class="small muted">last 12 weeks</span></div><div class="card"><div class="chart">${n.weeks.map((w, i) =>
     `<div class="c ${i === n.weeks.length - 1 ? 'now' : ''}" title="${money(w.cents)}"><i style="height:${Math.max(2, w.cents / maxW * 100)}%"></i><span>${i % 3 === 2 || i === n.weeks.length - 1 ? shortDate(w.start).replace(' ', '&nbsp;') : '&nbsp;'}</span></div>`).join('')}</div>
@@ -648,7 +676,7 @@ function viewNumbers() {
     const topc = ch[0][1];
     h += `<div class="sec"><h2>Where it sold</h2></div><div class="card">${ch.map(([r, u]) =>
       `<div class="hbar"><span>${esc(d.reasons.labels[r] || r)}</span><b>${plural(u, 'bag')}</b><div class="bar"><i style="width:${u / topc * 100}%;background:#8a7356"></i></div></div>`).join('')}
-      <p class="hint">Online orders and honesty-box counts at shop price; wholesale at the price you entered.</p></div>`;
+      <p class="hint">Bags by where they went. Honesty box counted at shop price, wholesale at the price you entered.</p></div>`;
   } else {
     h += `<div class="card empty mt">No sales recorded in this period yet.</div>`;
   }
@@ -1604,6 +1632,16 @@ document.addEventListener('click', async e => {
   const seg = t.closest('[data-seg]'); if (seg && seg.closest('#view')) { state.stockSeg = seg.dataset.seg; render(); return; }
   const per = t.closest('[data-period]'); if (per) { state.period = per.dataset.period; render(); return; }
   const ship = t.closest('[data-ship]'); if (ship) { shipAction(ship); return; }
+  const pst = t.closest('[data-postage]'); if (pst) {
+    const card = pst.closest('.order'), v = $('.post-in', card).value.trim();
+    if (!v) { $('.post-in', card).focus(); return; }
+    pst.disabled = true;
+    const r = await post({ action: 'postage-set', sessionId: card.dataset.id, postage: v });
+    pst.disabled = false;
+    toast(r.data.msg || r.data.error, !r.ok);
+    if (r.ok) { await loadOrders(); refreshBoss(); }
+    return;
+  }
   const flt = t.closest('[data-fsfilter]'); if (flt) { state.fsFilter = flt.dataset.fsfilter; render(); return; }
   const tk = t.closest('[data-tick]'); if (tk) { tk.classList.toggle('on'); tk.setAttribute('aria-pressed', tk.classList.contains('on')); return; }
   const mini = t.closest('button.mini'); if (mini) { mini.classList.toggle('on'); return; }

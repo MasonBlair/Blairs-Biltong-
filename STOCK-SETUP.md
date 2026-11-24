@@ -51,3 +51,11 @@ Until step 5, the shop keeps using the `soldOut` flags in `api/_lib/catalogue.js
 - Run paper alongside for a batch or two, and show your verifier before dropping paper.
 
 Files: `api/_lib/safety.js` (forms, limits, checks, reminders), `api/_lib/safety-db.js` (saving, history, printout).
+
+## Money
+
+- Each online order's real figures come from Stripe (paid, discount, shipping, Stripe fee, refunds): saved when the webhook fires, and caught up every time the app opens, including the last 90 days of orders from before the database existed. Read-only: nothing is charged or refunded.
+- Enter what you paid NZ Post in the **Postage you paid** box when you dispatch (or later, on the shipped order).
+- Numbers → Money: what customers paid, Stripe fees, what you received, postage, cost to make the biltong (from your batches' cost per 100 g), and profit.
+
+File: `api/_lib/finance.js`.

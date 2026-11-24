@@ -22,6 +22,8 @@ import {
   saveRecord, voidRecord, skipReminder, saveFsSettings, safetySummary, safetyView, batchRecord,
   printToken, readPrintToken, printHtml, exportAll
 } from './_lib/safety-db.js';
+import { syncFinance, financeRows } from './_lib/finance.js';
+import { savePostage, postageCents } from './mark-shipped.js';
 
 const SALE_REASONS = ['online', 'honesty', 'pickup', 'wholesale'];
 const BAG_SIZES = Object.keys(meta.SIZES).map(Number);
@@ -84,11 +86,12 @@ export async function overview() {
       q('SELECT * FROM supplies WHERE NOT archived ORDER BY sort, name'),
       q(`SELECT m.*, b.code FROM movements m LEFT JOIN batches b ON b.id = m.batch_id ORDER BY m.at DESC, m.id DESC LIMIT 40`),
       q(`SELECT flavour, COUNT(*)::int AS n FROM waitlist WHERE notified_at IS NULL GROUP BY flavour`),
-      q(`SELECT (at AT TIME ZONE 'Pacific/Auckland')::date AS d, sku, reason,
+      q(`SELECT (at AT TIME ZONE 'Pacific/Auckland')::date AS d, sku, reason, ref,
                 SUM(-qty)::int AS units, SUM(-qty * COALESCE(unit_cents,0))::int AS cents
            FROM movements WHERE qty < 0 AND reason = ANY($1) AND at > now() - interval '120 days'
-          GROUP BY 1,2,3`, [SALE_REASONS])
+          GROUP BY 1,2,3,4`, [SALE_REASONS])
     ]);
+  const money = await financeRows();
 
   const products = prods.filter(p => CATALOGUE[p.sku]).map(p => ({
     sku: p.sku, flavour: p.flavour, grams: p.grams, label: skuLabel(p.sku), price: priceOf(p.sku),
@@ -109,7 +112,7 @@ export async function overview() {
     };
   }));
 
-  const numbers = buildNumbers({ today, sales, products, batches, settings: s });
+  const numbers = buildNumbers({ today, sales, products, batches, settings: s, money });
   const safety = await safetySummary(batches.map(b => b.id));
   const alerts = buildAlerts({ today, products, batches, supplies, settings: s, numbers, safety });
 
@@ -125,18 +128,39 @@ export async function overview() {
 }
 
 /* ---------------------------------------------------------------- numbers */
-function buildNumbers({ today, sales, products, batches, settings }) {
+function buildNumbers({ today, sales, products, batches, settings, money = [] }) {
   const gramsOf = sku => Number(sku.split('-')[1]);
   const inRange = (d, n) => daysBetween(d, today) < n;
 
+  // Online orders Stripe has told us about: use what was really paid, not list prices.
+  const moneyIds = new Set(money.map(m => m.session_id));
+  const listCents = rows => rows.filter(r => !(r.reason === 'online' && moneyIds.has(r.ref))).reduce((a, r) => a + r.cents, 0);
+  const paidCents = rows => rows.reduce((a, m) => a + m.paid_cents - m.refunded_cents, 0);
+
   const period = n => {
     const rows = sales.filter(r => inRange(r.d, n));
+    const mrows = money.filter(m => inRange(m.d, n));
     const by = (key) => rows.reduce((o, r) => { o[r[key]] = (o[r[key]] || 0) + r.units; return o; }, {});
+    const offline = rows.filter(r => r.reason !== 'online').reduce((a, r) => a + r.cents, 0);
+    const posted = mrows.filter(m => !m.pickup);
     return {
       units: rows.reduce((a, r) => a + r.units, 0),
-      cents: rows.reduce((a, r) => a + r.cents, 0),
+      cents: paidCents(mrows) + listCents(rows),       // what customers actually paid, all channels
       grams: rows.reduce((a, r) => a + r.units * gramsOf(r.sku), 0),
-      bySku: by('sku'), byReason: by('reason')
+      bySku: by('sku'), byReason: by('reason'),
+      money: {
+        orders: mrows.length,
+        online: paidCents(mrows),
+        discounts: mrows.reduce((a, m) => a + m.discount_cents, 0),
+        shippingIn: mrows.reduce((a, m) => a + m.shipping_cents, 0),
+        refunds: mrows.reduce((a, m) => a + m.refunded_cents, 0),
+        fees: mrows.reduce((a, m) => a + (m.fee_cents || 0), 0),
+        feesPending: mrows.filter(m => m.fee_cents == null).length,
+        postage: posted.reduce((a, m) => a + (m.postage_cents || 0), 0),
+        postageMissing: posted.filter(m => m.postage_cents == null).length,
+        postedOrders: posted.length,
+        offline: offline + rows.filter(r => r.reason === 'online' && !moneyIds.has(r.ref)).reduce((a, r) => a + r.cents, 0)
+      }
     };
   };
 
@@ -147,7 +171,8 @@ function buildNumbers({ today, sales, products, batches, settings }) {
     const start = addDays(thisMonday, -7 * (11 - i));
     const end = addDays(start, 6);
     const rows = sales.filter(r => r.d >= start && r.d <= end);
-    return { start, units: rows.reduce((a, r) => a + r.units, 0), cents: rows.reduce((a, r) => a + r.cents, 0) };
+    const mrows = money.filter(m => m.d >= start && m.d <= end);
+    return { start, units: rows.reduce((a, r) => a + r.units, 0), cents: paidCents(mrows) + listCents(rows) };
   });
 
   // Selling pace over the last 28 days → how long stock lasts.
@@ -184,8 +209,22 @@ function buildNumbers({ today, sales, products, batches, settings }) {
     return { grams: g, price, cost, profit: price - cost, pct: Math.round((price - cost) / price * 100) };
   });
 
+  // Profit: what reached you, minus Stripe fees, postage and what the biltong cost to make.
+  const withProfit = p => {
+    const m = p.money;
+    const productCost = costPer100g == null ? null
+      : Object.entries(p.bySku).reduce((a, [sku, u]) => a + u * gramsOf(sku) * costPer100g / 100, 0);
+    m.received = m.online - m.fees + m.offline;
+    m.productCost = productCost == null ? null : Math.round(productCost);
+    m.profit = productCost == null ? null : Math.round(m.received - m.postage - productCost);
+    m.margin = m.profit != null && p.cents ? Math.round(m.profit / p.cents * 100) : null;
+    m.avgOrder = m.orders ? Math.round(m.online / m.orders) : null;
+    m.avgPostage = m.postedOrders - m.postageMissing > 0 ? Math.round(m.postage / (m.postedOrders - m.postageMissing)) : null;
+    return p;
+  };
+
   return {
-    d7: period(7), d30: period(30), d90: period(90), weeks, pace, forecast,
+    d7: withProfit(period(7)), d30: withProfit(period(30)), d90: withProfit(period(90)), weeks, pace, forecast,
     avgYield: avgYield ? Math.round(avgYield) : null, costPer100g, margins,
     stockValue: products.reduce((a, p) => a + Math.max(0, p.onHand) * p.price, 0)
   };
@@ -494,12 +533,14 @@ async function waitlistList() {
  */
 async function syncOrders() {
   const s = await getSettings();
-  if (!s.live || !s.liveSince || !process.env.STRIPE_SECRET_KEY) return { added: 0 };
+  if (!process.env.STRIPE_SECRET_KEY) return { added: 0 };
+  const money = await syncFinance(await stripeClient()).catch(err => { console.error('Money sync failed:', err.message); return null; });
+  if (!s.live || !s.liveSince) return { added: 0, money };
   const since = Math.max(Math.floor(new Date(s.liveSince).getTime() / 1000), Math.floor(Date.now() / 1000) - 14 * 86400);
   const stripe = await stripeClient();
   const list = await stripe.checkout.sessions.list({ limit: 100, created: { gte: since } });
   const paid = list.data.filter(x => x.payment_status === 'paid');
-  if (!paid.length) return { added: 0 };
+  if (!paid.length) return { added: 0, money };
   const { rows } = await q('SELECT session_id FROM processed_orders WHERE session_id = ANY($1)', [paid.map(x => x.id)]);
   const known = new Set(rows.map(r => r.session_id));
   let added = 0;
@@ -507,7 +548,7 @@ async function syncOrders() {
     const r = await recordOrder(sess);
     if (r.recorded) added++;
   }
-  return { added };
+  return { added, money };
 }
 
 async function waitlistSend(b) {
@@ -540,6 +581,14 @@ export async function POST(request) {
     if (body.action === 'waitlist-send') return json(await waitlistSend(body));
     if (body.action === 'waitlist-list') return json(await waitlistList());
     if (body.action === 'sync-orders') return json(await syncOrders());
+    if (body.action === 'postage-set') {
+      const cents = postageCents(body.postage);
+      if (cents === undefined) fail('Check the postage amount');
+      if (!String(body.sessionId || '').startsWith('cs_')) fail('Missing order');
+      await savePostage(await stripeClient(), String(body.sessionId), cents ?? null);
+      if (cents == null) await q('UPDATE order_finance SET postage_cents = NULL WHERE session_id = $1', [body.sessionId]);
+      return json({ ok: true, msg: cents == null ? 'Postage cleared' : 'Postage saved' });
+    }
     if (body.action === 'fs-print-link' || body.action === 'fs-export-link') {
       const from = isDate(body.from) ? body.from : addDays(todayNZ(), -30), to = isDate(body.to) ? body.to : todayNZ();
       const site = (process.env.SITE_URL || new URL(request.url).origin).replace(/\/+$/, '');

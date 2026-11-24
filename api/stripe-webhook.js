@@ -23,6 +23,8 @@
  */
 
 import { hasDb, recordOrder } from './_lib/stock.js';
+import { recordFinance } from './_lib/finance.js';
+import { stripeClient } from './_lib/admin.js';
 
 const STRIPE_API_VERSION = '2025-10-29.clover';
 const money = cents => '$' + (cents / 100).toFixed(2);
@@ -136,6 +138,7 @@ export async function POST(request) {
     if (hasDb() && session.payment_status === 'paid') {
       const r = await recordOrder(session);
       console.log('Stock updated:', JSON.stringify(r));
+      await recordFinance(await stripeClient(), session).catch(err => console.error('Money record failed:', err.message));
     }
   } catch (err) {
     // If this fails, the stocktake will catch it — never make Stripe retry.

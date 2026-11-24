@@ -6,6 +6,7 @@ Lives behind the Dispatch app (`/dispatch.html`), same password. Tabs:
 - **Orders**: the dispatch page as before, plus which batch each order's bags came from.
 - **Stock**: bags per flavour and size (tap one for batch breakdown, history and settings), Record in / out, Stocktake. **Supplies**: pouches, labels and ingredients, with reorder levels.
 - **Batches**: start a batch, move it through marinate → dry → ready → pack. Packing puts bags into stock with a best-before. Each batch shows yield, weight loss, cost, and who got its bags (for recalls).
+- **Recipe** (Today, Batches, and inside a marinating batch): type the trimmed weight and it lists the marinade (salt, malt vinegar in grams, Lea & Perrins) and the spice mix, with tick boxes. Recipe amounts per kg are editable under Edit the recipe; Dry Heat chilli is blank until you set it.
 - **Numbers**: sales, weekly chart, what's selling and where, pace per size, next-batch forecast, cost per bag and margin, batch history.
 - **Safety**: food safety records in place of the paper pack. Fridge temps, cleaning, calibration and corrective actions, plus the full 11-section batch record for each batch (receiving → CCP 1 → CCP 2 → release). Checks against your limits are done on the server. Reminders for routine checks show in the app until done or marked not done. Printable records for your verifier, and a full backup.
 - **Settings** (top right): live stock on/off, "only N left", shelf life, alerts, back-in-stock list.

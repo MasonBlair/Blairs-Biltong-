@@ -260,6 +260,7 @@ span.mini{width:24px;height:24px;border-radius:7px;margin:0;flex-shrink:0}span.m
 .sdot{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;flex-shrink:0;font:600 12px/1 'Oswald',sans-serif;color:var(--faint);background:#fff}
 .sdot svg{width:16px;height:16px}.sdot.ok{background:var(--ok);border-color:var(--ok);color:#fff}.sdot.bad{background:var(--bad);border-color:var(--bad);color:#fff;font-size:15px}.sdot.part{background:var(--warn-soft);border-color:#e7c48b;color:var(--warn)}
 .rel{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:14px;color:var(--muted)}.rel.ok{color:var(--ink)}
+.tick .amt{font:600 17px/1 'Oswald',sans-serif;white-space:nowrap}
 .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.kv:first-child{border-top:0}.kv>span:last-child{text-align:right}
 .choices.days button{min-width:44px;padding:0 10px}
 .sheet .sh-h .back{margin:4px -4px 0 -6px;color:var(--ink)}
@@ -444,10 +445,11 @@ function viewToday() {
   }
 
   h += `<div class="sec"><h2>Quick actions</h2></div>
-  <div class="grid3">
-    <button class="btn sec2" data-do="adjust" style="padding:0 6px">Record</button>
-    <button class="btn sec2" data-do="stocktake" style="padding:0 6px">Count</button>
-    <button class="btn sec2" data-do="start-batch" style="padding:0 6px">New batch</button>
+  <div class="grid2">
+    <button class="btn sec2" data-do="recipe">Recipe</button>
+    <button class="btn sec2" data-do="start-batch">New batch</button>
+    <button class="btn sec2" data-do="adjust">Record</button>
+    <button class="btn sec2" data-do="stocktake">Count</button>
   </div>`;
 
   h += `<div class="sec"><h2>Recent activity</h2></div>` + activityList(d.recent.slice(0, 10));
@@ -593,6 +595,7 @@ function batchCard(b) {
     body = `<div class="steps">${[0, 1, 2, 3].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>
       <div class="steps-l">${['Marinate', 'Dry', 'Ready', 'Packed'].map((l, i) => `<span class="${i === step ? 'on' : ''}">${l}</span>`).join('')}</div>
       <div class="small muted mt">${n1(b.raw_kg)} kg raw${b.cut ? ' ' + esc(b.cut.toLowerCase()) : ''} · started ${shortDate(b.started_on)}${since}</div>
+      ${b.status === 'marinating' ? `<button class="btn quiet sm" data-do="recipe" data-id="${b.id}" style="padding:0;min-height:30px;text-decoration:none;color:var(--gold-2);margin-right:14px">Recipe for ${n1(b.raw_kg)} kg ›</button>` : ''}
       ${(() => { const p = state.data.safety?.batches?.[b.id]; return p ? `<button class="btn quiet sm" data-do="fs-batch" data-id="${b.id}" style="padding:0;min-height:30px;text-decoration:none;color:${p.failed.length ? 'var(--bad)' : 'var(--gold-2)'}">Safety record: ${p.failed.length ? 'check failed' : p.done + ' of ' + p.total + ' done'} ›</button>` : ''; })()}
       <div class="btns mt"><button class="btn sec2" data-do="batch" data-id="${b.id}">Details</button>
       <button class="btn" data-do="${next[1] === 'pack' ? 'pack' : 'advance'}" data-id="${b.id}" data-to="${next[1]}">${next[0]}</button></div>`;
@@ -612,7 +615,7 @@ function viewBatches() {
   const open = d.batches.filter(b => ['marinating', 'drying', 'ready'].includes(b.status));
   const packed = d.batches.filter(b => b.status === 'packed');
   const closed = d.batches.filter(b => b.status === 'closed');
-  let h = `<button class="btn full" data-do="start-batch" style="margin-bottom:6px">${PLUS} Start a batch</button>`;
+  let h = `<div class="btns" style="margin-bottom:6px"><button class="btn" data-do="start-batch">${PLUS} Start a batch</button><button class="btn sec2" data-do="recipe">Recipe</button></div>`;
   h += `<div class="sec"><h2>In progress</h2></div>` + (open.length ? open.map(batchCard).join('') : '<div class="card empty">No batch on the go.</div>');
   h += `<div class="sec"><h2>In stock</h2></div>` + (packed.length ? packed.map(batchCard).join('') : '<div class="card empty">Packed batches show here, with how many bags are left from each.</div>');
   if (closed.length) h += `<details class="more"><summary>Finished batches (${closed.length})</summary>${closed.map(batchCard).join('')}</details>`;
@@ -809,9 +812,11 @@ async function sheetSku(sku) {
 /* ---- batches ---- */
 function sheetStartBatch() {
   const d = state.data;
+  ensureSafety();
   openSheet('Start a batch', `
     <label class="f">Flavour</label>${choiceHtml('flavour', d.flavours.map(f => [f.id, f.label]), d.flavours[0].id)}
-    <label class="f">Raw meat (kg)</label><input class="in" name="rawKg" inputmode="decimal" placeholder="12.5">
+    <label class="f">Trimmed raw meat (kg)</label><input class="in" name="rawKg" inputmode="decimal" placeholder="12.5">
+    <div class="info-row hide" id="startRecipe"><span class="muted">You’ll need</span><b></b></div>
     <label class="f">Cut</label>${choiceHtml('cut', [['Topside', 'Topside'], ['Silverside', 'Silverside'], ['Mixed', 'Mixed']], 'Topside')}
     <label class="f">Started</label><input class="in" type="date" name="startedOn" value="${d.today}">
     <label class="f">Paid for the meat ($, optional)</label><input class="in" name="meatCost" inputmode="decimal" placeholder="285.00">
@@ -820,6 +825,9 @@ function sheetStartBatch() {
     <label class="check"><input type="checkbox" name="useSupplies" checked><span>Take salt, vinegar, Lea &amp; Perrins and spices off supplies (recipe amounts per kg)</span></label>
     <div class="err"></div>
     <button class="btn full mt" id="save">Start batch</button>`, root => {
+    const prev = () => { const inp = $('[name=rawKg]', root); if (!inp) return; const kg = parseFloat(inp.value.replace(',', '.')); const box = $('#startRecipe', root);
+      box.classList.toggle('hide', !(kg > 0)); if (kg > 0) $('b', box).innerHTML = recipeShort(kg, pick(root, 'flavour')); };
+    root.addEventListener('input', prev); root.addEventListener('click', () => setTimeout(prev));
     $('#save', root).onclick = e => act({ action: 'batch-start', flavour: pick(root, 'flavour'), rawKg: $('[name=rawKg]', root).value, cut: pick(root, 'cut'),
       startedOn: $('[name=startedOn]', root).value, meatCost: $('[name=meatCost]', root).value, notes: $('[name=notes]', root).value,
       useSupplies: $('[name=useSupplies]', root).checked }, { btn: e.target, errEl: $('.err', root) });
@@ -1243,11 +1251,11 @@ function liveCheck(root, fields, ctx = {}) {
   }
   const S = ctx.sections || {};
   const kg = Number(S.slicing?.data?.trimmedKg) || ctx.rawKg || null;
-  const R = FS().recipe || { salt: 40, vinegar: 100, worcestershire: 60, spice: 66.7 };
+  const R = recipeNow();
   const at = $('[data-at]', root)?.value;
   const set = (k, t) => { const el = $(`[data-info="${k}"]`, root); if (el) el.innerHTML = t; };
   if (ctx.section === 'marinate_start') {
-    if (kg) set('targets', `Salt ${Math.round(kg * R.salt)} g · vinegar ${Math.round(kg * R.vinegar)} mL · L&amp;P ${Math.round(kg * R.worcestershire)} mL`);
+    if (kg) set('targets', recipeShort(kg, ctx.flavour));
     const out = $('[data-live="saltG"]', root);
     if (kg && data.saltG != null && out) {
       const pk = Math.round(data.saltG / kg * 10) / 10, bad = pk < FS().limits.saltMinPerKg;
@@ -1260,7 +1268,7 @@ function liveCheck(root, fields, ctx = {}) {
   if (ctx.section === 'drying_end') { const h = hrs('drying_start'); set('hours', h != null ? `${h} hours` : '—'); }
   if (ctx.section === 'spice' && data.tubBefore != null && data.tubAfter != null) {
     const net = data.tubBefore - data.tubAfter - (data.fallOff || 0), skg = data.seasonedKg || kg;
-    set('perKg', skg ? `${Math.round(net)} g · ${Math.round(net / skg * 10) / 10} g/kg <span class="muted">(target ${R.spice})</span>` : `${Math.round(net)} g`);
+    set('perKg', skg ? `${Math.round(net)} g · ${Math.round(net / skg * 10) / 10} g/kg <span class="muted">(target ${Math.round(((R.coriander || 0) + (R.pepper || 0) + (ctx.flavour === 'dryheat' ? R.chilli || 0 : 0)) * 10) / 10})</span>` : `${Math.round(net)} g`);
   }
   if (ctx.section === 'post' && kg && data.finalKg) set('yield', `${Math.round(data.finalKg / kg * 1000) / 10}%`);
   if (ctx.section === 'slices') {
@@ -1286,7 +1294,11 @@ async function sheetFsForm(opts) {
     const sec = sv.schema.batch.find(s => s.key === section);
     fields = sec.fields; title = `${sec.no}. ${sec.title}`;
     note = [sec.ccp ? `<span class="chip bad">${esc(sec.ccp)}</span>` : '', sec.note ? `<span class="small muted">${esc(sec.note)}</span>` : ''].filter(Boolean).join(' ');
-    ctx.sections = opts.sections || {}; ctx.rawKg = state.data.batches.find(b => b.id === batchId)?.raw_kg;
+    ctx.sections = opts.sections || {}; const bb = state.data.batches.find(b => b.id === batchId); ctx.rawKg = bb?.raw_kg; ctx.flavour = bb?.flavour;
+    if (section === 'marinate_start' || section === 'spice') {
+      const kgR = Number(ctx.sections.slicing?.data?.trimmedKg) || ctx.rawKg;
+      note += ` <button type="button" class="btn quiet sm" data-do="recipe" data-id="${batchId}" data-kg="${kgR}" style="padding:0;min-height:28px">Full recipe for ${n1(kgR)} kg ›</button>`;
+    }
   } else { fields = sv.schema.logs[kind].fields; title = sv.schema.logs[kind].title; }
   const remember = sv.remember[section || kind] || {};
   const base = existing ? existing.data : { ...Object.fromEntries(fields.filter(f => f.remember && remember[f.k]).map(f => [f.k, remember[f.k]])), ...(opts.prefill || {}) };
@@ -1525,6 +1537,65 @@ function sheetFsSkip(id) {
   });
 }
 
+
+/* ================================================================== RECIPE CALCULATOR
+   Trimmed weight in → everything to weigh out for the marinade and spice mix. */
+const RECIPE_DEFAULT = { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null };
+const recipeNow = () => ({ ...RECIPE_DEFAULT, ...(state.safety?.settings?.recipe || {}) });
+function recipeLines(kg, flavour) {
+  const R = recipeNow(), x = v => Math.round(kg * v);
+  const marinade = [['salt', 'Salt (iodised)', x(R.salt), 'g'], ['vinegar', 'Malt vinegar', x(R.vinegar), 'g'], ['worcestershire', 'Lea & Perrins', x(R.worcestershire), 'mL']];
+  const spice = [['coriander', 'Coriander seed', x(R.coriander), 'g'], ['pepper', 'Black pepper', x(R.pepper), 'g']];
+  if (flavour === 'dryheat') spice.push(['chilli', 'Chilli', R.chilli ? x(R.chilli) : null, 'g']);
+  return { marinade, spice, spiceTotal: spice.reduce((a, l) => a + (l[2] || 0), 0), R };
+}
+const recipeShort = (kg, flavour) => { const r = recipeLines(kg, flavour); return `Salt ${r.marinade[0][2]} g · vinegar ${r.marinade[1][2]} g · L&amp;P ${r.marinade[2][2]} mL · spice ${r.spiceTotal} g`; };
+
+async function sheetRecipe(pre = {}) {
+  await ensureSafety();
+  const fl = pre.flavour || (state.data.flavours.find(f => f.id === 'original') || state.data.flavours[0]).id;
+  openSheet('Recipe', `
+    <label class="f">Trimmed weight</label>
+    <div class="bignum" style="height:76px"><button type="button" data-nudge="-0.5" aria-label="Less">−</button>
+      <input data-kg inputmode="decimal" value="${pre.kg ?? ''}" placeholder="0.0"><span class="u">kg</span>
+      <button type="button" data-nudge="0.5" aria-label="More">+</button></div>
+    <div class="mt">${choiceHtml('rflav', state.data.flavours.map(f => [f.id, f.label]), fl)}</div>
+    <div id="recipeOut"></div>
+    <details class="more"><summary>Edit the recipe</summary><div class="card" id="recipeEdit"></div></details>`, root => {
+    const draw = () => {
+      const inp = $('[data-kg]', root); if (!inp) return;
+      const kg = parseFloat(inp.value.replace(',', '.')), flavour = pick(root, 'rflav');
+      const out = $('#recipeOut', root);
+      if (!(kg > 0)) { out.innerHTML = '<div class="card empty mt">Type the trimmed weight to see what to weigh out.</div>'; return; }
+      const r = recipeLines(kg, flavour);
+      const ticked = new Set($$('.tick.on', out).map(t => t.dataset.k));
+      const row = ([k, label, amt, unit]) => amt == null
+        ? `<div class="tick" style="cursor:default;opacity:.75"><span class="box"></span><span class="lbl">${esc(label)}<br><span class="small muted">No amount set yet. Add it under Edit the recipe.</span></span></div>`
+        : `<button type="button" class="tick ${ticked.has(k) ? 'on' : ''}" data-tick data-k="${k}"><span class="box">${TICK}</span><span class="lbl" style="flex:1">${esc(label)}</span><b class="amt">${amt.toLocaleString('en-NZ')} ${unit}</b></button>`;
+      out.innerHTML = `
+        <label class="f">Marinade <span class="lim">meat fully submerged</span></label>${r.marinade.map(row).join('')}
+        <label class="f">Spice mix <span class="lim">${r.spiceTotal.toLocaleString('en-NZ')} g blend · applied the next morning</span></label>${r.spice.map(row).join('')}
+        <p class="hint">Per kg: salt ${r.R.salt} g · vinegar ${r.R.vinegar} g · Lea &amp; Perrins ${r.R.worcestershire} mL · coriander ${r.R.coriander} g · pepper ${r.R.pepper} g${flavour === 'dryheat' ? ` · chilli ${r.R.chilli ?? 'not set'}${r.R.chilli ? ' g' : ''}` : ''}. Salt critical limit ${FS().limits.saltMinPerKg ?? 30} g/kg.</p>
+        ${pre.batchId ? `<button class="btn sec2 full mt" data-do="fs-section" data-id="${pre.batchId}" data-section="marinate_start" data-fromrecipe="1">Record it in the batch record</button>` : ''}`;
+    };
+    const R = recipeNow();
+    const ed = (k, label, unit) => `<div class="packrow"><div><b>${label}</b><div class="small muted">${unit} per kg</div></div><input class="in" style="text-align:center" inputmode="decimal" data-rk="${k}" value="${R[k] ?? ''}"></div>`;
+    $('#recipeEdit', root).innerHTML = `${ed('salt', 'Salt', 'g')}${ed('vinegar', 'Malt vinegar', 'g')}${ed('worcestershire', 'Lea & Perrins', 'mL')}${ed('coriander', 'Coriander seed', 'g')}${ed('pepper', 'Black pepper', 'g')}${ed('chilli', 'Chilli (Dry Heat)', 'g')}
+      <p class="hint">Change these only when your recipe and food control plan change. Salt can’t go below the ${FS().limits.saltMinPerKg ?? 30} g/kg critical limit.</p>
+      <div class="err"></div><button class="btn sec2 full mt" data-saverecipe>Save recipe</button>`;
+    $('[data-saverecipe]', root).onclick = async e => {
+      const recipe = Object.fromEntries($$('[data-rk]', root).map(i => [i.dataset.rk, i.value.trim()]));
+      if (Number(recipe.salt) < (FS().limits.saltMinPerKg ?? 30)) { $('#recipeEdit .err', root).textContent = 'Salt is below your critical limit.'; return; }
+      const r = await post({ action: 'fs-settings', recipe });
+      if (!r.ok) { $('#recipeEdit .err', root).textContent = r.data.error; return; }
+      await loadSafety(); toast('Recipe saved'); draw();
+    };
+    $('[data-kg]', root).addEventListener('input', draw);
+    root.addEventListener('click', e => { if (e.target.closest('[data-nudge],.choices[data-name="rflav"]')) setTimeout(draw); });
+    draw();
+  });
+}
+
 /* ================================================================== EVENTS */
 document.addEventListener('click', async e => {
   const t = e.target;
@@ -1588,6 +1659,9 @@ document.addEventListener('click', async e => {
     case 'fs-skip': sheetFsSkip(el.dataset.id); break;
     case 'fs-batch': if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetFsBatch(id), 270); } else sheetFsBatch(id); break;
     case 'fs-section': {
+      if (el.dataset.fromrecipe || state.fsBatchCtx?.batchId !== id) {
+        closeSheet(); await new Promise(r => setTimeout(r, 270)); await sheetFsBatch(id);
+      }
       const c = state.fsBatchCtx, ex = c.sections[el.dataset.section];
       // A finished section opens as a correction; a part-done one just carries on.
       sheetFsForm({ kind: 'batch', section: el.dataset.section, batchId: id, sections: c.sections, back: c.back,
@@ -1610,6 +1684,12 @@ document.addEventListener('click', async e => {
       if (!reason) { $('[data-void-reason]').focus(); toast('Say why it’s not valid first', true); break; }
       if (!arm(el, 'Sure?')) break;
       if (await act({ action: 'fs-void', id, reason })) loadSafety();
+      break;
+    }
+    case 'recipe': {
+      const b = id ? state.data.batches.find(x => x.id === id) : null;
+      const pre = { batchId: b?.id, flavour: b?.flavour, kg: el.dataset.kg ? +el.dataset.kg : b?.raw_kg };
+      if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetRecipe(pre), 270); } else sheetRecipe(pre);
       break;
     }
     case 'fs-reminders': sheetFsReminders(); break;

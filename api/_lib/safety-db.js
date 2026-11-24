@@ -72,9 +72,9 @@ export async function saveRecord(c, b, fail) {
   const ctx = {};
   if (kind === 'batch') {
     ctx.sections = await batchSections(c, batchId);
-    const { rows: [bt] } = await c.query('SELECT raw_kg FROM batches WHERE id = $1', [batchId]);
+    const { rows: [bt] } = await c.query('SELECT raw_kg, flavour FROM batches WHERE id = $1', [batchId]);
     if (!bt) fail('Batch not found');
-    ctx.rawKg = bt.raw_kg;
+    ctx.rawKg = bt.raw_kg; ctx.flavour = bt.flavour;
   }
 
   let result;
@@ -138,6 +138,16 @@ export async function saveFsSettings(c, b, fail) {
       const n = Number(v); if (!Number.isFinite(n) || n < 0) fail('Check the limits'); L[k] = n;
     }
     next.limits = L;
+  }
+  if (b.recipe) {
+    const R = { ...FS_DEFAULTS.recipe, ...(cur.recipe || {}) };
+    for (const k of Object.keys(FS_DEFAULTS.recipe)) {
+      if (!(k in b.recipe)) continue;
+      const v = b.recipe[k];
+      if (v === '' || v == null) { if (k === 'chilli') R[k] = null; continue; }
+      const n = Number(v); if (!Number.isFinite(n) || n < 0 || n > 1000) fail('Check the recipe amounts'); R[k] = n;
+    }
+    next.recipe = R;
   }
   const patch = { fs: next };
   if ('remindersOn' in b) patch.fsRemindersOn = Boolean(b.remindersOn);

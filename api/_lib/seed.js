@@ -22,7 +22,7 @@ const SUPPLIES = [
   ['Labels 50 × 80 mm',        'packaging',  'labels',  'bag-50',  1,    20],
   ['Labels 70 × 100 mm',       'packaging',  'labels',  'bag-100+',1,    21],
   ['Salt (iodised)',           'ingredient', 'g',       'raw-kg',  40,   30],
-  ['Malt vinegar',             'ingredient', 'mL',      'raw-kg',  100,  31],
+  ['Malt vinegar',             'ingredient', 'g',       'raw-kg',  100,  31],
   ['Lea & Perrins',            'ingredient', 'mL',      'raw-kg',  60,   32],
   ['Coriander seed',           'ingredient', 'g',       'raw-kg',  40,   33],
   ['Black pepper',             'ingredient', 'g',       'raw-kg',  26.7, 34]

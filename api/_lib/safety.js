@@ -25,7 +25,9 @@ export const FS_DEFAULTS = {
     awMax: 0.85,                          // CCP 2
     releaseLossPct: null                  // % weight loss reference from the Water Activity Setup Record
   },
-  recipe: { salt: 40, vinegar: 100, worcestershire: 60, spice: 66.7 }   // per kg
+  // Per kg of trimmed raw meat. Vinegar is weighed (g); Lea & Perrins measured (mL).
+  // Spice blend = coriander + pepper (60:40), plus chilli for Dry Heat once set.
+  recipe: { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null }
 };
 
 export const FS_REMINDER_DEFAULTS = [
@@ -79,7 +81,7 @@ export const BATCH_SECTIONS = [
   { key: 'marinate_start', no: 3, title: 'Marinating: start', ccp: 'CCP 1', day: 'Marinating day', fields: [
     { k: 'targets', type: 'info', label: 'Targets (trimmed weight × recipe)' },
     { k: 'saltG', type: 'num', label: 'Salt weighed', unit: 'g', req: true },
-    { k: 'vinegarMl', type: 'num', label: 'Malt vinegar measured', unit: 'mL' },
+    { k: 'vinegarG', type: 'num', label: 'Malt vinegar weighed', unit: 'g' },
     { k: 'worcMl', type: 'num', label: 'Lea & Perrins measured', unit: 'mL' },
     { k: 'submerged', type: 'tick', label: 'Meat fully submerged', critical: true },
     { k: 'chillerC', type: 'num', label: 'Chiller temperature at start', unit: '°C', dec: true, limit: { max: 'chillerMax' }, req: true }
@@ -165,6 +167,11 @@ export const LOG_FORMS = {
   ] }
 };
 
+/** Spice blend per kg for a flavour. */
+export function spicePerKg(recipe, flavour) {
+  return (recipe.coriander || 0) + (recipe.pepper || 0) + (flavour === 'dryheat' && recipe.chilli ? recipe.chilli : 0);
+}
+
 /* ------------------------------------------------------------------ checks */
 const num = v => (v === '' || v == null || !Number.isFinite(Number(v)) ? null : Number(v));
 const r1 = n => Math.round(n * 10) / 10;
@@ -225,7 +232,7 @@ export function evaluate(kind, section, data, at, settings, ctx = {}) {
 
   if (kind === 'batch') {
     if (section === 'marinate_start' && kg) {
-      derived.targets = `Salt ${Math.round(kg * recipe.salt)} g · vinegar ${Math.round(kg * recipe.vinegar)} mL · Lea & Perrins ${Math.round(kg * recipe.worcestershire)} mL (${r1(kg)} kg)`;
+      derived.targets = `Salt ${Math.round(kg * recipe.salt)} g · vinegar ${Math.round(kg * recipe.vinegar)} g · Lea & Perrins ${Math.round(kg * recipe.worcestershire)} mL (${r1(kg)} kg)`;
       const salt = num(data.saltG);
       if (salt != null) {
         derived.saltPerKg = r1(salt / kg);
@@ -240,7 +247,7 @@ export function evaluate(kind, section, data, at, settings, ctx = {}) {
     if (section === 'spice') {
       const net = (num(data.tubBefore) ?? 0) - (num(data.tubAfter) ?? 0) - (num(data.fallOff) ?? 0);
       const skg = num(data.seasonedKg) ?? kg;
-      if (num(data.tubBefore) != null && num(data.tubAfter) != null && skg) derived.perKg = `${Math.round(net)} g net · ${r1(net / skg)} g/kg (target ${recipe.spice})`;
+      if (num(data.tubBefore) != null && num(data.tubAfter) != null && skg) derived.perKg = `${Math.round(net)} g net · ${r1(net / skg)} g/kg (target ${r1(spicePerKg(recipe, ctx.flavour))})`;
     }
     if (section === 'drying_end' && S.drying_start?.at) derived.hours = `${r1((new Date(at) - new Date(S.drying_start.at)) / 3.6e6)} hours`;
     if (section === 'slices') {

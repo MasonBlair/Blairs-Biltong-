@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Blair's Biltong — static site with Stripe Checkout via Vercel Functions",
+  "description": "Blair's Biltong — static site with Stripe Checkout via Vercel Functions, plus the boss dashboard (stock, batches, supplies)",
   "scripts": {
     "dev": "vercel dev",
     "test:checkout": "node test/checkout.test.js"
   },
   "dependencies": {
+    "pg": "^8.23.1",
     "stripe": "^22.4.0"
   },
   "engines": {

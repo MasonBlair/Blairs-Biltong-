@@ -14,174 +14,1018 @@
 <meta name="theme-color" content="#241b13">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#241b13;--ink-2:#150e07;--cream:#efe4d0;--cream-2:#f7f1e4;--cream-3:#e2d5bd;--gold:#b9873c;--kraft:#c9a878;--muted:#6b5b49;--ok:#3f6b3a;--bad:#9a3324}
-*{box-sizing:border-box}
-body{margin:0;background:var(--cream-3);color:var(--ink);font:400 16px/1.5 'Barlow',Helvetica,Arial,sans-serif}
-header{background:var(--ink);border-bottom:4px solid var(--gold);padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;align-items:center;gap:12px}
-header img{width:44px;height:auto}
-header h1{margin:0;font:600 18px/1 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-2)}
-header button{margin-left:auto}
-main{max-width:640px;margin:0 auto;padding:16px}
-h2{font:600 13px/1 'Oswald',sans-serif;letter-spacing:.18em;text-transform:uppercase;margin:22px 0 10px}
-.card{background:var(--cream-2);border-radius:8px;padding:16px;margin-bottom:14px;box-shadow:0 1px 0 rgba(0,0,0,.05)}
-.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.ref{font:600 13px/1 'Oswald',sans-serif;letter-spacing:.14em;color:var(--gold)}
-.name{font:600 19px/1.2 'Oswald',sans-serif;margin:6px 0 2px}
-.meta,.addr{color:var(--muted);font-size:14px}
-ul{margin:10px 0;padding-left:18px}
-label{display:block;font:600 11px/1 'Oswald',sans-serif;letter-spacing:.16em;text-transform:uppercase;margin:12px 0 6px}
-input,textarea{width:100%;font:500 16px/1.3 'Barlow',sans-serif;padding:11px 12px;border:1px solid var(--kraft);border-radius:5px;background:#fff;color:var(--ink)}
-input.trk{font:600 18px/1 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-textarea{min-height:56px;resize:vertical}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-button{font:600 13px/1 'Oswald',sans-serif;letter-spacing:.12em;text-transform:uppercase;border:0;border-radius:5px;padding:13px 16px;cursor:pointer}
-.primary{background:var(--gold);color:var(--ink-2);flex:1}
-.ghost{background:transparent;color:var(--ink);border:1px solid var(--kraft)}
-header .ghost{color:var(--kraft);border-color:#5a4632;padding:9px 12px}
-.danger{background:var(--ink);color:var(--cream-2);flex:1}
-button:disabled{opacity:.5;cursor:default}
+:root{
+  --ink:#241b13;--ink-2:#150e07;--bg:#f2ece1;--card:#fffcf6;--line:rgba(36,27,19,.09);--line-2:rgba(36,27,19,.16);
+  --muted:#7a6a55;--faint:#a3937c;--cream:#f7f1e4;--gold:#b9873c;--gold-2:#9c6f2c;--gold-soft:rgba(185,135,60,.13);
+  --ok:#3d6a37;--ok-soft:#e5ede0;--warn:#9a6114;--warn-soft:#f6e9d2;--bad:#9a3324;--bad-soft:#f5e0db;--info:#4b5f73;--info-soft:#e4e9ee;
+  --r:12px;--tab-h:62px;--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 'Barlow',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hide{display:none!important}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:var(--ink);padding:calc(10px + var(--sat)) 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--gold)}
+header img{width:34px;height:auto}
+header h1{margin:0;font:600 16px/1 'Oswald',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--cream)}
+header .sp{flex:1}
+.icon-btn{width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:#d8c7a8}
+.icon-btn:active{background:rgba(255,255,255,.08)}
+.icon-btn svg{width:21px;height:21px}
+.icon-btn.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+main{max-width:680px;margin:0 auto;padding:14px 14px calc(var(--tab-h) + var(--sab) + 28px)}
+
+/* ---------- tab bar ---------- */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,252,246,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:var(--sab)}
+nav.tabs .in{display:flex;width:100%;max-width:680px}
+nav.tabs button{flex:1;height:var(--tab-h);border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  color:var(--faint);font:500 11px/1 'Barlow',sans-serif;letter-spacing:.02em;position:relative}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--ink)}
+nav.tabs button[aria-current="page"]::before{content:'';position:absolute;top:0;left:28%;right:28%;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+nav.tabs .badge{position:absolute;top:8px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--gold);color:var(--ink-2);font:600 10.5px/17px 'Barlow',sans-serif}
+
+/* ---------- building blocks ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card.flush{padding:0;overflow:hidden}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 9px}
+.sec h2{margin:0;font:600 12px/1 'Oswald',sans-serif;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+.sec a,.sec button.link{font-size:13px;color:var(--gold-2);font-weight:600;text-decoration:none;background:none;border:0;padding:0}
+.hello{font:500 13px/1 'Barlow',sans-serif;color:var(--muted);margin:4px 2px 12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;text-align:left;width:100%}
+button.stat:active{background:#fbf6ec}
+.stat .k{font-size:12.5px;color:var(--muted);display:block}
+.stat .v{font:600 25px/1.15 'Oswald',sans-serif;letter-spacing:.01em;display:block;margin-top:5px}
+.stat .s{font-size:12.5px;color:var(--muted);display:block;margin-top:2px}
+.big{font:600 34px/1 'Oswald',sans-serif}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:13px}.tiny{font-size:12px}
+.ok-t{color:var(--ok)}.warn-t{color:var(--warn)}.bad-t{color:var(--bad)}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wrap{flex-wrap:wrap}
+.mt{margin-top:12px}.mt2{margin-top:20px}.mb0{margin-bottom:0}
+
+.list .it{display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.list .it:first-child{border-top:0}
+button.it:active{background:#fbf6ec}
+.it .main{flex:1;min-width:0}
+.it .t,.it .d{display:block}
+.it .t{font-weight:600;line-height:1.3}
+.it .d{font-size:13px;color:var(--muted);line-height:1.35;margin-top:1px}
+.it .end{text-align:right;flex-shrink:0}
+.chev{width:16px;height:16px;color:var(--faint);flex-shrink:0}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--info)}
+.dot.warn{background:#d39a3f}.dot.bad{background:var(--bad)}.dot.ok{background:var(--ok)}
+
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:12px;font:600 11.5px/1 'Barlow',sans-serif;letter-spacing:.02em;white-space:nowrap;background:var(--info-soft);color:var(--info)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.gold{background:var(--gold-soft);color:var(--gold-2)}.chip.plain{background:#efe8da;color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:46px;padding:0 16px;border-radius:10px;border:1px solid transparent;
+  font:600 13px/1 'Oswald',sans-serif;letter-spacing:.11em;text-transform:uppercase;background:var(--gold);color:var(--ink-2)}
+.btn:active{filter:brightness(.95)}
+.btn.sec2{background:var(--card);border-color:var(--line-2);color:var(--ink)}
+.btn.dark{background:var(--ink);color:var(--cream)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--muted);text-transform:none;letter-spacing:0;font:500 14px/1 'Barlow',sans-serif;text-decoration:underline;min-height:40px}
+.btn.full{width:100%}
+.btn.sm{min-height:36px;padding:0 12px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg{width:17px;height:17px}
+.btns{display:flex;gap:8px}.btns>.btn{flex:1;white-space:nowrap;padding:0 10px}
+
+.seg{display:flex;background:#e7dfd0;border-radius:10px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;height:34px;border-radius:8px;font:600 13px/1 'Barlow',sans-serif;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(36,27,19,.12)}
+
+/* stock tiles */
+.flav-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.flav-head h3{margin:0;font:600 18px/1 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.tile{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 8px 10px;text-align:center;width:100%;position:relative}
+.tile:active{background:#fbf6ec}
+.tile .g{font:600 12px/1 'Oswald',sans-serif;letter-spacing:.12em;color:var(--muted)}
+.tile .n{font:600 30px/1.1 'Oswald',sans-serif;margin:6px 0 3px}
+.tile .l{font-size:11.5px;color:var(--faint);line-height:1.2;min-height:14px}
+.tile.low{border-color:#e7c48b;background:#fdf6e9}.tile.low .n{color:var(--warn)}
+.tile.out{border-color:#e9bfb6;background:#fcf1ee}.tile.out .n{color:var(--bad)}
+.tile.off{opacity:.55}
+
+.bar{height:6px;background:#ece4d5;border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--gold);border-radius:3px}
+.bar.ok>i{background:var(--ok)}.bar.warn>i{background:#d39a3f}.bar.bad>i{background:var(--bad)}
+
+/* batch stepper */
+.steps{display:flex;gap:4px;margin:12px 0 4px}
+.steps i{flex:1;height:5px;border-radius:3px;background:#e7dfd0}
+.steps i.on{background:var(--gold)}
+.steps-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)}
+.steps-l span.on{color:var(--ink);font-weight:600}
+.code{font:600 13px/1 'Oswald',sans-serif;letter-spacing:.14em;color:var(--gold-2)}
+.btitle{font:600 18px/1.2 'Oswald',sans-serif;letter-spacing:.03em;margin:5px 0 2px}
+
+/* chart */
+.chart{display:flex;align-items:flex-end;gap:5px;height:130px;padding-top:8px}
+.chart .c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px}
+.chart .c i{display:block;width:100%;max-width:26px;background:#e2cfa9;border-radius:4px 4px 1px 1px;min-height:2px}
+.chart .c.now i{background:var(--gold)}
+.chart .c span{font-size:10.5px;color:var(--faint);white-space:nowrap}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;margin:10px 0}
+.hbar .bar{grid-column:1/-1;height:7px}
+
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{font:600 11px/1 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:right;padding:0 0 8px;font-weight:600}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t td{padding:9px 0;border-top:1px solid var(--line);text-align:right;white-space:nowrap}
+
+/* forms */
+label.f{display:block;font:600 11.5px/1 'Oswald',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:16px 0 7px}
+label.f:first-child{margin-top:4px}
+input.in,select.in,textarea.in{width:100%;min-height:46px;padding:11px 12px;border:1px solid var(--line-2);border-radius:10px;background:#fff;font-size:16px}
+textarea.in{min-height:70px;resize:vertical}
+input.in:focus,select.in:focus,textarea.in:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+.choices{display:flex;flex-wrap:wrap;gap:7px}
+.choices button{min-height:38px;padding:0 13px;border-radius:19px;border:1px solid var(--line-2);background:#fff;font:500 14px/1 'Barlow',sans-serif}
+.choices button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;background:#fff;overflow:hidden;height:46px}
+.stepper button{width:46px;height:100%;border:0;background:#faf6ee;font-size:20px;color:var(--ink)}
+.stepper input{flex:1;min-width:0;height:100%;border:0;text-align:center;font:600 18px/1 'Oswald',sans-serif;background:transparent}
+.stepper input:focus{outline:none}
+.packrow{display:grid;grid-template-columns:1fr 150px;align-items:center;gap:10px;margin-top:10px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.switch:first-child{border-top:0}
+.switch input[type=checkbox]{appearance:none;width:48px;height:28px;border-radius:14px;background:#d9cfbd;position:relative;flex-shrink:0;transition:background .2s;cursor:pointer;margin:0}
+.switch input[type=checkbox]::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s}
+.switch input[type=checkbox]:checked{background:var(--ok)}
+.switch input[type=checkbox]:checked::after{left:23px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px}
+.check input{width:20px;height:20px;accent-color:var(--ink);margin:1px 0 0;flex-shrink:0}
+.err{color:var(--bad);font-size:13.5px;font-weight:600;min-height:18px;margin-top:10px}
+
+/* orders (dispatch) */
+.order .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.order .ref{font:600 13px/1 'Oswald',sans-serif;letter-spacing:.14em;color:var(--gold-2)}
+.order .name{font:600 19px/1.2 'Oswald',sans-serif;margin:6px 0 2px}
+.order ul{margin:8px 0;padding-left:18px}
+.order .addr{color:var(--muted);font-size:14px}
+.order input.trk{font:600 18px/1 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
 .msg{margin-top:10px;font-size:14px;font-weight:600}
 .msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
-.shipped{opacity:.75}
-.pill{display:inline-block;background:var(--ok);color:#fff;font:600 11px/1 'Oswald',sans-serif;letter-spacing:.12em;padding:5px 8px;border-radius:99px;text-transform:uppercase}
-.empty{color:var(--muted);text-align:center;padding:26px 10px}
-#login{max-width:360px;margin:60px auto}
-.hide{display:none}
-.link{background:none;border:0;padding:12px 0 0;color:var(--muted);font:500 13px/1.3 'Barlow',sans-serif;letter-spacing:0;text-transform:none;text-decoration:underline}
-details summary{cursor:pointer;font:600 13px/1 'Oswald',sans-serif;letter-spacing:.18em;text-transform:uppercase;margin:22px 0 10px}
+.order.shipped{opacity:.8}
+details.more>summary{list-style:none;cursor:pointer;margin:22px 2px 9px;font:600 12px/1 'Oswald',sans-serif;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:' +';color:var(--faint)}
+details.more[open]>summary::after{content:' −'}
+
+.empty{text-align:center;color:var(--muted);padding:26px 14px;font-size:14px}
+.skel{height:84px;border-radius:var(--r);background:linear-gradient(90deg,#ebe3d4,#f3ecdf,#ebe3d4);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:12px}
+@keyframes sh{to{background-position:-200% 0}}
+.note{background:var(--gold-soft);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45}
+.note.info{background:var(--info-soft)}
+
+/* ---------- sheet ---------- */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(21,14,7,.42);opacity:0;transition:opacity .22s}
+.scrim.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:calc(100% - 40px - var(--sat));display:flex;flex-direction:column;
+  background:var(--bg);border-radius:18px 18px 0 0;transform:translateY(100%);transition:transform .26s cubic-bezier(.2,.8,.2,1);max-width:680px;margin:0 auto}
+.sheet.on{transform:none}
+.sheet .sh-h{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative}
+.sheet .sh-h::before{content:'';position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:#d4c9b6}
+.sheet .sh-h h3{margin:6px 0 0;font:600 17px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;flex:1}
+.sheet .sh-h .icon-btn{color:var(--muted);margin-top:4px}
+.sheet .sh-b{overflow:auto;padding:16px 16px calc(20px + var(--sab));-webkit-overflow-scrolling:touch}
+.sheet .sh-f{position:sticky;bottom:0;background:var(--bg);padding-top:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + var(--sab) + 14px);transform:translate(-50%,20px);z-index:60;background:var(--ink);color:var(--cream);
+  border-radius:12px;padding:12px 14px 12px 16px;font-size:14px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:.22s;max-width:calc(100% - 28px);box-shadow:0 8px 24px rgba(21,14,7,.25)}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast.bad{background:var(--bad)}
+.toast button{border:0;background:none;color:var(--gold);font:600 13px/1 'Oswald',sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:4px}
+
+/* ---------- login ---------- */
+#login{max-width:380px;margin:9vh auto 0}
+#login .card{padding:22px}
+#login h2{font:600 20px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
 </style>
 </head>
 <body>
 <header>
   <img src="assets/blairs-logo.png" alt="">
-  <h1>Dispatch</h1>
-  <button class="ghost hide" id="refresh">Refresh</button>
+  <h1 id="title">Dispatch</h1>
+  <span class="sp"></span>
+  <button class="icon-btn hide" id="refresh" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+  <button class="icon-btn hide" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg></button>
 </header>
 
 <main>
-  <section id="login" class="card">
-    <label for="pw">Dispatch password</label>
-    <input id="pw" type="password" autocomplete="current-password">
-    <div class="row"><button class="primary" id="go">Open</button></div>
-    <div class="msg bad" id="loginMsg"></div>
-  </section>
-
-  <section id="app" class="hide">
+  <section id="login">
     <div class="card">
-      <div class="meta">Check the email looks right without needing a real order.</div>
-      <div class="row"><button class="ghost" id="sample">Email me a sample</button></div>
-      <div class="msg" id="sampleMsg"></div>
+      <h2>Boss login</h2>
+      <p class="muted small" style="margin:0 0 14px">Orders, stock, batches and numbers for Blair’s Biltong.</p>
+      <label class="f" for="pw">Dispatch password</label>
+      <input class="in" id="pw" type="password" autocomplete="current-password">
+      <button class="btn full mt" id="go">Open</button>
+      <div class="err" id="loginMsg"></div>
     </div>
-
-    <h2>To ship</h2>
-    <div id="todo"></div>
-
-    <details>
-      <summary>Already shipped</summary>
-      <div id="done"></div>
-    </details>
   </section>
+  <section id="view" class="hide"></section>
 </main>
 
+<nav class="tabs hide" id="tabs"><div class="in">
+  <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11.5h13V9"/><path d="M10 20.5v-6h4v6"/></svg>Today</button>
+  <button data-tab="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h11v10h-11z"/><path d="M13.5 10h4l3 3.2v3.3h-7"/><circle cx="6.5" cy="17.8" r="1.8"/><circle cx="17" cy="17.8" r="1.8"/></svg>Orders<span class="badge hide" id="shipBadge"></span></button>
+  <button data-tab="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>Stock</button>
+  <button data-tab="batches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 8.5 4.5-8.5 4.5L3.5 8z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4 8.5-4"/></svg>Batches</button>
+  <button data-tab="numbers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20.5h18"/><path d="M6 20.5v-7M11 20.5V6.5M16 20.5v-10M20.5 20.5V3.5" /></svg>Numbers</button>
+</div></nav>
+
+<div class="scrim hide" id="scrim"></div>
+<div class="sheet hide" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+  <div class="sh-h"><h3 id="shTitle"></h3><button class="icon-btn" data-do="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sh-b" id="shBody"></div>
+</div>
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastAct" class="hide"></button></div>
+
 <script>
-const $ = s => document.querySelector(s);
+/* =========================================================================
+   Blair's Biltong — boss dashboard
+   Talks to /api/boss (stock, batches, supplies, numbers) and /api/orders +
+   /api/mark-shipped (dispatch). Same password for all of it.
+   ========================================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = c => (c < 0 ? '−$' : '$') + (Math.abs(c) / 100).toFixed(2);
+const money0 = c => '$' + Math.round(c / 100).toLocaleString('en-NZ');
+const n1 = n => (Math.round(n * 10) / 10).toLocaleString('en-NZ');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const D = s => new Date(s + 'T12:00:00');
+const niceDate = s => s ? D(s).toLocaleDateString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short' }) : '—';
+const shortDate = s => s ? D(s).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' }) : '—';
+const daysUntil = s => Math.round((D(s) - D(state.data?.today || new Date().toISOString().slice(0, 10))) / 864e5);
+const ago = iso => {
+  const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (m < 1) return 'just now'; if (m < 60) return m + ' min ago';
+  const h = Math.round(m / 60); if (h < 24) return h + ' h ago';
+  const d = Math.round(h / 24); return d < 7 ? d + ' d ago' : new Date(iso).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' });
+};
+const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const TITLES = { today: 'Today', orders: 'Orders', stock: 'Stock', batches: 'Batches', numbers: 'Numbers' };
+const STATUS = { marinating: 'Marinating', drying: 'Drying', ready: 'Ready to pack', packed: 'Packed', closed: 'Closed' };
+const STEP = { marinating: 0, drying: 1, ready: 2, packed: 3, closed: 3 };
+const AUTO_USE = { '': 'Not automatic', 'raw-kg': 'Per kg of raw meat', 'bag-50': 'Each 50 g bag', 'bag-100': 'Each 100 g bag', 'bag-200': 'Each 200 g bag', 'bag-100+': 'Each 100 g and 200 g bag', 'bag-any': 'Every bag' };
+
 let key = '';
 try { key = localStorage.getItem('bb-dispatch') || ''; } catch {}
-
-const money = c => '$' + (c / 100).toFixed(2);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const when = t => new Date(t * 1000).toLocaleDateString('en-NZ', { weekday:'short', day:'numeric', month:'short' });
+const state = { tab: 'today', data: null, noDb: false, orders: null, ordersErr: '', stockSeg: 'bags', period: 'd30', loading: false };
+try { const t = sessionStorage.getItem('bb-tab'); if (TITLES[t]) state.tab = t; } catch {}
 
 async function api(path, opts = {}) {
   const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'x-dispatch-key': key, ...(opts.headers || {}) } });
   let data = {}; try { data = await res.json(); } catch {}
   return { status: res.status, ok: res.ok, data };
 }
+const post = body => api('/api/boss', { method: 'POST', body: JSON.stringify(body) });
 
-async function load() {
-  $('#todo').innerHTML = '<div class="empty">Loading orders…</div>';
+/* ------------------------------------------------------------------ loading */
+async function loadBoss() {
+  const r = await api('/api/boss');
+  if (r.status === 401) { logout('Wrong password.'); return false; }
+  if (r.status === 503 && r.data.error === 'no_db') { state.noDb = true; state.data = null; return true; }
+  if (!r.ok) { toast(r.data.error || 'Couldn’t load the dashboard.', true); return true; }
+  state.noDb = false; state.data = r.data; return true;
+}
+async function loadOrders() {
   const r = await api('/api/orders');
   if (r.status === 401) { logout('Wrong password.'); return; }
-  if (!r.ok) { $('#todo').innerHTML = `<div class="empty">${esc(r.data.error || 'Couldn’t load orders.')}</div>`; return; }
-  $('#login').classList.add('hide'); $('#app').classList.remove('hide'); $('#refresh').classList.remove('hide');
-  const todo = r.data.orders.filter(o => !o.shippedAt);
-  const done = r.data.orders.filter(o => o.shippedAt);
-  $('#todo').innerHTML = todo.length ? todo.map(card).join('') : '<div class="empty">Nothing waiting to ship. 🏔</div>';
-  $('#done').innerHTML = done.length ? done.map(card).join('') : '<div class="empty">None yet.</div>';
+  if (!r.ok) { state.ordersErr = r.data.error || 'Couldn’t load orders.'; state.orders = state.orders || []; }
+  else { state.ordersErr = ''; state.orders = r.data.orders; }
+  const n = state.orders.filter(o => !o.shippedAt).length;
+  $('#shipBadge').textContent = n; $('#shipBadge').classList.toggle('hide', !n);
+  render();
+}
+async function loadAll(first) {
+  if (state.loading) return; state.loading = true;
+  $('#refresh').classList.add('spin');
+  const okBoss = await loadBoss();
+  if (okBoss === false) { state.loading = false; $('#refresh').classList.remove('spin'); return; }
+  showApp(); render();
+  await loadOrders();
+  $('#refresh').classList.remove('spin'); state.loading = false;
+  // Catch any paid orders the webhook missed, then refresh if it found some.
+  if (first && state.data?.settings.live) {
+    const s = await post({ action: 'sync-orders' });
+    if (s.ok && s.data.added) { toast(`Picked up ${plural(s.data.added, 'order')} from Stripe`); await refreshBoss(); }
+  }
+}
+async function refreshBoss() { await loadBoss(); render(); }
+
+function showApp() {
+  $('#login').classList.add('hide'); $('#view').classList.remove('hide'); $('#tabs').classList.remove('hide');
+  $('#refresh').classList.remove('hide'); $('#settingsBtn').classList.toggle('hide', !state.data);
 }
 
-function card(o) {
+/* ------------------------------------------------------------------ render */
+function setTab(t) {
+  state.tab = t; try { sessionStorage.setItem('bb-tab', t); } catch {}
+  window.scrollTo(0, 0); render();
+}
+function render() {
+  $('#title').textContent = TITLES[state.tab];
+  $$('nav.tabs button').forEach(b => b.dataset.tab === state.tab ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  const v = $('#view');
+  if (state.tab === 'orders') { v.innerHTML = viewOrders(); return; }
+  if (state.noDb) { v.innerHTML = setupCard(); return; }
+  if (!state.data) { v.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
+  v.innerHTML = { today: viewToday, stock: viewStock, batches: viewBatches, numbers: viewNumbers }[state.tab]();
+}
+
+function setupCard() {
+  return `<div class="card"><h2 style="font:600 18px/1.2 Oswald,sans-serif;letter-spacing:.05em;text-transform:uppercase;margin:0 0 8px">Connect the database</h2>
+    <p class="muted" style="margin:0 0 12px">Stock, batches and numbers need a small database. In Vercel, open your project, go to <b>Storage</b>, add a <b>Neon</b> Postgres database and connect it to this project. Then push again or redeploy.</p>
+    <p class="muted small" style="margin:0">Orders and dispatch work in the meantime.</p>
+    <button class="btn sec2 full mt" data-tab-go="orders">Go to orders</button></div>`;
+}
+
+/* ================================================================== TODAY */
+function viewToday() {
+  const d = state.data, n = d.numbers;
+  const toShip = state.orders ? state.orders.filter(o => !o.shippedAt).length : null;
+  const bags = d.products.reduce((a, p) => a + Math.max(0, p.onHand), 0);
+  const inProg = d.batches.filter(b => ['marinating', 'drying', 'ready'].includes(b.status));
+  const fc = n.forecast;
+  let h = `<div class="hello">${D(d.today).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+  <div class="grid2">
+    <button class="stat" data-tab-go="orders"><span class="k">To ship</span><span class="v">${toShip == null ? '…' : toShip}</span><span class="s">${toShip ? 'Posted orders waiting' : 'All caught up'}</span></button>
+    <button class="stat" data-tab-go="numbers"><span class="k">Last 7 days</span><span class="v">${money0(n.d7.cents)}</span><span class="s">${plural(n.d7.units, 'bag')} sold</span></button>
+    <button class="stat" data-tab-go="stock"><span class="k">Bags on hand</span><span class="v">${bags}</span><span class="s">${d.settings.live ? 'Live on the shop' : 'Not live on shop yet'}</span></button>
+    <button class="stat" data-tab-go="numbers"><span class="k">Next batch</span><span class="v ${fc?.overdue ? 'warn-t' : ''}" style="${fc ? 'font-size:21px;padding-top:4px' : ''}">${fc ? (fc.overdue ? 'Start now' : niceDate(fc.startBy)) : '—'}</span><span class="s">${fc ? `Stock lasts ~${fc.daysLeft} days` : 'Needs a few weeks of sales'}</span></button>
+  </div>`;
+
+  if (d.alerts.length) {
+    h += `<div class="sec"><h2>Needs attention</h2></div><div class="card flush list">${d.alerts.slice(0, 8).map(a =>
+      `<button class="it" data-tab-go="${a.tab === 'supplies' ? 'stock' : a.tab}" ${a.tab === 'supplies' ? 'data-seg="supplies"' : ''}><span class="dot ${a.level}"></span><span class="main"><span class="d" style="color:var(--ink);font-size:14px">${esc(a.text)}</span></span>${CHEV}</button>`).join('')}</div>`;
+  }
+
+  if (inProg.length) {
+    h += `<div class="sec"><h2>In progress</h2></div>` + inProg.map(batchCard).join('');
+  }
+
+  h += `<div class="sec"><h2>Quick actions</h2></div>
+  <div class="grid3">
+    <button class="btn sec2" data-do="adjust" style="padding:0 6px">Record</button>
+    <button class="btn sec2" data-do="stocktake" style="padding:0 6px">Count</button>
+    <button class="btn sec2" data-do="start-batch" style="padding:0 6px">New batch</button>
+  </div>`;
+
+  h += `<div class="sec"><h2>Recent activity</h2></div>` + activityList(d.recent.slice(0, 10));
+  return h;
+}
+
+function activityList(rows) {
+  if (!rows.length) return `<div class="card empty">Nothing recorded yet. Pack a batch or do a stocktake to get started.</div>`;
+  return `<div class="card flush list">${rows.map(m => {
+    const canUndo = !['online', 'packed'].includes(m.reason);
+    const who = m.customer ? esc(m.customer.split(' · ')[0]) : '';
+    return `<div class="it"><span class="main"><span class="t">${m.qty > 0 ? '+' : '−'}${Math.abs(m.qty)} ${esc(m.label)}</span>
+      <span class="d">${esc(m.reasonLabel)}${m.code ? ' · ' + esc(m.code) : ''}${who ? ' · ' + who : ''}${m.note ? ' · ' + esc(m.note) : ''}</span></span>
+      <span class="end"><span class="tiny faint">${ago(m.at)}</span>${canUndo ? `<br><button class="btn quiet sm" style="min-height:26px;padding:0;font-size:12.5px" data-do="undo" data-id="${m.id}">Undo</button>` : ''}</span></div>`;
+  }).join('')}</div>`;
+}
+
+/* ================================================================== ORDERS */
+function viewOrders() {
+  if (!state.orders) return '<div class="skel"></div><div class="skel"></div>';
+  const todo = state.orders.filter(o => !o.shippedAt), done = state.orders.filter(o => o.shippedAt);
+  return `${state.ordersErr ? `<div class="note" style="margin-bottom:12px">${esc(state.ordersErr)}</div>` : ''}
+  <div class="sec" style="margin-top:4px"><h2>To ship</h2><span class="small muted">${todo.length ? plural(todo.length, 'order') : ''}</span></div>
+  ${todo.length ? todo.map(orderCard).join('') : '<div class="card empty">Nothing waiting to ship.</div>'}
+  <details class="more"><summary>Already shipped (${done.length})</summary>${done.length ? done.map(orderCard).join('') : '<div class="card empty">None yet.</div>'}</details>
+  <details class="more"><summary>Email tools</summary><div class="card">
+    <div class="muted small">Check the shipped email looks right without needing a real order.</div>
+    <button class="btn sec2 mt" data-do="sample">Email me a sample</button><div class="msg" id="sampleMsg"></div></div></details>`;
+}
+function orderCard(o) {
   const shipped = !!o.shippedAt;
-  return `<div class="card ${shipped ? 'shipped' : ''}" data-id="${esc(o.id)}">
-    <div class="top"><span class="ref">#${esc(o.ref)}</span><span class="meta">${when(o.created)} · ${money(o.total)}</span></div>
+  const when = new Date(o.created * 1000).toLocaleDateString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short' });
+  const batches = (o.batches || []).map(b => `<span class="chip plain">${esc(b)}</span>`).join(' ');
+  return `<div class="card order ${shipped ? 'shipped' : ''}" data-id="${esc(o.id)}">
+    <div class="top"><span class="ref">#${esc(o.ref)}</span><span class="small muted">${when} · ${money(o.total)}</span></div>
     <div class="name">${esc(o.name || o.email)}</div>
     <ul>${o.items.map(i => `<li>${i.qty} × ${esc(i.desc)}</li>`).join('')}</ul>
     <div class="addr">${o.address.map(esc).join('<br>')}</div>
+    ${batches ? `<div class="row mt small muted">From batch ${batches}</div>` : ''}
     ${shipped
-      ? `<div class="row"><span class="pill">Shipped ${new Date(o.shippedAt).toLocaleDateString('en-NZ')}</span><span class="meta">${esc(o.tracking || '')}</span></div>`
-      : `<label>NZ Post tracking number</label>
-         <input class="trk" placeholder="e.g. LY123456789NZ" autocapitalize="characters" autocomplete="off">
-         <label>Personal note (optional)</label>
-         <textarea class="note" placeholder="e.g. Threw in an extra 50 g, enjoy!"></textarea>
-         <div class="row">
-           <button class="ghost" data-act="test">Test to me</button>
-           <button class="primary" data-act="send">Send to customer</button>
-         </div>
+      ? `<div class="row mt"><span class="chip ok">Shipped ${new Date(o.shippedAt).toLocaleDateString('en-NZ')}</span><span class="small muted">${esc(o.tracking || '')}</span></div>`
+      : `<label class="f">NZ Post tracking number</label>
+         <input class="in trk" placeholder="LY123456789NZ" autocapitalize="characters" autocomplete="off">
+         <label class="f">Personal note (optional)</label>
+         <textarea class="in note-in" placeholder="Threw in an extra 50 g, enjoy!"></textarea>
+         <div class="btns mt"><button class="btn sec2" data-ship="test">Test to me</button><button class="btn" data-ship="send">Send to customer</button></div>
          <div class="msg"></div>
-         <button class="link" data-act="mark">Already sent — mark shipped (no email)</button>`}
+         <button class="btn quiet" data-ship="mark">Already sent — mark shipped (no email)</button>`}
   </div>`;
 }
-
-document.addEventListener('click', async e => {
-  const btn = e.target.closest('button[data-act]'); if (!btn) return;
-  const el = btn.closest('.card'), msg = el.querySelector('.msg');
-  const tracking = el.querySelector('.trk').value.trim();
-  const note = el.querySelector('.note').value.trim();
-  const act = btn.dataset.act;
+async function shipAction(btn) {
+  const el = btn.closest('.order'), msg = $('.msg', el);
+  const tracking = $('.trk', el).value.trim(), note = $('.note-in', el).value.trim(), act = btn.dataset.ship;
   if (act !== 'mark' && !tracking) { msg.className = 'msg bad'; msg.textContent = 'Add the tracking number first.'; return; }
-
-  // Two taps for anything that changes an order: first tap arms it, second acts.
-  if ((act === 'send' || act === 'mark') && !btn.dataset.armed) {
-    const was = { cls: btn.className, txt: btn.textContent };
-    btn.dataset.armed = '1';
-    btn.textContent = act === 'send' ? 'Tap again to send' : 'Tap again to mark shipped (no email)';
-    if (act === 'send') btn.className = 'danger';
-    setTimeout(() => { delete btn.dataset.armed; btn.className = was.cls; btn.textContent = was.txt; }, 5000);
-    return;
-  }
-
-  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  if ((act === 'send' || act === 'mark') && !arm(btn, act === 'send' ? 'Tap again to send' : 'Tap again to mark shipped (no email)', act === 'send' ? 'btn dark' : null)) return;
+  $$('button', el).forEach(b => b.disabled = true);
   msg.className = 'msg'; msg.textContent = 'Sending…';
   const r = await api('/api/mark-shipped', { method: 'POST', body: JSON.stringify({ sessionId: el.dataset.id, tracking, note, test: act === 'test', markOnly: act === 'mark' }) });
-  el.querySelectorAll('button').forEach(b => b.disabled = false);
+  $$('button', el).forEach(b => b.disabled = false);
   if (r.ok) {
     msg.className = 'msg ok';
-    msg.textContent = act === 'test' ? `Test sent to ${r.data.sentTo}.`
-      : act === 'mark' ? 'Marked as shipped. No email sent.'
-      : `Sent to ${r.data.sentTo}. Marked as shipped.`;
-    if (act !== 'test') setTimeout(load, 1500);
+    msg.textContent = act === 'test' ? `Test sent to ${r.data.sentTo}.` : act === 'mark' ? 'Marked as shipped. No email sent.' : `Sent to ${r.data.sentTo}. Marked as shipped.`;
+    if (act !== 'test') setTimeout(loadOrders, 1400);
   } else {
     msg.className = 'msg bad';
     msg.textContent = r.data.error === 'already_shipped' ? 'This order was already marked shipped.' : (r.data.error || 'Something went wrong.');
   }
-});
+}
 
-$('#sample').onclick = async () => {
-  const m = $('#sampleMsg'); m.className = 'msg'; m.textContent = 'Sending…';
-  const r = await api('/api/mark-shipped', { method: 'POST', body: JSON.stringify({ sample: true }) });
-  m.className = 'msg ' + (r.ok ? 'ok' : 'bad');
-  m.textContent = r.ok ? `Sample sent to ${r.data.sentTo}. Check your inbox (and spam, the first time).` : (r.data.error || 'Something went wrong.');
-};
+/* Two taps for anything that can't be taken back: the first tap arms it. */
+function arm(btn, text, cls) {
+  if (btn.dataset.armed) { delete btn.dataset.armed; return true; }
+  const was = { cls: btn.className, txt: btn.innerHTML };
+  btn.dataset.armed = '1'; btn.textContent = text; if (cls) btn.className = cls + (was.cls.includes('full') ? ' full' : '');
+  setTimeout(() => { if (btn.dataset.armed) { delete btn.dataset.armed; btn.className = was.cls; btn.innerHTML = was.txt; } }, 4500);
+  return false;
+}
+
+/* ================================================================== STOCK */
+function stateOf(p, live) {
+  if (p.hidden) return 'off';
+  if (p.onHand <= 0) return 'out';
+  if (p.onHand <= p.lowAt) return 'low';
+  return '';
+}
+function viewStock() {
+  const d = state.data;
+  let h = `<div class="seg" role="group"><button data-seg="bags" aria-pressed="${state.stockSeg === 'bags'}">Bags</button><button data-seg="supplies" aria-pressed="${state.stockSeg === 'supplies'}">Supplies</button></div>`;
+  if (state.stockSeg === 'supplies') return h + viewSupplies();
+  if (!d.settings.live) h += `<div class="note" style="margin-bottom:12px">The shop is still using the sold-out switches in the code. Once you’ve counted your bags, turn on <b>live stock</b> in Settings and the shop will follow these numbers.</div>`;
+  h += `<div class="btns" style="margin-bottom:14px"><button class="btn" data-do="adjust">Record in / out</button><button class="btn sec2" data-do="stocktake">Stocktake</button></div>`;
+  for (const f of d.flavours) {
+    const ps = d.products.filter(p => p.flavour === f.id);
+    const total = ps.reduce((a, p) => a + Math.max(0, p.onHand), 0);
+    const allOut = ps.every(p => p.hidden || p.onHand <= 0);
+    h += `<div class="card"><div class="flav-head"><h3>${esc(f.label)}</h3>
+      <span class="row">${d.waitlist[f.id] ? `<span class="chip gold">${d.waitlist[f.id]} waiting</span>` : ''}<span class="chip ${allOut ? 'bad' : 'ok'}">${allOut ? 'Sold out' : plural(total, 'bag')}</span></span></div>
+      <div class="grid3">${ps.map(p => {
+        const pace = d.numbers.pace[p.sku];
+        const sub = p.hidden ? 'Hidden' : pace?.daysLeft != null && p.onHand > 0 ? (pace.daysLeft < 2 ? 'Last few' : `~${pace.daysLeft} days`) : (d.sizes.find(z => z.grams === p.grams)?.label || '');
+        return `<button class="tile ${stateOf(p)}" data-do="sku" data-sku="${p.sku}"><div class="g">${p.grams}G</div><div class="n">${p.onHand}</div><div class="l">${esc(sub)}</div></button>`;
+      }).join('')}</div></div>`;
+  }
+  h += `<div class="card"><div class="between"><span class="muted small">Stock value at shop prices</span><b>${money0(d.numbers.stockValue)}</b></div>
+    <div class="between mt"><span class="muted small">Last stocktake</span><b>${d.settings.lastStocktake ? niceDate(d.settings.lastStocktake) : 'Not yet'}</b></div></div>`;
+  return h;
+}
+
+function viewSupplies() {
+  const d = state.data;
+  let h = `<button class="btn sec2 full" data-do="supply-new" style="margin-bottom:14px">${PLUS} Add a supply</button>`;
+  for (const [cat, label] of [['packaging', 'Packaging'], ['ingredient', 'Ingredients'], ['other', 'Other']]) {
+    const rows = d.supplies.filter(s => s.category === cat);
+    if (!rows.length) continue;
+    h += `<div class="sec"><h2>${label}</h2></div><div class="card flush list">${rows.map(s => {
+      const counted = s.on_hand > 0 || s.cost_cents != null || s.reorder_at != null;
+      let chip = '', cls = 'ok', pct = 100;
+      if (s.on_hand < 0) { chip = '<span class="chip plain">Count needed</span>'; cls = 'bad'; pct = 0; }
+      else if (s.reorder_at != null) {
+        pct = Math.min(100, s.on_hand / Math.max(1, s.reorder_at * 2) * 100);
+        if (s.on_hand <= s.reorder_at) { chip = '<span class="chip warn">Reorder</span>'; cls = 'warn'; }
+      } else if (!counted) chip = '<span class="chip plain">Not set up</span>';
+      return `<button class="it" data-do="supply" data-id="${s.id}"><span class="main"><span class="t">${esc(s.name)}</span>
+        <span class="d">${fmtQty(s.on_hand)} ${esc(s.unit)}${s.reorder_at != null ? ` · reorder at ${fmtQty(s.reorder_at)}` : ''}</span>
+        ${s.reorder_at != null ? `<div class="bar ${cls}" style="margin-top:7px;max-width:220px"><i style="width:${pct}%"></i></div>` : ''}</span>
+        <span class="end">${chip}</span>${CHEV}</button>`;
+    }).join('')}</div>`;
+  }
+  h += `<p class="hint" style="margin:12px 4px">Pouches, labels and recipe ingredients come off automatically when you start and pack batches. Set a reorder level and you’ll get an email when one runs low.</p>`;
+  return h;
+}
+const fmtQty = n => Number.isInteger(n) ? n.toLocaleString('en-NZ') : n1(n);
+
+/* ================================================================== BATCHES */
+function batchCard(b) {
+  const fl = state.data.flavours.find(f => f.id === b.flavour)?.label || b.flavour;
+  const open = ['marinating', 'drying', 'ready'].includes(b.status);
+  const step = STEP[b.status];
+  let body = '';
+  if (open) {
+    const next = { marinating: ['Hung to dry', 'drying'], drying: ['Ready to pack', 'ready'], ready: ['Pack bags', 'pack'] }[b.status];
+    const since = b.status === 'drying' && b.drying_on ? ` · day ${daysUntil(b.drying_on) * -1 + 1} of drying` : '';
+    body = `<div class="steps">${[0, 1, 2, 3].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="steps-l">${['Marinate', 'Dry', 'Ready', 'Packed'].map((l, i) => `<span class="${i === step ? 'on' : ''}">${l}</span>`).join('')}</div>
+      <div class="small muted mt">${n1(b.raw_kg)} kg raw${b.cut ? ' ' + esc(b.cut.toLowerCase()) : ''} · started ${shortDate(b.started_on)}${since}</div>
+      <div class="btns mt"><button class="btn sec2" data-do="batch" data-id="${b.id}">Details</button>
+      <button class="btn" data-do="${next[1] === 'pack' ? 'pack' : 'advance'}" data-id="${b.id}" data-to="${next[1]}">${next[0]}</button></div>`;
+  } else {
+    const left = b.remainingBags, total = b.packedBags;
+    const bbDays = b.best_before ? daysUntil(b.best_before) : null;
+    body = `<div class="small muted" style="margin-top:2px">Packed ${shortDate(b.packed_on)}${b.best_before ? ` · best before ${shortDate(b.best_before)}` : ''}${b.yieldPct ? ` · ${b.yieldPct}% yield` : ''}</div>
+      <div class="between mt small"><span>${left} of ${total} bags left</span>${bbDays != null && left > 0 && bbDays <= state.data.settings.bestBeforeWarnDays ? `<span class="chip ${bbDays < 0 ? 'bad' : 'warn'}">${bbDays < 0 ? 'Past best-before' : bbDays + ' days to BB'}</span>` : ''}</div>
+      <div class="bar" style="margin-top:7px"><i style="width:${total ? left / total * 100 : 0}%"></i></div>`;
+  }
+  return `<div class="card" ${open ? '' : `data-do="batch" data-id="${b.id}" role="button" tabindex="0" style="cursor:pointer"`}>
+    <div class="between"><span class="code">${esc(b.code)}</span><span class="chip ${open ? 'gold' : b.status === 'closed' ? 'plain' : 'ok'}">${STATUS[b.status]}</span></div>
+    <div class="btitle">${esc(fl)}</div>${body}</div>`;
+}
+function viewBatches() {
+  const d = state.data;
+  const open = d.batches.filter(b => ['marinating', 'drying', 'ready'].includes(b.status));
+  const packed = d.batches.filter(b => b.status === 'packed');
+  const closed = d.batches.filter(b => b.status === 'closed');
+  let h = `<button class="btn full" data-do="start-batch" style="margin-bottom:6px">${PLUS} Start a batch</button>`;
+  h += `<div class="sec"><h2>In progress</h2></div>` + (open.length ? open.map(batchCard).join('') : '<div class="card empty">No batch on the go.</div>');
+  h += `<div class="sec"><h2>In stock</h2></div>` + (packed.length ? packed.map(batchCard).join('') : '<div class="card empty">Packed batches show here, with how many bags are left from each.</div>');
+  if (closed.length) h += `<details class="more"><summary>Finished batches (${closed.length})</summary>${closed.map(batchCard).join('')}</details>`;
+  return h;
+}
+
+/* ================================================================== NUMBERS */
+function viewNumbers() {
+  const d = state.data, n = d.numbers, p = n[state.period];
+  const days = { d7: 7, d30: 30, d90: 90 }[state.period];
+  let h = `<div class="seg"><button data-period="d7" aria-pressed="${state.period === 'd7'}">7 days</button><button data-period="d30" aria-pressed="${state.period === 'd30'}">30 days</button><button data-period="d90" aria-pressed="${state.period === 'd90'}">90 days</button></div>
+  <div class="grid2">
+    <div class="stat"><span class="k">Sales</span><span class="v">${money0(p.cents)}</span><span class="s">${money0(p.cents / days)} a day</span></div>
+    <div class="stat"><span class="k">Bags sold</span><span class="v">${p.units}</span><span class="s">${n1(p.grams / 1000)} kg of biltong</span></div>
+  </div>`;
+
+  const maxW = Math.max(1, ...n.weeks.map(w => w.cents));
+  h += `<div class="sec"><h2>Weekly sales</h2><span class="small muted">last 12 weeks</span></div><div class="card"><div class="chart">${n.weeks.map((w, i) =>
+    `<div class="c ${i === n.weeks.length - 1 ? 'now' : ''}" title="${money(w.cents)}"><i style="height:${Math.max(2, w.cents / maxW * 100)}%"></i><span>${i % 3 === 2 || i === n.weeks.length - 1 ? shortDate(w.start).replace(' ', '&nbsp;') : '&nbsp;'}</span></div>`).join('')}</div>
+    <div class="between small muted mt"><span>Best week ${money0(maxW)}</span><span>This week ${money0(n.weeks[n.weeks.length - 1].cents)}</span></div></div>`;
+
+  const skus = Object.entries(p.bySku).sort((a, b) => b[1] - a[1]);
+  if (skus.length) {
+    const top = skus[0][1];
+    h += `<div class="sec"><h2>What’s selling</h2></div><div class="card">${skus.map(([sku, u]) => {
+      const pr = d.products.find(x => x.sku === sku);
+      return `<div class="hbar"><span>${esc(pr?.label || sku)}</span><b>${u}</b><div class="bar"><i style="width:${u / top * 100}%"></i></div></div>`;
+    }).join('')}</div>`;
+    const ch = Object.entries(p.byReason).sort((a, b) => b[1] - a[1]);
+    const topc = ch[0][1];
+    h += `<div class="sec"><h2>Where it sold</h2></div><div class="card">${ch.map(([r, u]) =>
+      `<div class="hbar"><span>${esc(d.reasons.labels[r] || r)}</span><b>${plural(u, 'bag')}</b><div class="bar"><i style="width:${u / topc * 100}%;background:#8a7356"></i></div></div>`).join('')}
+      <p class="hint">Online orders and honesty-box counts at shop price; wholesale at the price you entered.</p></div>`;
+  } else {
+    h += `<div class="card empty mt">No sales recorded in this period yet.</div>`;
+  }
+
+  const fc = n.forecast;
+  h += `<div class="sec"><h2>Planning</h2></div><div class="card">`;
+  if (fc) {
+    h += `<div class="between"><span class="muted">Start the next batch by</span><b class="${fc.overdue ? 'warn-t' : ''}">${fc.overdue ? 'Now' : niceDate(fc.startBy)}</b></div>
+      <div class="between mt"><span class="muted">Stock runs out around</span><b>${niceDate(fc.runOut)}</b></div>
+      <div class="between mt"><span class="muted">Selling per day</span><b>${fc.gramsPerDay} g</b></div>
+      ${fc.rawKgFor14Days ? `<div class="between mt"><span class="muted">Raw meat for two weeks</span><b>${fc.rawKgFor14Days} kg</b></div>` : ''}
+      <p class="hint">Based on the last 28 days of sales, your bags on hand and any batch already on the go.</p>`;
+  } else h += `<p class="muted small" style="margin:0">Once a few weeks of sales are in, this tells you when to start the next batch and how much meat to buy.</p>`;
+  h += `<table class="t mt2"><tr><th>Size</th><th>On hand</th><th>Per week</th><th>Lasts</th></tr>${d.products.filter(x => !x.hidden).map(x => {
+    const pc = n.pace[x.sku];
+    return `<tr><td>${esc(x.label)}</td><td>${x.onHand}</td><td>${pc.perDay ? n1(pc.perDay * 7) : '—'}</td><td>${pc.daysLeft != null ? pc.daysLeft + ' d' : '—'}</td></tr>`;
+  }).join('')}</table></div>`;
+
+  h += `<div class="sec"><h2>Cost and margin</h2></div><div class="card">`;
+  if (n.margins) {
+    h += `<div class="between"><span class="muted">Average yield</span><b>${n.avgYield} g per raw kg</b></div>
+      <div class="between mt"><span class="muted">Cost per 100 g</span><b>${money(n.costPer100g)}</b></div>
+      <table class="t mt2"><tr><th>Bag</th><th>Price</th><th>Cost</th><th>Profit</th></tr>${n.margins.map(m =>
+        `<tr><td>${m.grams} g</td><td>${money(m.price)}</td><td>${money(m.cost)}</td><td><b>${money(m.profit)}</b> <span class="muted small">${m.pct}%</span></td></tr>`).join('')}</table>
+      <p class="hint">Meat, ingredients and packaging from your recent batches. Add prices to supplies to make it more accurate.</p>`;
+  } else {
+    h += `<p class="muted small" style="margin:0">Enter what you paid for the meat when you start a batch, and costs on your supplies. Once a batch is packed you’ll see cost per bag and profit here.${n.avgYield ? `<br><br>Average yield so far: <b>${n.avgYield} g per raw kg</b>.` : ''}</p>`;
+  }
+  h += `</div>`;
+
+  const hist = d.batches.filter(b => b.packedBags).slice(0, 8);
+  if (hist.length) {
+    h += `<div class="sec"><h2>Batch history</h2></div><div class="card"><table class="t"><tr><th>Batch</th><th>Raw</th><th>Bags</th><th>Loss</th><th>Yield</th></tr>${hist.map(b =>
+      `<tr data-do="batch" data-id="${b.id}" style="cursor:pointer"><td><b>${esc(b.code)}</b></td><td>${n1(b.raw_kg)} kg</td><td>${b.packedBags}</td><td>${b.lossPct != null ? b.lossPct + '%' : '—'}</td><td>${b.yieldPct != null ? b.yieldPct + '%' : '—'}</td></tr>`).join('')}</table>
+      <p class="hint">Loss is raw to dried weight. Yield is bagged weight out of raw weight.</p></div>`;
+  }
+  return h;
+}
+
+/* ================================================================== SHEETS */
+let sheetOnClose = null;
+function openSheet(title, html, onMount) {
+  $('#shTitle').textContent = title; $('#shBody').innerHTML = html; $('#shBody').scrollTop = 0;
+  $('#scrim').classList.remove('hide'); $('#sheet').classList.remove('hide');
+  requestAnimationFrame(() => { $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); });
+  document.body.style.overflow = 'hidden';
+  if (onMount) onMount($('#shBody'));
+}
+function closeSheet() {
+  $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on');
+  document.body.style.overflow = '';
+  setTimeout(() => { $('#scrim').classList.add('hide'); $('#sheet').classList.add('hide'); $('#shBody').innerHTML = ''; }, 260);
+}
+
+let toastTimer;
+function toast(text, bad, action) {
+  const t = $('#toast'); $('#toastText').textContent = text; t.classList.toggle('bad', !!bad);
+  const a = $('#toastAct');
+  if (action) { a.textContent = action.label; a.onclick = () => { t.classList.remove('on'); action.fn(); }; a.classList.remove('hide'); } else a.classList.add('hide');
+  t.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), action ? 6000 : 3200);
+}
+
+/** Send a change, show the result, refresh the numbers. */
+async function act(body, { close = true, btn, errEl } = {}) {
+  if (btn) btn.disabled = true;
+  const r = await post(body);
+  if (btn) btn.disabled = false;
+  if (!r.ok) { if (errEl) errEl.textContent = r.data.error || 'Couldn’t save that.'; else toast(r.data.error || 'Couldn’t save that.', true); return null; }
+  if (close) closeSheet();
+  toast(r.data.msg || 'Saved');
+  await refreshBoss();
+  return r.data;
+}
+
+const choiceHtml = (name, opts, sel) => `<div class="choices" data-name="${name}">${opts.map(([v, l]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${String(v) === String(sel)}">${esc(l)}</button>`).join('')}</div>`;
+const stepper = (name, val = 0, min = 0) => `<div class="stepper"><button type="button" data-step="-1" aria-label="Less">−</button><input name="${name}" inputmode="numeric" pattern="[0-9]*" value="${val}" data-min="${min}"><button type="button" data-step="1" aria-label="More">+</button></div>`;
+const pick = (root, name) => $(`.choices[data-name="${name}"] [aria-pressed="true"]`, root)?.dataset.v ?? '';
+
+/* ---- record in / out ---- */
+function sheetAdjust(pre = {}) {
+  const d = state.data;
+  const skuOpts = d.products.map(p => [p.sku, p.label]);
+  const outR = d.reasons.out.filter(r => r !== 'online').map(r => [r, d.reasons.labels[r]]);
+  const inR = d.reasons.in.filter(r => r !== 'packed').map(r => [r, d.reasons.labels[r]]);
+  openSheet('Record in / out', `
+    <label class="f">Bag</label>${choiceHtml('sku', skuOpts, pre.sku || d.products.find(p => p.onHand > 0)?.sku || skuOpts[0][0])}
+    <label class="f">Direction</label><div class="seg mb0" id="dirSeg"><button type="button" data-dir="out" aria-pressed="${pre.dir !== 'in'}">Out of stock</button><button type="button" data-dir="in" aria-pressed="${pre.dir === 'in'}">Into stock</button></div>
+    <label class="f">How many bags</label>${stepper('qty', 1, 1)}
+    <label class="f">Reason</label><div id="reasonBox"></div>
+    <div id="wsBox" class="hide"><label class="f">Wholesale price per bag ($)</label><input class="in" name="unit" inputmode="decimal" placeholder="10.50"></div>
+    <label class="f">Note (optional)</label><input class="in" name="note" placeholder="${pre.dir === 'in' ? 'Customer brought back' : 'Queenstown Gym, invoice 12'}">
+    <p class="hint">Online orders come off automatically. Bags come out of the oldest batch first.</p>
+    <div class="err"></div>
+    <button class="btn full mt" id="save">Save</button>`, root => {
+    const dir = () => $('#dirSeg [aria-pressed="true"]', root).dataset.dir;
+    const drawReasons = () => {
+      $('#reasonBox', root).innerHTML = choiceHtml('reason', dir() === 'out' ? outR : inR, dir() === 'out' ? (pre.reason || 'honesty') : 'return');
+      $('#wsBox', root).classList.toggle('hide', pick(root, 'reason') !== 'wholesale');
+    };
+    drawReasons();
+    $('#dirSeg', root).addEventListener('click', e => { const b = e.target.closest('[data-dir]'); if (!b) return; $$('#dirSeg button', root).forEach(x => x.setAttribute('aria-pressed', x === b)); drawReasons(); });
+    root.addEventListener('click', e => { if (e.target.closest('.choices[data-name="reason"]')) setTimeout(() => $('#wsBox', root).classList.toggle('hide', pick(root, 'reason') !== 'wholesale')); });
+    $('#save', root).onclick = e => {
+      const unit = $('[name=unit]', root).value.trim();
+      act({ action: 'adjust', sku: pick(root, 'sku'), dir: dir(), qty: +$('[name=qty]', root).value, reason: pick(root, 'reason'),
+        note: $('[name=note]', root).value, unitCents: unit ? Math.round(parseFloat(unit) * 100) : null }, { btn: e.target, errEl: $('.err', root) });
+    };
+  });
+}
+
+/* ---- stocktake ---- */
+function sheetStocktake() {
+  const d = state.data;
+  openSheet('Stocktake', `
+    <p class="muted small" style="margin:0 0 6px">Count what’s actually there. Leave a row blank to skip it. Anything missing is logged with the reason below; anything extra is logged as a correction.</p>
+    ${d.flavours.map(f => `<label class="f">${esc(f.label)}</label>${d.products.filter(p => p.flavour === f.id).map(p =>
+      `<div class="packrow" style="margin-top:6px"><div><b>${p.grams} g</b> <span class="small muted">· records say ${p.onHand}</span></div><input class="in" style="text-align:center" inputmode="numeric" pattern="[0-9]*" name="c-${p.sku}" placeholder="${p.onHand}"></div>`).join('')}`).join('')}
+    <label class="f">Missing bags were mostly</label>${choiceHtml('reason', [['honesty', 'Honesty box sales'], ['staff', 'Eaten / staff'], ['sample', 'Samples'], ['waste', 'Wastage'], ['correction', 'Just correcting']], 'honesty')}
+    <p class="hint">Honesty-box sales count as revenue at shop price.</p>
+    <div class="err"></div>
+    <button class="btn full mt" id="save">Save count</button>`, root => {
+    $('#save', root).onclick = e => {
+      const counts = {};
+      $$('input[name^="c-"]', root).forEach(i => { if (i.value.trim() !== '') counts[i.name.slice(2)] = i.value.trim(); });
+      if (!Object.keys(counts).length) { $('.err', root).textContent = 'Enter at least one count.'; return; }
+      act({ action: 'stocktake', counts, reason: pick(root, 'reason') }, { btn: e.target, errEl: $('.err', root) });
+    };
+  });
+}
+
+/* ---- one bag size ---- */
+async function sheetSku(sku) {
+  const p = state.data.products.find(x => x.sku === sku);
+  const pace = state.data.numbers.pace[sku];
+  openSheet(p.label, `
+    <div class="between"><div><div class="big">${p.onHand}</div><div class="small muted">bags on hand${pace?.perDay ? ` · selling ${n1(pace.perDay * 7)} a week` : ''}</div></div>
+    <span class="chip ${({ out: 'bad', low: 'warn', off: 'plain' })[stateOf(p)] || 'ok'}">${({ out: 'Sold out', low: 'Low', off: 'Hidden' })[stateOf(p)] || 'In stock'}</span></div>
+    <div class="btns mt"><button class="btn sec2" data-do="adjust" data-sku="${sku}" data-dir="out">Take out</button><button class="btn sec2" data-do="adjust" data-sku="${sku}" data-dir="in">Put in</button></div>
+    <label class="f">By batch</label>
+    <div class="card flush list mb0">${p.lots.length ? p.lots.map(l => {
+      const dd = l.bestBefore ? daysUntil(l.bestBefore) : null;
+      return `<div class="it"><span class="main"><span class="t">${l.code ? esc(l.code) : 'No batch'}</span><span class="d">${l.bestBefore ? `Best before ${niceDate(l.bestBefore)}` : 'Counted before batches were tracked'}</span></span>
+      <span class="end"><b>${l.qty}</b>${dd != null && dd <= state.data.settings.bestBeforeWarnDays ? `<br><span class="chip ${dd < 0 ? 'bad' : 'warn'}">${dd < 0 ? 'Past BB' : dd + ' d'}</span>` : ''}</span></div>`;
+    }).join('') : '<div class="empty">None in stock.</div>'}</div>
+    <label class="f">Settings</label>
+    <div class="card mb0"><div class="packrow" style="margin:0"><div><b>Low stock at</b><div class="small muted">Alert when it drops to this</div></div>${stepper('lowAt', p.lowAt)}</div>
+      <div class="switch mt" style="padding-bottom:0"><div><b>Hide from shop</b><div class="small muted">Shows sold out, whatever the count</div></div><input type="checkbox" name="hidden" ${p.hidden ? 'checked' : ''}></div>
+      <button class="btn sec2 full mt" id="saveP">Save settings</button><div class="err"></div></div>
+    <label class="f">History</label><div id="hist"><div class="skel" style="height:120px"></div></div>`, async root => {
+    $('#saveP', root).onclick = e => act({ action: 'product-save', sku, lowAt: +$('[name=lowAt]', root).value, hidden: $('[name=hidden]', root).checked }, { btn: e.target, errEl: $('.err', root) });
+    const r = await api('/api/boss?sku=' + encodeURIComponent(sku));
+    const box = $('#hist', root); if (!box) return;
+    box.innerHTML = r.ok && r.data.moves.length ? `<div class="card flush list mb0">${r.data.moves.map(m =>
+      `<div class="it"><span class="main"><span class="t">${m.qty > 0 ? '+' : '−'}${Math.abs(m.qty)} · ${esc(m.reasonLabel)}</span><span class="d">${m.code ? esc(m.code) + ' · ' : ''}${m.customer ? esc(m.customer) + ' · ' : ''}${m.note ? esc(m.note) + ' · ' : ''}${ago(m.at)}</span></span></div>`).join('')}</div>`
+      : '<div class="card empty mb0">No history yet.</div>';
+  });
+}
+
+/* ---- batches ---- */
+function sheetStartBatch() {
+  const d = state.data;
+  openSheet('Start a batch', `
+    <label class="f">Flavour</label>${choiceHtml('flavour', d.flavours.map(f => [f.id, f.label]), d.flavours[0].id)}
+    <label class="f">Raw meat (kg)</label><input class="in" name="rawKg" inputmode="decimal" placeholder="12.5">
+    <label class="f">Cut</label>${choiceHtml('cut', [['Topside', 'Topside'], ['Silverside', 'Silverside'], ['Mixed', 'Mixed']], 'Topside')}
+    <label class="f">Started</label><input class="in" type="date" name="startedOn" value="${d.today}">
+    <label class="f">Paid for the meat ($, optional)</label><input class="in" name="meatCost" inputmode="decimal" placeholder="285.00">
+    <p class="hint">The total on the invoice for this meat. It’s what makes cost per bag work.</p>
+    <label class="f">Notes (optional)</label><textarea class="in" name="notes" placeholder="Kaan’s delivery, Silver Fern Farms topside"></textarea>
+    <label class="check"><input type="checkbox" name="useSupplies" checked><span>Take salt, vinegar, Lea &amp; Perrins and spices off supplies (recipe amounts per kg)</span></label>
+    <div class="err"></div>
+    <button class="btn full mt" id="save">Start batch</button>`, root => {
+    $('#save', root).onclick = e => act({ action: 'batch-start', flavour: pick(root, 'flavour'), rawKg: $('[name=rawKg]', root).value, cut: pick(root, 'cut'),
+      startedOn: $('[name=startedOn]', root).value, meatCost: $('[name=meatCost]', root).value, notes: $('[name=notes]', root).value,
+      useSupplies: $('[name=useSupplies]', root).checked }, { btn: e.target, errEl: $('.err', root) });
+  });
+}
+
+function sheetPack(id) {
+  const d = state.data, b = d.batches.find(x => x.id === id);
+  const months = d.settings.shelfLifeMonths || 3;
+  const bbFrom = s => { const x = new Date(s + 'T12:00:00Z'); x.setUTCMonth(x.getUTCMonth() + months); return x.toISOString().slice(0, 10); };
+  openSheet(`Pack ${b.code}`, `
+    <p class="muted small" style="margin:0">${n1(b.raw_kg)} kg raw · ${esc(d.flavours.find(f => f.id === b.flavour)?.label)}</p>
+    <label class="f">Bags packed</label>
+    ${d.sizes.map(z => `<div class="packrow"><div><b>${z.grams} g</b> <span class="muted small">${esc(z.label)}</span></div>${stepper('bag' + z.grams, 0)}</div>`).join('')}
+    <div class="note info mt" id="packSum">Enter your bag counts.</div>
+    <label class="f">Dried weight before bagging (kg, optional)</label><input class="in" name="driedKg" inputmode="decimal" placeholder="5.2">
+    <label class="f">Packed on</label><input class="in" type="date" name="packedOn" value="${d.today}">
+    <label class="f">Best before</label><input class="in" type="date" name="bestBefore" value="${bbFrom(d.today)}">
+    <p class="hint">Set to ${months} months from packing. Change it in Settings.</p>
+    <label class="check"><input type="checkbox" name="useSupplies" checked><span>Take pouches and labels off supplies</span></label>
+    <div class="err"></div>
+    <button class="btn full mt" id="save">Put bags into stock</button>`, root => {
+    const sum = () => {
+      const bags = Object.fromEntries(d.sizes.map(z => [z.grams, +$(`[name=bag${z.grams}]`, root).value || 0]));
+      const n = Object.values(bags).reduce((a, x) => a + x, 0), g = Object.entries(bags).reduce((a, [k, x]) => a + k * x, 0);
+      const dk = parseFloat($('[name=driedKg]', root).value);
+      $('#packSum', root).innerHTML = n ? `<b>${plural(n, 'bag')}</b> · ${n1(g / 1000)} kg bagged · yield <b>${Math.round(g / (b.raw_kg * 10))}%</b>${dk ? ` · weight loss ${n1((1 - dk / b.raw_kg) * 100)}%` : ''}` : 'Enter your bag counts.';
+      return bags;
+    };
+    root.addEventListener('input', sum); root.addEventListener('click', () => setTimeout(sum));
+    $('[name=packedOn]', root).addEventListener('change', e => { $('[name=bestBefore]', root).value = bbFrom(e.target.value); });
+    $('#save', root).onclick = e => act({ action: 'batch-pack', id, bags: sum(), driedKg: $('[name=driedKg]', root).value, packedOn: $('[name=packedOn]', root).value,
+      bestBefore: $('[name=bestBefore]', root).value, useSupplies: $('[name=useSupplies]', root).checked }, { btn: e.target, errEl: $('.err', root) });
+  });
+}
+
+async function sheetBatch(id) {
+  const d = state.data, b = d.batches.find(x => x.id === id);
+  if (!b) return;
+  const fl = d.flavours.find(f => f.id === b.flavour)?.label;
+  openSheet(`${b.code} · ${fl}`, `<div class="skel" style="height:220px"></div>`);
+  const r = await api('/api/boss?batch=' + id);
+  if (!r.ok || r.data.error) { $('#shBody').innerHTML = `<div class="err">${esc(r.data.error || 'Couldn’t load the batch.')}</div>`; return; }
+  const { moves, used, cost } = r.data;
+  const sales = moves.filter(m => m.qty < 0);
+  const online = sales.filter(m => m.reason === 'online');
+  const other = {};
+  sales.filter(m => m.reason !== 'online').forEach(m => { other[m.reasonLabel] = (other[m.reasonLabel] || 0) + -m.qty; });
+  const open = ['marinating', 'drying', 'ready'].includes(b.status);
+  const fact = (k, v) => `<div class="stat" style="padding:11px 12px"><span class="k">${k}</span><span class="v" style="font-size:20px">${v}</span></div>`;
+  const dateRow = (label, name, val) => `<div class="packrow" style="margin-top:8px"><span class="muted">${label}</span><input class="in" type="date" name="${name}" value="${val || ''}"></div>`;
+
+  $('#shBody').innerHTML = `
+    <div class="between"><span class="chip ${open ? 'gold' : b.status === 'closed' ? 'plain' : 'ok'}">${STATUS[b.status]}</span><span class="small muted">${b.cut ? esc(b.cut) + ' · ' : ''}started ${niceDate(b.started_on)}</span></div>
+    <div class="grid3 mt">${fact('Raw', n1(b.raw_kg) + ' kg')}${fact('Dried', b.dried_kg ? n1(b.dried_kg) + ' kg' : '—')}${fact('Loss', b.lossPct != null ? b.lossPct + '%' : '—')}
+      ${fact('Bags', b.packedBags || '—')}${fact('Left', b.packedBags ? b.remainingBags : '—')}${fact('Yield', b.yieldPct != null ? b.yieldPct + '%' : '—')}</div>
+    ${open ? `<div class="btns mt">${b.status !== 'ready' ? `<button class="btn sec2" data-do="advance" data-id="${b.id}" data-to="${b.status === 'marinating' ? 'drying' : 'ready'}">${b.status === 'marinating' ? 'Hung to dry' : 'Ready to pack'}</button>` : ''}<button class="btn" data-do="pack" data-id="${b.id}">Pack bags</button></div>` : ''}
+
+    ${b.packedBags ? `<label class="f">Packed</label><div class="card mb0">${Object.entries(b.packed).map(([g, n]) =>
+      `<div class="between" style="padding:3px 0"><span>${g} g</span><span><b>${(b.remaining[g] ?? 0)}</b> <span class="muted small">left of ${n}</span></span></div>`).join('')}
+      ${b.best_before ? `<div class="between mt small"><span class="muted">Best before</span><b>${niceDate(b.best_before)}</b></div>` : ''}</div>` : ''}
+
+    ${b.packedBags ? `<label class="f">Where it went</label><div class="card flush list mb0">
+      ${online.map(m => `<div class="it"><span class="main"><span class="t">${esc(m.customer || 'Online order')}</span><span class="d">${-m.qty} × ${esc(m.label)} · ${niceDate(m.at.slice(0, 10))}${m.ref ? ' · #' + esc(m.ref.slice(-8).toUpperCase()) : ''}</span></span></div>`).join('')}
+      ${Object.entries(other).map(([k, n]) => `<div class="it"><span class="main"><span class="t">${esc(k)}</span></span><span class="end"><b>${plural(n, 'bag')}</b></span></div>`).join('')}
+      ${!sales.length ? '<div class="empty">Nothing sold from this batch yet.</div>' : ''}</div>
+      <p class="hint">If you ever need to recall this batch, this is who has it.</p>` : ''}
+
+    <label class="f">Cost</label><div class="card mb0">
+      <div class="between"><span class="muted">Meat</span><b>${cost.meat != null ? money(cost.meat) : 'Not entered'}</b></div>
+      <div class="between mt"><span class="muted">Ingredients and packaging</span><b>${money(cost.supplies)}</b></div>
+      <div class="between mt"><span class="muted">Total</span><b>${money(cost.total)}</b></div>
+      ${b.costPer100g ? `<div class="between mt"><span class="muted">Per 100 g bagged</span><b>${money(b.costPer100g)}</b></div>` : ''}
+      ${cost.missingSupplyCosts ? '<p class="hint">Some supplies have no price yet, so this is a little low.</p>' : ''}
+    </div>
+
+    <label class="f">Details</label><div class="card mb0" id="editBox">
+      <div class="packrow" style="margin-top:0"><span class="muted">Raw kg</span><input class="in" name="rawKg" inputmode="decimal" value="${b.raw_kg}"></div>
+      <div class="packrow" style="margin-top:8px"><span class="muted">Dried kg</span><input class="in" name="driedKg" inputmode="decimal" value="${b.dried_kg ?? ''}"></div>
+      <div class="packrow" style="margin-top:8px"><span class="muted">Meat cost $</span><input class="in" name="meatCost" inputmode="decimal" value="${b.meat_cost_cents != null ? (b.meat_cost_cents / 100).toFixed(2) : ''}"></div>
+      ${dateRow('Started', 'startedOn', b.started_on)}${dateRow('Hung to dry', 'dryingOn', b.drying_on)}${dateRow('Ready', 'readyOn', b.ready_on)}
+      ${b.packed_on ? dateRow('Packed', 'packedOn', b.packed_on) + dateRow('Best before', 'bestBefore', b.best_before) : ''}
+      <label class="f">Notes</label><textarea class="in" name="notes">${esc(b.notes || '')}</textarea>
+      <button class="btn sec2 full mt" id="saveB">Save details</button><div class="err"></div>
+    </div>
+
+    ${used.length ? `<details class="more"><summary>Supplies used</summary><div class="card flush list">${used.map(u => `<div class="it"><span class="main"><span class="t">${esc(u.name)}</span></span><span class="end">${fmtQty(-u.qty)} ${esc(u.unit)}</span></div>`).join('')}</div></details>` : ''}
+
+    <div class="mt2">
+      ${b.status === 'packed' ? `<button class="btn sec2 full" data-do="close-batch" data-id="${b.id}">Mark batch finished</button>` : ''}
+      ${b.status === 'closed' ? `<button class="btn sec2 full" data-do="reopen-batch" data-id="${b.id}">Reopen batch</button>` : ''}
+      ${b.packedBags && b.packedBags === b.remainingBags ? `<button class="btn quiet full" data-do="unpack" data-id="${b.id}">Undo packing (typed the wrong numbers)</button>` : ''}
+      ${!b.packedBags ? `<button class="btn quiet full" data-do="delete-batch" data-id="${b.id}" style="color:var(--bad)">Delete this batch</button>` : ''}
+    </div>`;
+  const root = $('#shBody');
+  $('#saveB', root).onclick = e => {
+    const fields = {};
+    for (const n of ['rawKg', 'driedKg', 'meatCost', 'startedOn', 'dryingOn', 'readyOn', 'packedOn', 'bestBefore', 'notes']) { const i = $(`[name=${n}]`, root); if (i) fields[n] = i.value; }
+    act({ action: 'batch-update', id, fields }, { btn: e.target, errEl: $('#editBox .err', root) });
+  };
+}
+
+/* ---- supplies ---- */
+async function sheetSupply(id) {
+  const s = state.data.supplies.find(x => x.id === id);
+  openSheet(s.name, `
+    <div class="between"><div><div class="big">${fmtQty(s.on_hand)}</div><div class="small muted">${esc(s.unit)} on hand${s.cost_cents != null ? ` · ${costTxt(s.cost_cents)} per ${esc(singular(s.unit))}` : ''}</div></div>
+      ${s.reorder_at != null && s.on_hand <= s.reorder_at ? '<span class="chip warn">Reorder</span>' : ''}</div>
+    <div class="seg mt" id="mvSeg"><button type="button" data-mv="received" aria-pressed="true">Received</button><button type="button" data-mv="used" aria-pressed="false">Used</button><button type="button" data-mv="count" aria-pressed="false">Count</button></div>
+    <div id="mvBox"></div>
+    <div class="err" id="mvErr"></div>
+    <button class="btn full" id="mvSave">Save</button>
+
+    <details class="more"><summary>Settings</summary><div class="card" id="setBox">${supplyForm(s)}<button class="btn sec2 full mt" id="saveS">Save settings</button><div class="err"></div>
+      <button class="btn quiet full" data-do="archive-supply" data-id="${s.id}" style="color:var(--bad)">Remove this supply</button></div></details>
+    <label class="f">History</label><div id="hist"><div class="skel" style="height:100px"></div></div>`, async root => {
+    const mv = () => $('#mvSeg [aria-pressed="true"]', root).dataset.mv;
+    const draw = () => {
+      const m = mv();
+      $('#mvBox', root).innerHTML = m === 'received'
+        ? `<label class="f">Amount received (${esc(s.unit)})</label><input class="in" name="qty" inputmode="decimal" placeholder="${s.reorder_qty || ''}">
+           <label class="f">Total paid ($, optional)</label><input class="in" name="totalCost" inputmode="decimal" placeholder="45.00"><p class="hint">Updates the cost per ${esc(singular(s.unit))} used for batch costs.</p>`
+        : m === 'used' ? `<label class="f">Amount used (${esc(s.unit)})</label><input class="in" name="qty" inputmode="decimal"><p class="hint">Only for use outside batches. Batches take their own.</p>`
+        : `<label class="f">Actual amount on hand (${esc(s.unit)})</label><input class="in" name="qty" inputmode="decimal" placeholder="${fmtQty(s.on_hand)}">`;
+    };
+    draw();
+    $('#mvSeg', root).addEventListener('click', e => { const b = e.target.closest('[data-mv]'); if (!b) return; $$('#mvSeg button', root).forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); });
+    $('#mvSave', root).onclick = e => act({ action: 'supply-move', id, reason: mv(), qty: $('#mvBox [name=qty]', root).value, totalCost: $('#mvBox [name=totalCost]', root)?.value || null }, { btn: e.target, errEl: $('#mvErr', root) });
+    $('#saveS', root).onclick = e => act({ action: 'supply-save', id, ...readSupplyForm(root) }, { btn: e.target, errEl: $('#setBox .err', root) });
+    const r = await api('/api/boss?supply=' + id);
+    const box = $('#hist', root); if (!box) return;
+    const lbl = { received: 'Received', used: 'Used', batch: 'Batch', packed: 'Packing', correction: 'Correction' };
+    box.innerHTML = r.ok && r.data.moves.length ? `<div class="card flush list mb0">${r.data.moves.map(m =>
+      `<div class="it"><span class="main"><span class="t">${m.qty > 0 ? '+' : '−'}${fmtQty(Math.abs(m.qty))} ${esc(s.unit)} · ${lbl[m.reason] || m.reason}</span><span class="d">${m.code ? esc(m.code) + ' · ' : ''}${m.note ? esc(m.note) + ' · ' : ''}${ago(m.at)}</span></span></div>`).join('')}</div>`
+      : '<div class="card empty mb0">No history yet.</div>';
+  });
+}
+const singular = u => ({ pouches: 'pouch', labels: 'label' }[u] || u);
+const costTxt = c => c >= 100 ? money(c) : (c < 1 ? (c).toFixed(2) + '¢' : Math.round(c * 10) / 10 + '¢');
+function supplyForm(s = {}) {
+  return `<label class="f">Name</label><input class="in" name="name" value="${esc(s.name || '')}" placeholder="Pouches 100 g">
+    <div class="grid2"><div><label class="f">Type</label><select class="in" name="category">${[['packaging', 'Packaging'], ['ingredient', 'Ingredient'], ['other', 'Other']].map(([v, l]) => `<option value="${v}" ${s.category === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div><label class="f">Unit</label><input class="in" name="unit" value="${esc(s.unit || '')}" placeholder="pouches, g, mL"></div></div>
+    <div class="grid2"><div><label class="f">Reorder at</label><input class="in" name="reorderAt" inputmode="decimal" value="${s.reorder_at ?? ''}" placeholder="100"></div>
+      <div><label class="f">Usual order</label><input class="in" name="reorderQty" inputmode="decimal" value="${s.reorder_qty ?? ''}" placeholder="500"></div></div>
+    <label class="f">Cost per unit ($)</label><input class="in" name="unitCost" inputmode="decimal" value="${s.cost_cents != null ? +(s.cost_cents / 100).toFixed(4) : ''}" placeholder="0.32">
+    <label class="f">Supplier</label><input class="in" name="supplier" value="${esc(s.supplier || '')}" placeholder="Pack Fresh">
+    <label class="f">Comes off automatically</label><select class="in" name="autoUse">${Object.entries(AUTO_USE).map(([v, l]) => `<option value="${v}" ${(s.auto_use || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <label class="f">Amount each time</label><input class="in" name="usePer" inputmode="decimal" value="${s.use_per ?? 1}">
+    <p class="hint">For example 40 (g of salt) per kg of raw meat, or 1 pouch per 100 g bag.</p>`;
+}
+const readSupplyForm = root => Object.fromEntries(['name', 'category', 'unit', 'reorderAt', 'reorderQty', 'unitCost', 'supplier', 'autoUse', 'usePer'].map(n => [n, $(`[name=${n}]`, root).value]));
+function sheetSupplyNew() {
+  openSheet('Add a supply', supplyForm({ category: 'packaging', use_per: 1 }) + `<div class="err"></div><button class="btn full mt" id="save">Add supply</button>`, root => {
+    $('#save', root).onclick = e => act({ action: 'supply-save', ...readSupplyForm(root) }, { btn: e.target, errEl: $('.err', root) });
+  });
+}
+
+/* ---- settings ---- */
+function sheetSettings() {
+  const d = state.data, s = d.settings;
+  const wl = d.flavours.map(f => [f, d.waitlist[f.id] || 0]);
+  openSheet('Settings', `
+    <div class="card">
+      <div class="switch"><div><b>Live stock on the shop</b><div class="small muted">The shop shows sold out, “only 3 left”, and stops checkout going over what you have.</div></div><input type="checkbox" name="live" ${s.live ? 'checked' : ''}></div>
+      ${!s.live ? '<div class="note" style="margin-top:6px">Do a stocktake first, so the shop starts from the right numbers.</div>' : ''}
+      <div class="switch"><div><b>Email alerts</b><div class="small muted">Low stock and supplies to reorder${d.mailReady ? '' : ' (needs the email settings in Vercel)'}</div></div><input type="checkbox" name="emailAlerts" ${s.emailAlerts ? 'checked' : ''}></div>
+    </div>
+    <div class="card">
+      <div class="packrow" style="margin:0"><div><b>Show “only N left”</b><div class="small muted">At or below</div></div>${stepper('showLeftUnder', s.showLeftUnder)}</div>
+      <div class="packrow"><div><b>Shelf life</b><div class="small muted">Months, for best-before</div></div>${stepper('shelfLifeMonths', s.shelfLifeMonths, 1)}</div>
+      <div class="packrow"><div><b>Best-before warning</b><div class="small muted">Days ahead</div></div>${stepper('bestBeforeWarnDays', s.bestBeforeWarnDays)}</div>
+      <div class="packrow"><div><b>Batch takes</b><div class="small muted">Days, slicing to packed</div></div>${stepper('batchLeadDays', s.batchLeadDays, 1)}</div>
+    </div>
+    <div class="err"></div>
+    <button class="btn full" id="save">Save settings</button>
+    ${d.mailReady ? '<button class="btn sec2 full mt" data-do="test-alert">Send me a test alert</button>' : ''}
+
+    <div class="sec"><h2>Back-in-stock list</h2></div>
+    <div class="card flush list">${wl.map(([f, n]) => `<div class="it"><span class="main"><span class="t">${esc(f.label)}</span><span class="d">${n ? plural(n, 'person') + ' waiting' : 'Nobody waiting'}</span></span>
+      ${n ? `<button class="btn sm" data-do="waitlist-send" data-flavour="${f.id}">Email them</button>` : ''}</div>`).join('')}</div>
+    <p class="hint" style="margin:0 4px 0">People sign up on sold-out flavours on the shop. When you’ve restocked, tap Email them and each person gets one “it’s back” email.</p>
+    <button class="btn sec2 full mt" data-do="waitlist-view">See the list</button>
+
+    <button class="btn quiet full mt2" data-do="logout">Log out on this phone</button>`, root => {
+    $('#save', root).onclick = e => {
+      const live = $('[name=live]', root).checked;
+      if (live && !s.live && !arm(e.target, 'Tap again to go live')) return;
+      act({ action: 'settings-save', live, emailAlerts: $('[name=emailAlerts]', root).checked,
+        ...Object.fromEntries(['showLeftUnder', 'shelfLifeMonths', 'bestBeforeWarnDays', 'batchLeadDays'].map(k => [k, +$(`[name=${k}]`, root).value])) },
+        { btn: e.target, errEl: $('.err', root) });
+    };
+  });
+}
+async function sheetWaitlist() {
+  openSheet('Back-in-stock list', '<div class="skel" style="height:160px"></div>');
+  const r = await post({ action: 'waitlist-list' });
+  const fl = id => state.data.flavours.find(f => f.id === id)?.label || id;
+  $('#shBody').innerHTML = r.ok && r.data.rows.length ? `<div class="card flush list">${r.data.rows.map(w =>
+    `<div class="it"><span class="main"><span class="t" style="word-break:break-all">${esc(w.email)}</span><span class="d">${esc(fl(w.flavour))} · ${w.notified_at ? 'emailed ' + ago(w.notified_at) : 'waiting since ' + ago(w.created_at)}</span></span>
+     <button class="btn quiet sm" data-do="waitlist-remove" data-id="${w.id}">Remove</button></div>`).join('')}</div>` : '<div class="card empty">Nobody on the list yet.</div>';
+}
+
+/* ================================================================== EVENTS */
+document.addEventListener('click', async e => {
+  const t = e.target;
+  const tab = t.closest('nav.tabs button'); if (tab) { setTab(tab.dataset.tab); if (tab.dataset.tab === 'orders' && !state.loading) loadOrders(); return; }
+  const go = t.closest('[data-tab-go]'); if (go) { if (go.dataset.seg) state.stockSeg = go.dataset.seg; setTab(go.dataset.tabGo); return; }
+  const seg = t.closest('[data-seg]'); if (seg && seg.closest('#view')) { state.stockSeg = seg.dataset.seg; render(); return; }
+  const per = t.closest('[data-period]'); if (per) { state.period = per.dataset.period; render(); return; }
+  const ship = t.closest('[data-ship]'); if (ship) { shipAction(ship); return; }
+  const ch = t.closest('.choices button'); if (ch) { $$('button', ch.parentElement).forEach(b => b.setAttribute('aria-pressed', b === ch)); return; }
+  const st = t.closest('.stepper button'); if (st) {
+    const i = $('input', st.parentElement); const min = +i.dataset.min || 0;
+    i.value = Math.max(min, (parseInt(i.value, 10) || 0) + +st.dataset.step); i.dispatchEvent(new Event('input', { bubbles: true })); return;
+  }
+  if (t.closest('#scrim')) { closeSheet(); return; }
+  const el = t.closest('[data-do]'); if (!el) return;
+  const id = el.dataset.id ? +el.dataset.id : null;
+  switch (el.dataset.do) {
+    case 'close': closeSheet(); break;
+    case 'adjust': {
+      const pre = { sku: el.dataset.sku, dir: el.dataset.dir };
+      if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetAdjust(pre), 270); } else sheetAdjust(pre);
+      break;
+    }
+    case 'stocktake': sheetStocktake(); break;
+    case 'sku': sheetSku(el.dataset.sku); break;
+    case 'start-batch': sheetStartBatch(); break;
+    case 'batch': sheetBatch(id); break;
+    case 'pack': if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetPack(id), 270); } else sheetPack(id); break;
+    case 'advance': await act({ action: 'batch-status', id, status: el.dataset.to }, { close: $('#sheet').classList.contains('on') }); break;
+    case 'close-batch': await act({ action: 'batch-status', id, status: 'closed' }); break;
+    case 'reopen-batch': await act({ action: 'batch-status', id, status: 'packed' }); break;
+    case 'unpack': if (arm(el, 'Tap again to undo packing')) await act({ action: 'batch-unpack', id }); break;
+    case 'delete-batch': if (arm(el, 'Tap again to delete')) await act({ action: 'batch-delete', id }); break;
+    case 'undo': if (arm(el, 'Sure?')) await act({ action: 'undo', id }, { close: false }); break;
+    case 'supply': sheetSupply(id); break;
+    case 'supply-new': sheetSupplyNew(); break;
+    case 'archive-supply': if (arm(el, 'Tap again to remove')) await act({ action: 'supply-archive', id }); break;
+    case 'test-alert': { el.disabled = true; const r = await post({ action: 'test-alert' }); el.disabled = false; toast(r.data.msg || r.data.error, !r.ok); break; }
+    case 'waitlist-send': if (arm(el, 'Tap to send')) await act({ action: 'waitlist-send', flavour: el.dataset.flavour }); break;
+    case 'waitlist-view': closeSheet(); setTimeout(sheetWaitlist, 270); break;
+    case 'waitlist-remove': { const r = await post({ action: 'waitlist-remove', id }); if (r.ok) el.closest('.it').remove(); break; }
+    case 'sample': {
+      const m = $('#sampleMsg'); m.className = 'msg'; m.textContent = 'Sending…';
+      const r = await api('/api/mark-shipped', { method: 'POST', body: JSON.stringify({ sample: true }) });
+      m.className = 'msg ' + (r.ok ? 'ok' : 'bad');
+      m.textContent = r.ok ? `Sample sent to ${r.data.sentTo}. Check your inbox (and spam, the first time).` : (r.data.error || 'Something went wrong.');
+      break;
+    }
+    case 'logout': closeSheet(); logout(''); break;
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#sheet').classList.contains('on')) closeSheet();
+  if (e.key === 'Enter' && e.target.matches('[role=button][data-do]')) e.target.click();
+});
 
 function logout(text) {
   key = ''; try { localStorage.removeItem('bb-dispatch'); } catch {}
-  $('#app').classList.add('hide'); $('#login').classList.remove('hide'); $('#refresh').classList.add('hide');
-  $('#loginMsg').textContent = text || '';
+  state.data = null; state.orders = null;
+  $('#view').classList.add('hide'); $('#tabs').classList.add('hide'); $('#login').classList.remove('hide');
+  $('#refresh').classList.add('hide'); $('#settingsBtn').classList.add('hide');
+  $('#title').textContent = 'Dispatch'; $('#loginMsg').textContent = text || '';
 }
-$('#go').onclick = () => { key = $('#pw').value; try { localStorage.setItem('bb-dispatch', key); } catch {} load(); };
+$('#go').onclick = () => { key = $('#pw').value; try { localStorage.setItem('bb-dispatch', key); } catch {} loadAll(true); };
 $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#go').click(); });
-$('#refresh').onclick = load;
-if (key) load();
+$('#refresh').onclick = () => loadAll(false);
+$('#settingsBtn').onclick = () => state.data && sheetSettings();
+// Coming back to the app after a while: pull fresh numbers.
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && key && state.data) loadAll(false); });
+if (key) loadAll(true);
 </script>
 </body>
 </html>

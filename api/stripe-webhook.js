@@ -22,6 +22,8 @@
  * `await request.text()` rather than `request.json()`.
  */
 
+import { hasDb, recordOrder } from './_lib/stock.js';
+
 const STRIPE_API_VERSION = '2025-10-29.clover';
 const money = cents => '$' + (cents / 100).toFixed(2);
 
@@ -126,6 +128,18 @@ export async function POST(request) {
   } catch (err) {
     // Log it, but still 200 — otherwise Stripe retries and you get duplicates.
     console.error('Order handling failed:', err && err.message);
+  }
+
+  // Take the bags out of stock (oldest batch first). Safe if Stripe sends twice.
+  try {
+    const session = event.data.object;
+    if (hasDb() && session.payment_status === 'paid') {
+      const r = await recordOrder(session);
+      console.log('Stock updated:', JSON.stringify(r));
+    }
+  } catch (err) {
+    // If this fails, the stocktake will catch it — never make Stripe retry.
+    console.error('Stock update failed:', err && err.message);
   }
 
   return new Response('ok', { status: 200 });

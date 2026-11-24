@@ -8,6 +8,7 @@
  * as metadata (shipped_at, tracking), so Stripe stays the single record.
  */
 import { json, authorised, stripeClient, shippingOf, isPickup } from './_lib/admin.js';
+import { hasDb, batchesForOrders } from './_lib/stock.js';
 
 export async function GET(request) {
   if (!authorised(request)) return json({ error: 'Wrong password' }, 401);
@@ -42,6 +43,14 @@ export async function GET(request) {
       tracking: pi?.metadata?.tracking || null
     };
   }));
+
+  // Which batch each order's bags came from (for traceability), if stock is set up.
+  if (hasDb()) {
+    try {
+      const map = await batchesForOrders(orders.map(o => o.id));
+      for (const o of orders) o.batches = map[o.id] || [];
+    } catch (err) { console.error('Batch lookup failed:', err.message); }
+  }
 
   return json({ orders });
 }

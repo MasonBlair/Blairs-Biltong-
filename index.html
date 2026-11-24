@@ -322,6 +322,18 @@ section[id]{scroll-margin-top:var(--header-h,84px)}
 .pop-tag{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:.72rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gold);margin-bottom:2px}
 .so-note{font-size:.8rem;color:rgba(36,27,19,.6);margin:10px 0 0}
+/* Live stock: a size that's sold out, the "only a few left" line, and the
+   "tell me when it's back" form on sold-out flavours. */
+.sizes button.na{color:rgba(36,27,19,.42);border-style:dashed}
+.sizes button.na::after{content:'';position:absolute;left:8px;right:8px;top:50%;border-top:1.5px solid rgba(36,27,19,.4);transform:rotate(-12deg)}
+.left-note{font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);min-height:1.3em;margin:-6px 0 10px}
+.notify{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.notify input{width:100%;font:500 .95rem/1.2 'Barlow',sans-serif;padding:12px;border:1px solid rgba(36,27,19,.25);
+  border-radius:2px;background:#fff;color:var(--ink);text-align:center}
+.notify input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.notify .btn{margin-top:0}
+.notify-msg{font-size:.8rem;color:rgba(36,27,19,.65);margin:2px 0 0;min-height:1.2em}
 
 /* Week pack — a bag a day for seven days, which clears the free-shipping line */
 .weekpack{margin-top:30px;border:1.5px dashed rgba(185,135,60,.55);background:rgba(185,135,60,.07);
@@ -928,9 +940,10 @@ const CONFIG = {
   checkCodeEndpoint: '/api/check-code'
 };
 
-// Flavours × bag sizes. Must mirror FLAVOURS/SIZES in api/create-checkout-session.js
+// Flavours × bag sizes. Must mirror FLAVOURS/SIZES in api/_lib/catalogue.js
 // (the server is what actually charges — these are display prices).
-// soldOut: true greys the card out and blocks adding it; flip to false when stock is back.
+// soldOut: true greys the card out and blocks adding it. Once live stock is on in the
+// dashboard, real stock numbers override these flags automatically.
 const FLAVOURS = [
   { id:'original', name:'Original', desc:'The original. Coriander, black pepper, and time.', soldOut:false },
   { id:'dryheat',  name:'Dry Heat', desc:'A slow, dry chilli heat.',                        soldOut:true  }
@@ -993,8 +1006,12 @@ function renderProducts(){
       </div>
       ${sizeInfo(first)}
       ${f.soldOut ? `
-      <button class="btn btn-dark" disabled>Sold out</button>
-      <p class="so-note">Back soon.</p>` : `
+      <form class="notify" data-flavour="${f.id}" novalidate>
+        <input type="email" required placeholder="Your email" aria-label="Email me when ${escapeHtml(f.name)} is back" autocomplete="email">
+        <button class="btn btn-dark" type="submit">Tell me when it’s back</button>
+        <p class="notify-msg" aria-live="polite">Small batches. We’ll email you once, when it’s back.</p>
+      </form>` : `
+      ${STOCK.live ? '<p class="left-note" aria-live="polite"></p>' : ''}
       <div class="qty">
         <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
         <span data-qty>1</span>
@@ -1019,18 +1036,99 @@ function renderProducts(){
         el.classList.toggle('on', on);
         on ? el.removeAttribute('aria-hidden') : el.setAttribute('aria-hidden', 'true');
       });
+      syncCardStock(card);
     }));
+    const form = $('form.notify', card);
+    if (form) form.addEventListener('submit', e => notifyMe(e, form));
     if (!qtyEl) return;                                   // sold out — nothing to add
     $$('[data-step]', card).forEach(b => b.addEventListener('click', () => {
-      const next = Math.max(1, Math.min(20, +qtyEl.textContent + (+b.dataset.step)));
+      const next = Math.max(1, Math.min(maxQty(card), +qtyEl.textContent + (+b.dataset.step)));
       qtyEl.textContent = next;
     }));
     $('[data-add]', card).addEventListener('click', () => {
-      addToCart(`${card.dataset.flavour}-${card.dataset.grams}`, +qtyEl.textContent);
+      const id = `${card.dataset.flavour}-${card.dataset.grams}`;
+      const p = PRODUCTS.find(x => x.id === id);
+      if (!p || p.soldOut) return;
+      addToCart(id, +qtyEl.textContent);
       qtyEl.textContent = 1;
     });
+    $$('.sizes button', card).forEach(b => {
+      const p = PRODUCTS.find(x => x.id === `${card.dataset.flavour}-${b.dataset.grams}`);
+      b.classList.toggle('na', Boolean(p && p.soldOut));
+      if (p && p.soldOut) b.setAttribute('aria-label', `${b.dataset.grams}g, sold out`);
+    });
+    syncCardStock(card);
   });
   observeReveals();
+}
+
+/* ---------- live stock (from the dashboard, via /api/stock) ---------- */
+// live:false means the dashboard isn't deciding yet — the soldOut flags above rule.
+let STOCK = { live:false, items:{} };
+
+/** Most of the selected size someone can add: stock left, capped at 20. */
+function maxQty(card){
+  const it = STOCK.items[`${card.dataset.flavour}-${card.dataset.grams}`];
+  return STOCK.live && it && it.left != null ? Math.max(1, Math.min(20, it.left)) : 20;
+}
+
+/** Add button + "Only 3 left" line for whichever size is selected on a card. */
+function syncCardStock(card){
+  const add = $('[data-add]', card);
+  if (!add) return;
+  const id = `${card.dataset.flavour}-${card.dataset.grams}`;
+  const p = PRODUCTS.find(x => x.id === id);
+  const it = STOCK.items[id];
+  add.disabled = Boolean(p && p.soldOut);
+  add.textContent = add.disabled ? 'Sold out in this size' : 'Add to cart';
+  const note = $('.left-note', card);
+  if (note) note.textContent = !add.disabled && it && it.left != null ? `Only ${it.left} left` : '';
+  const qtyEl = $('[data-qty]', card);
+  if (qtyEl && +qtyEl.textContent > maxQty(card)) qtyEl.textContent = maxQty(card);
+}
+
+async function loadStock(){
+  try {
+    const res = await fetch('/api/stock');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.live) return;
+    STOCK = data;
+    PRODUCTS.forEach(p => { p.soldOut = !(data.items[p.id] && data.items[p.id].available); });
+    FLAVOURS.forEach(f => { f.soldOut = PRODUCTS.filter(p => p.flavour === f.id).every(p => p.soldOut); });
+    // Start each card on a size that's actually in stock.
+    renderProducts();
+    $$('#productGrid .card').forEach(card => {
+      const p = PRODUCTS.find(x => x.id === `${card.dataset.flavour}-${card.dataset.grams}`);
+      if (p && p.soldOut) {
+        const alt = PRODUCTS.find(x => x.flavour === card.dataset.flavour && !x.soldOut);
+        if (alt) $(`.sizes button[data-grams="${alt.grams}"]`, card).click();
+      }
+    });
+    // Anything in a saved cart that's since sold out comes out.
+    const before = cart.length;
+    cart = cart.filter(l => { const p = PRODUCTS.find(x => x.id === l.id); return p && !p.soldOut; });
+    if (cart.length !== before) renderCart();
+  } catch { /* offline or no API: keep the built-in flags */ }
+}
+
+/** "Tell me when it's back" on a sold-out flavour. */
+async function notifyMe(e, form){
+  e.preventDefault();
+  const input = $('input', form), btn = $('button', form), msg = $('.notify-msg', form);
+  const email = input.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = 'Enter your email first.'; input.focus(); return; }
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/stock', { method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ email, flavour: form.dataset.flavour }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    form.reset();
+    msg.textContent = 'You’re on the list. We’ll email you when it’s back.';
+  } catch (err) {
+    msg.textContent = location.protocol === 'file:' ? 'Only works on the live site.' : err.message;
+  } finally { btn.disabled = false; }
 }
 
 /* ============================================================================
@@ -1373,6 +1471,7 @@ renderProducts();
 loadCart();
 renderCart();
 observeReveals();
+loadStock();
 </script>
 </body>
 </html>

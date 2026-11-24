@@ -15,30 +15,17 @@
  */
 
 import { checkCode } from './local-codes.js';
+import { isLive, checkCart } from './_lib/stock.js';
 
 // Pinned so a future Stripe API release can't silently change behaviour.
 const STRIPE_API_VERSION = '2025-10-29.clover';
 
 /* ---------------------------------------------------------------------------
-   CATALOGUE — prices in CENTS. Must mirror PRODUCTS in index.html.
-   This is the source of truth for what a customer is charged.
+   CATALOGUE — flavours, bag sizes and prices live in api/_lib/catalogue.js
+   (shared with the stock dashboard). Must mirror PRODUCTS in index.html.
    --------------------------------------------------------------------------- */
-// One entry per flavour × bag size. Ids look like "original-100".
-// soldOut: true → checkout refuses it, whatever the browser sends.
-// Flip soldOut to false (here AND in index.html FLAVOURS) when stock is back.
-const FLAVOURS = {
-  original: { label: 'Original', soldOut: false },
-  dryheat:  { label: 'Dry Heat', soldOut: true }
-};
-const SIZES = { 50: 750, 100: 1500, 200: 3000 };   // grams → cents (linear for now)
-const SIZE_LABELS = { 50: 'Snack Pack', 100: 'Large', 200: 'Share Bag' };
-
-export const CATALOGUE = Object.fromEntries(
-  Object.entries(FLAVOURS).flatMap(([flavour, f]) =>
-    Object.entries(SIZES).map(([grams, cents]) => [
-      `${flavour}-${grams}`,
-      { name: `Blair's Biltong — ${f.label} ${grams}g ${SIZE_LABELS[grams]}`, cents: Number(cents), soldOut: f.soldOut }
-    ])));
+import { CATALOGUE } from './_lib/catalogue.js';
+export { CATALOGUE };
 
 const FREE_SHIPPING_OVER_CENTS = 5000;   // $50.00
 const FLAT_SHIPPING_CENTS      = 500;    // $5.00
@@ -48,7 +35,10 @@ const MAX_LINES                = 10;
 /* ---------------------------------------------------------------------------
    Payload builder — exported so it can be unit tested without hitting Stripe
    --------------------------------------------------------------------------- */
-export function buildSessionPayload(items, siteUrl, rawCode) {
+// opts.liveStock: true when the dashboard's stock numbers decide what's
+// available (checked separately in the handler), so the hand-set soldOut
+// flags above are ignored.
+export function buildSessionPayload(items, siteUrl, rawCode, opts = {}) {
   if (!Array.isArray(items) || items.length === 0) throw new Error('EMPTY_CART');
   if (items.length > MAX_LINES) throw new Error('TOO_MANY_LINES');
 
@@ -59,7 +49,7 @@ export function buildSessionPayload(items, siteUrl, rawCode) {
     if (!Object.prototype.hasOwnProperty.call(CATALOGUE, id)) {
       throw new Error(`UNKNOWN_PRODUCT:${id}`);
     }
-    if (CATALOGUE[id].soldOut) throw new Error(`SOLD_OUT:${id}`);
+    if (CATALOGUE[id].soldOut && !opts.liveStock) throw new Error(`SOLD_OUT:${id}`);
     const qty = Math.floor(Number(raw.qty));
     if (!Number.isFinite(qty) || qty < 1) throw new Error(`BAD_QUANTITY:${id}`);
     merged.set(id, Math.min(MAX_QTY_PER_LINE, (merged.get(id) || 0) + qty));
@@ -149,10 +139,18 @@ export async function POST(request) {
 
   const siteUrl = process.env.SITE_URL.replace(/\/+$/, '');
 
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'That cart looks invalid. Please refresh and try again.' }, 400); }
+  const { items, code } = body || {};
+
+  // Live stock from the dashboard, if it's switched on. If the database is
+  // unreachable, fall back to the soldOut flags rather than blocking sales.
+  let liveStock = false;
+  try { liveStock = await isLive(); } catch (err) { console.error('Stock check unavailable:', err.message); }
+
   let payload;
   try {
-    const { items, code } = await request.json();
-    payload = buildSessionPayload(items, siteUrl, code);
+    payload = buildSessionPayload(items, siteUrl, code, { liveStock });
   } catch (err) {
     // Client's fault — say so, but don't leak internals.
     console.warn('Rejected cart:', err.message);
@@ -160,6 +158,23 @@ export async function POST(request) {
       return json({ error: 'Sorry, something in your cart has just sold out. Please remove it and try again.' }, 400);
     }
     return json({ error: 'That cart looks invalid. Please refresh and try again.' }, 400);
+  }
+
+  if (liveStock) {
+    try {
+      await checkCart(payload.line_items.map(li => ({ sku: li.price_data.product_data.metadata.sku, qty: li.quantity })));
+    } catch (err) {
+      const m = String(err.message);
+      if (m.startsWith('OUT_OF_STOCK:')) {
+        const [, sku, left] = m.split(':');
+        const name = (CATALOGUE[sku]?.name || 'One item').replace("Blair's Biltong — ", '');
+        return json({ error: Number(left) > 0
+          ? `Only ${left} left of ${name}. Please lower the quantity and try again.`
+          : `Sorry, ${name} has just sold out. Please remove it and try again.` }, 400);
+      }
+      // A database hiccup shouldn't cost you a sale — carry on without the check.
+      console.error('Stock check failed, continuing without it:', m);
+    }
   }
 
   try {

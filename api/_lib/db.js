@@ -9,19 +9,20 @@
  * there's no separate setup step. Changes to the schema go at the end of
  * MIGRATIONS as a new entry; never edit an old one.
  */
-import pg from 'pg';
 
 const URL = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
 export const hasDb = () => Boolean(URL);
 
-// Return plain values: dates as 'YYYY-MM-DD', numbers as numbers.
-pg.types.setTypeParser(1082, v => v);                 // date
-pg.types.setTypeParser(1700, v => parseFloat(v));     // numeric
-pg.types.setTypeParser(20,   v => parseInt(v, 10));   // bigint (sums, counts)
 
 let pool = null;
-function getPool() {
+// Loaded only when there's a database, so the shop and its tests run without it.
+async function getPool() {
   if (!pool) {
+    const { default: pg } = await import('pg');
+    // Return plain values: dates as 'YYYY-MM-DD', numbers as numbers.
+    pg.types.setTypeParser(1082, v => v);                 // date
+    pg.types.setTypeParser(1700, v => parseFloat(v));     // numeric
+    pg.types.setTypeParser(20,   v => parseInt(v, 10));   // bigint (sums, counts)
     pool = new pg.Pool({
       connectionString: URL,
       max: 3,
@@ -156,7 +157,7 @@ async function migrate(client) {
 async function ensureReady() {
   if (!ready) {
     ready = (async () => {
-      const c = await getPool().connect();
+      const c = await (await getPool()).connect();
       try { await migrate(c); } finally { c.release(); }
     })().catch(err => { ready = null; throw err; });
   }
@@ -166,7 +167,7 @@ async function ensureReady() {
 /** Run one query. */
 export async function q(text, params) {
   await ensureReady();
-  return getPool().query(text, params);
+  return (await getPool()).query(text, params);
 }
 
 /**
@@ -175,7 +176,7 @@ export async function q(text, params) {
  */
 export async function tx(fn) {
   await ensureReady();
-  const c = await getPool().connect();
+  const c = await (await getPool()).connect();
   try {
     await c.query('BEGIN');
     await c.query('SELECT pg_advisory_xact_lock(777)');

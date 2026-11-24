@@ -365,9 +365,9 @@ const ACTIONS = {
     const meat = b.meatCost === '' || b.meatCost == null ? null : Math.round(num(b.meatCost) * 100);
     const code = await nextBatchCode(c);
     const { rows: [row] } = await c.query(
-      `INSERT INTO batches (code, flavour, cut, raw_kg, meat_cost_cents, started_on, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-      [code, flavour, clean(b.cut, 60), rawKg, meat, started, clean(b.notes, 1000)]);
+      `INSERT INTO batches (code, flavour, cut, raw_kg, meat_cost_cents, started_on, notes, marinate_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7, CASE WHEN $6::date = $8::date THEN now() END) RETURNING id`,
+      [code, flavour, clean(b.cut, 60), rawKg, meat, started, clean(b.notes, 1000), todayNZ()]);
     if (b.useSupplies !== false) await useSuppliesFor(c, { batchId: row.id, rawKg });
     return { msg: `${code} started`, id: row.id };
   },
@@ -379,6 +379,8 @@ const ACTIONS = {
     const to = String(b.status);
     const col = { drying: 'drying_on', ready: 'ready_on' }[to];
     if (col) await c.query(`UPDATE batches SET status = $2, ${col} = $3 WHERE id = $1`, [id, to, on]);
+    // Tapping "Hung to dry" today records the exact time it went on.
+    if (to === 'drying' && on === todayNZ()) await c.query(`UPDATE batches SET drying_at = now() WHERE id = $1`, [id]);
     else if (to === 'closed' || to === 'packed' || to === 'marinating' || to === 'drying') await c.query(`UPDATE batches SET status = $2 WHERE id = $1`, [id, to]);
     else fail('Unknown step');
     return { msg: `${bt.code}: ${to}` };
@@ -428,6 +430,9 @@ const ACTIONS = {
     if ('driedKg' in f) put('dried_kg', num(f.driedKg));
     if ('rawKg' in f) { const r = num(f.rawKg); if (!(r > 0)) fail('Raw weight must be more than 0'); put('raw_kg', r); }
     if ('bestBefore' in f && isDate(f.bestBefore)) put('best_before', f.bestBefore);
+    for (const [k, col] of [['marinateAt', 'marinate_at'], ['dryingAt', 'drying_at']]) {
+      if (k in f) put(col, f[k] && !Number.isNaN(Date.parse(f[k])) ? new Date(f[k]) : null);
+    }
     for (const [k, col] of [['startedOn', 'started_on'], ['dryingOn', 'drying_on'], ['readyOn', 'ready_on'], ['packedOn', 'packed_on']]) {
       if (k in f) put(col, isDate(f[k]) ? f[k] : null);
     }

@@ -261,6 +261,8 @@ span.mini{width:24px;height:24px;border-radius:7px;margin:0;flex-shrink:0}span.m
 .sdot svg{width:16px;height:16px}.sdot.ok{background:var(--ok);border-color:var(--ok);color:#fff}.sdot.bad{background:var(--bad);border-color:var(--bad);color:#fff;font-size:15px}.sdot.part{background:var(--warn-soft);border-color:#e7c48b;color:var(--warn)}
 .rel{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:14px;color:var(--muted)}.rel.ok{color:var(--ink)}
 .tick .amt{font:600 17px/1 'Oswald',sans-serif;white-space:nowrap}
+.timebox{background:var(--gold-soft);border-radius:10px;padding:6px 12px;margin-top:10px}
+.timebox b{white-space:nowrap}
 .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.kv:first-child{border-top:0}.kv>span:last-child{text-align:right}
 .choices.days button{min-width:44px;padding:0 10px}
 .sheet .sh-h .back{margin:4px -4px 0 -6px;color:var(--ink)}
@@ -445,14 +447,6 @@ function viewToday() {
     h += `<div class="sec"><h2>In progress</h2></div>` + inProg.map(batchCard).join('');
   }
 
-  h += `<div class="sec"><h2>Quick actions</h2></div>
-  <div class="grid2">
-    <button class="btn sec2" data-do="recipe">Recipe</button>
-    <button class="btn sec2" data-do="start-batch">New batch</button>
-    <button class="btn sec2" data-do="adjust">Record</button>
-    <button class="btn sec2" data-do="stocktake">Count</button>
-  </div>`;
-
   h += `<div class="sec"><h2>Recent activity</h2></div>` + activityList(d.recent.slice(0, 10));
   return h;
 }
@@ -601,6 +595,7 @@ function batchCard(b) {
     body = `<div class="steps">${[0, 1, 2, 3].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>
       <div class="steps-l">${['Marinate', 'Dry', 'Ready', 'Packed'].map((l, i) => `<span class="${i === step ? 'on' : ''}">${l}</span>`).join('')}</div>
       <div class="small muted mt">${n1(b.raw_kg)} kg raw${b.cut ? ' ' + esc(b.cut.toLowerCase()) : ''} · started ${shortDate(b.started_on)}${since}</div>
+      ${batchTimes(b)}
       ${b.status === 'marinating' ? `<button class="btn quiet sm" data-do="recipe" data-id="${b.id}" style="padding:0;min-height:30px;text-decoration:none;color:var(--gold-2);margin-right:14px">Recipe for ${n1(b.raw_kg)} kg ›</button>` : ''}
       ${(() => { const p = state.data.safety?.batches?.[b.id]; return p ? `<button class="btn quiet sm" data-do="fs-batch" data-id="${b.id}" style="padding:0;min-height:30px;text-decoration:none;color:${p.failed.length ? 'var(--bad)' : 'var(--gold-2)'}">Safety record: ${p.failed.length ? 'check failed' : p.done + ' of ' + p.total + ' done'} ›</button>` : ''; })()}
       <div class="btns mt"><button class="btn sec2" data-do="batch" data-id="${b.id}">Details</button>
@@ -627,6 +622,49 @@ function viewBatches() {
   if (closed.length) h += `<details class="more"><summary>Finished batches (${closed.length})</summary>${closed.map(batchCard).join('')}</details>`;
   return h;
 }
+
+
+/* ---------- batch timing: when it went in, when to be back ---------- */
+function clockWhen(iso) {
+  const d = new Date(iso), now = new Date();
+  const t = d.toLocaleTimeString('en-NZ', { hour: 'numeric', minute: '2-digit' }).replace(' ', '').toLowerCase();
+  const day = new Date(d.toDateString()), today = new Date(now.toDateString());
+  const diff = Math.round((day - today) / 864e5);
+  return diff === 0 ? `${t} today` : diff === 1 ? `${t} tomorrow` : diff === -1 ? `${t} yesterday` : `${d.toLocaleDateString('en-NZ', { weekday: 'short' })} ${t}`;
+}
+function untilText(iso) {
+  const ms = new Date(iso) - Date.now();
+  if (ms <= 0) return 'Ready now';
+  const mins = Math.ceil(ms / 6e4), h = Math.floor(mins / 60), m = mins % 60;
+  return `in ${h ? h + ' h' : ''}${h && m ? ' ' : ''}${m || !h ? m + ' min' : ''}`;
+}
+function sinceText(iso) {
+  const h = (Date.now() - new Date(iso)) / 36e5;
+  return h < 1 ? `${Math.round(h * 60)} min so far` : `${Math.floor(h)} h so far · day ${Math.floor(h / 24) + 1}`;
+}
+function batchTimes(b) {
+  const t = state.data.safety?.batches?.[b.id]?.times || {};
+  const minH = state.safety?.settings?.limits?.marinateMinH ?? 10;
+  const mStart = t.marinate_start || b.marinate_at, dStart = t.drying_start || b.drying_at;
+  const row = (label, value, chip) => `<div class="between" style="padding:5px 0"><span class="muted small">${label}</span><span class="row" style="gap:8px"><b class="small">${value}</b>${chip || ''}</span></div>`;
+  if (b.status === 'marinating') {
+    if (!mStart) return `<div class="timebox"><button class="btn quiet sm" data-do="batch" data-id="${b.id}" style="padding:0;min-height:26px">Add the time it went into the marinade ›</button></div>`;
+    const ready = new Date(new Date(mStart).getTime() + minH * 36e5).toISOString();
+    return `<div class="timebox">${row('Into the marinade', clockWhen(mStart))}
+      ${row(`Out from (${minH} h)`, clockWhen(ready), `<span class="chip ${new Date(ready) <= new Date() ? 'ok' : 'gold'}" data-until="${ready}">${untilText(ready)}</span>`)}</div>`;
+  }
+  if (b.status === 'drying') {
+    if (!dStart) return `<div class="timebox"><button class="btn quiet sm" data-do="batch" data-id="${b.id}" style="padding:0;min-height:26px">Add the time it went on the dryer ›</button></div>`;
+    return `<div class="timebox">${row('On the dryer', clockWhen(dStart))}${row('Drying', `<span data-since="${dStart}">${sinceText(dStart)}</span>`)}</div>`;
+  }
+  if (b.status === 'ready' && t.drying_end) return `<div class="timebox">${row('Off the dryer', clockWhen(t.drying_end))}</div>`;
+  return '';
+}
+// Keep the countdowns current while the app is open.
+setInterval(() => {
+  $$('[data-until]').forEach(el => { el.textContent = untilText(el.dataset.until); if (new Date(el.dataset.until) <= new Date()) el.className = 'chip ok'; });
+  $$('[data-since]').forEach(el => { el.textContent = sinceText(el.dataset.since); });
+}, 30000);
 
 /* ================================================================== NUMBERS */
 function viewNumbers() {
@@ -938,7 +976,11 @@ async function sheetBatch(id) {
       <div class="packrow" style="margin-top:0"><span class="muted">Raw kg</span><input class="in" name="rawKg" inputmode="decimal" value="${b.raw_kg}"></div>
       <div class="packrow" style="margin-top:8px"><span class="muted">Dried kg</span><input class="in" name="driedKg" inputmode="decimal" value="${b.dried_kg ?? ''}"></div>
       <div class="packrow" style="margin-top:8px"><span class="muted">Meat cost $</span><input class="in" name="meatCost" inputmode="decimal" value="${b.meat_cost_cents != null ? (b.meat_cost_cents / 100).toFixed(2) : ''}"></div>
-      ${dateRow('Started', 'startedOn', b.started_on)}${dateRow('Hung to dry', 'dryingOn', b.drying_on)}${dateRow('Ready', 'readyOn', b.ready_on)}
+      ${dateRow('Started', 'startedOn', b.started_on)}
+      <div class="packrow" style="margin-top:8px"><span class="muted">Into marinade at</span><input class="in" type="datetime-local" name="marinateAt" value="${b.marinate_at ? toLocalInput(b.marinate_at) : ''}"></div>
+      ${dateRow('Hung to dry', 'dryingOn', b.drying_on)}
+      <div class="packrow" style="margin-top:8px"><span class="muted">On the dryer at</span><input class="in" type="datetime-local" name="dryingAt" value="${b.drying_at ? toLocalInput(b.drying_at) : ''}"></div>
+      ${dateRow('Ready', 'readyOn', b.ready_on)}
       ${b.packed_on ? dateRow('Packed', 'packedOn', b.packed_on) + dateRow('Best before', 'bestBefore', b.best_before) : ''}
       <label class="f">Notes</label><textarea class="in" name="notes">${esc(b.notes || '')}</textarea>
       <button class="btn sec2 full mt" id="saveB">Save details</button><div class="err"></div>
@@ -956,6 +998,7 @@ async function sheetBatch(id) {
   $('#saveB', root).onclick = e => {
     const fields = {};
     for (const n of ['rawKg', 'driedKg', 'meatCost', 'startedOn', 'dryingOn', 'readyOn', 'packedOn', 'bestBefore', 'notes']) { const i = $(`[name=${n}]`, root); if (i) fields[n] = i.value; }
+    for (const n of ['marinateAt', 'dryingAt']) { const i = $(`[name=${n}]`, root); if (i) fields[n] = i.value ? new Date(i.value).toISOString() : ''; }
     act({ action: 'batch-update', id, fields }, { btn: e.target, errEl: $('#editBox .err', root) });
   };
 }

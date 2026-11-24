@@ -168,6 +168,12 @@ const MIGRATIONS = [
     customer       text
   );
   CREATE INDEX IF NOT EXISTS order_finance_at_idx ON order_finance (at);
+  `,
+  // 4 — exact times a batch went into the marinade and onto the dryer
+  `
+  ALTER TABLE batches ADD COLUMN IF NOT EXISTS marinate_at timestamptz;
+  ALTER TABLE batches ADD COLUMN IF NOT EXISTS drying_at timestamptz;
+  UPDATE batches SET marinate_at = created_at WHERE marinate_at IS NULL AND status = 'marinating';
   `
 ];
 

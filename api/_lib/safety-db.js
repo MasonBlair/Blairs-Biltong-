@@ -176,11 +176,16 @@ export async function safetySummary(batchIds = []) {
   const { rows: oc } = await q(`SELECT id, batch_id, data, at FROM fs_records WHERE kind = 'corrective' AND ${CUR}
                                   AND COALESCE((data->>'closed')::boolean, false) = false ORDER BY at DESC`);
   const { rows: secs } = batchIds.length
-    ? await q(`SELECT batch_id, section, pass, result FROM fs_records WHERE kind = 'batch' AND batch_id = ANY($1) AND ${CUR}`, [batchIds])
+    ? await q(`SELECT batch_id, section, pass, result, at FROM fs_records WHERE kind = 'batch' AND batch_id = ANY($1) AND ${CUR}`, [batchIds])
     : { rows: [] };
   const byBatch = {};
   for (const r of secs) (byBatch[r.batch_id] ||= {})[r.section] = r;
-  const batches = Object.fromEntries(batchIds.map(id => [id, batchProgress(byBatch[id] || {})]));
+  const batches = Object.fromEntries(batchIds.map(id => {
+    const S = byBatch[id] || {};
+    // When each step was recorded, so the batch card can say when to be back.
+    const times = Object.fromEntries(['marinate_start', 'marinate_end', 'drying_start', 'drying_end'].filter(k => S[k]).map(k => [k, S[k].at]));
+    return [id, { ...batchProgress(S), times }];
+  }));
   // Failed checks that haven't been dealt with: no action written on them and
   // no corrective action record logged since.
   const { rows: fails } = await q(`SELECT f.id, f.kind, f.section, f.batch_id, f.at, f.result FROM fs_records f

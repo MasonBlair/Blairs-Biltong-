@@ -99,11 +99,20 @@ export async function overview() {
     lots: lotRows.filter(l => l.sku === p.sku).map(l => ({ batchId: l.batch_id, code: l.code, qty: l.qty, bestBefore: l.best_before }))
   }));
 
+  // All batch costs in one go (meat + supplies used), rather than one query per batch.
+  const { rows: costRows } = batchRows.length ? await q(
+    `SELECT batch_id, COALESCE(SUM(-qty * COALESCE(cost_cents,0)),0)::float AS cents, BOOL_OR(cost_cents IS NULL) AS missing
+       FROM supply_moves WHERE batch_id = ANY($1) GROUP BY batch_id`, [batchRows.map(b => b.id)]) : { rows: [] };
+  const costOf = b => {
+    const c = costRows.find(r => r.batch_id === b.id) || { cents: 0, missing: false };
+    return { meat: b.meat_cost_cents ?? null, supplies: Math.round(c.cents), total: (b.meat_cost_cents ?? 0) + Math.round(c.cents),
+      complete: b.meat_cost_cents != null, missingSupplyCosts: Boolean(c.missing) };
+  };
   const batches = await Promise.all(batchRows.map(async b => {
     const packedBags = Object.values(b.packed).reduce((a, n) => a + n, 0);
     const packedGrams = Object.entries(b.packed).reduce((a, [g, n]) => a + g * n, 0);
     const remainingBags = Object.values(b.remaining).reduce((a, n) => a + Math.max(0, n), 0);
-    const cost = await batchCost({ query: q }, b.id);
+    const cost = costOf(b);
     return {
       ...b, packedBags, packedGrams, remainingBags,
       yieldPct: packedGrams && b.raw_kg ? Math.round(packedGrams / (b.raw_kg * 10)) : null,

@@ -1203,9 +1203,9 @@ function fieldHtml(f, v) {
       const L = limitFor(f);
       const lim = L ? `${L.max != null ? (L.strict ? 'below ' : '≤ ') + L.max : '≥ ' + L.min}${f.unit && f.unit !== '°C' ? ' ' + f.unit : f.unit ? ' °C' : ''}` : '';
       if (f.big) return `<label class="f">${esc(f.label)}${lim ? ` <span class="lim">limit ${lim}</span>` : ''}</label>
-        <div class="bignum" data-numwrap="${f.k}"><button type="button" data-nudge="-0.5" aria-label="Lower">−</button>
+        <div class="bignum" data-numwrap="${f.k}"><button type="button" data-nudge="${f.unit === '°C' ? -0.1 : -0.5}" aria-label="Lower">−</button>
         <input data-k="${f.k}" inputmode="decimal" value="${esc(v ?? '')}" placeholder="0.0"><span class="u">${esc(f.unit || '')}</span>
-        <button type="button" data-nudge="0.5" aria-label="Higher">+</button></div><div class="live" data-live="${f.k}"></div>`;
+        <button type="button" data-nudge="${f.unit === '°C' ? 0.1 : 0.5}" aria-label="Higher">+</button></div><div class="live" data-live="${f.k}"></div>`;
       return `<label class="f" for="${id}">${esc(f.label)}${lim ? ` <span class="lim">limit ${lim}</span>` : ''}</label>
         <div class="numrow" data-numwrap="${f.k}"><input class="in" id="${id}" data-k="${f.k}" inputmode="${f.dec ? 'decimal' : 'numeric'}" value="${esc(v ?? '')}">${f.unit ? `<span class="u">${esc(f.unit)}</span>` : ''}<span class="live" data-live="${f.k}"></span></div>`;
     }
@@ -1375,12 +1375,13 @@ async function sheetFsForm(opts) {
       }
       const body = { action: 'fs-save', kind, section, batchId: kind === 'corrective' ? ($('[data-batch]', root).value || null) : batchId, data,
         at: new Date($('[data-at]', root).value).toISOString(), replaces: existing?.id, reason: $('[data-reason]', root)?.value };
-      btn.disabled = true;
+      btn.disabled = true; const label = btn.innerHTML; btn.textContent = 'Saving…';
       const r = await post(body);
-      btn.disabled = false;
+      btn.disabled = false; btn.innerHTML = label;
       if (!r.ok) { err.textContent = r.data.error || 'Couldn’t save that.'; return; }
       const rec = r.data.record;
-      await Promise.all([loadSafety(), loadBoss()]); render();
+      // Move on straight away; the rest of the app refreshes in the background.
+      Promise.all([loadSafety(), loadBoss()]).then(render);
       if (rec.pass === false && kind !== 'corrective' && !(data.action || '').trim()) {
         toast('Saved. A limit wasn’t met.', true);
         // Straight into the corrective action, filled in with what failed.

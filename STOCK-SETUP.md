@@ -7,6 +7,7 @@ Lives behind the Dispatch app (`/dispatch.html`), same password. Tabs:
 - **Stock**: bags per flavour and size (tap one for batch breakdown, history and settings), Record in / out, Stocktake. **Supplies**: pouches, labels and ingredients, with reorder levels.
 - **Batches**: start a batch, move it through marinate → dry → ready → pack. Packing puts bags into stock with a best-before. Each batch shows yield, weight loss, cost, and who got its bags (for recalls).
 - **Numbers**: sales, weekly chart, what's selling and where, pace per size, next-batch forecast, cost per bag and margin, batch history.
+- **Safety**: food safety records in place of the paper pack. Fridge temps, cleaning, calibration and corrective actions, plus the full 11-section batch record for each batch (receiving → CCP 1 → CCP 2 → release). Checks against your limits are done on the server. Reminders for routine checks show in the app until done or marked not done. Printable records for your verifier, and a full backup.
 - **Settings** (top right): live stock on/off, "only N left", shelf life, alerts, back-in-stock list.
 
 ## How stock moves
@@ -39,3 +40,13 @@ Until step 5, the shop keeps using the `soldOut` flags in `api/_lib/catalogue.js
 - `api/_lib/stock.js`: the stock engine (FIFO by batch, orders, supplies, alerts)
 - `api/_lib/catalogue.js`: flavours, sizes and prices (shared by checkout and stock)
 - `api/_lib/seed.js`: starting supplies and settings for a fresh database
+
+## Food safety records
+
+- Every record is time-stamped and signed with your initials. Corrections save a new version with a reason; the old one is kept. Removing a record marks it "not valid" with a reason. Nothing is ever silently overwritten.
+- Limits (Safety → Safety settings) come from the food control plan: chiller ≤ 5 °C, salt ≥ 30 g/kg, marinating ≥ 10 h, thickest slice ≤ 17 mm, aw below 0.85. Set the **release threshold** (% weight loss) once lab validation gives you the number.
+- A failed check opens a corrective action, filled in with what failed. A batch can't be released while one of its checks failed or a corrective action is open.
+- **Records for your verifier** opens a printable page in Safari (Share → Print, or save as PDF). **Back up everything** downloads every record as a file. Do this every month or so and keep the file.
+- Run paper alongside for a batch or two, and show your verifier before dropping paper.
+
+Files: `api/_lib/safety.js` (forms, limits, checks, reminders), `api/_lib/safety-db.js` (saving, history, printout).

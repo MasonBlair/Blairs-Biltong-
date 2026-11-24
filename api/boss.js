@@ -18,6 +18,10 @@ import {
 } from './_lib/stock.js';
 import { CATALOGUE } from './_lib/catalogue.js';
 import { mailReady, sendMail, wrapEmail, esc } from './_lib/mail.js';
+import {
+  saveRecord, voidRecord, skipReminder, saveFsSettings, safetySummary, safetyView, batchRecord,
+  printToken, readPrintToken, printHtml, exportAll
+} from './_lib/safety-db.js';
 
 const SALE_REASONS = ['online', 'honesty', 'pickup', 'wholesale'];
 const BAG_SIZES = Object.keys(meta.SIZES).map(Number);
@@ -34,10 +38,23 @@ const fail = m => { throw new UserError(m); };
 
 /* ========================================================================= GET */
 export async function GET(request) {
+  const url = new URL(request.url);
+  // Verifier printout / backup: opened in Safari from a short-lived signed link.
+  if (url.searchParams.get('print') || url.searchParams.get('export')) {
+    const t = readPrintToken(url.searchParams.get('print') || url.searchParams.get('export'));
+    if (!t || !hasDb()) return new Response('This link has expired. Make a new one from the Safety tab.', { status: 403, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    if (url.searchParams.get('print')) {
+      return new Response(await printHtml(t.from, t.to), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
+    }
+    return new Response(JSON.stringify(await exportAll(), null, 1), { headers: {
+      'Content-Type': 'application/json', 'Cache-Control': 'no-store',
+      'Content-Disposition': `attachment; filename="blairs-biltong-backup-${todayNZ()}.json"` } });
+  }
   if (!authorised(request)) return json({ error: 'Wrong password' }, 401);
   if (!hasDb()) return json({ error: 'no_db' }, 503);
   try {
-    const url = new URL(request.url);
+    if (url.searchParams.get('safety')) return json(await safetyView());
+    if (url.searchParams.get('record')) return json(await batchRecord(int(url.searchParams.get('record'))));
     if (url.searchParams.get('batch')) return json(await batchDetail(int(url.searchParams.get('batch'))));
     if (url.searchParams.get('sku')) return json(await skuDetail(url.searchParams.get('sku')));
     if (url.searchParams.get('supply')) return json(await supplyDetail(int(url.searchParams.get('supply'))));
@@ -93,14 +110,15 @@ export async function overview() {
   }));
 
   const numbers = buildNumbers({ today, sales, products, batches, settings: s });
-  const alerts = buildAlerts({ today, products, batches, supplies, settings: s, numbers });
+  const safety = await safetySummary(batches.map(b => b.id));
+  const alerts = buildAlerts({ today, products, batches, supplies, settings: s, numbers, safety });
 
   return {
     today, settings: s, mailReady: mailReady(),
     flavours: Object.entries(meta.FLAVOURS).map(([id, f]) => ({ id, label: f.label })),
     sizes: BAG_SIZES.map(g => ({ grams: g, label: meta.SIZE_LABELS[g], cents: meta.SIZES[g] })),
     reasons: { out: OUT_REASONS, in: IN_REASONS, labels: REASON_LABELS },
-    products, batches, supplies, numbers, alerts,
+    products, batches, supplies, numbers, alerts, safety,
     recent: recent.map(m => ({ ...m, label: skuLabel(m.sku), reasonLabel: REASON_LABELS[m.reason] || m.reason })),
     waitlist: Object.fromEntries(wl.map(r => [r.flavour, r.n]))
   };
@@ -173,8 +191,18 @@ function buildNumbers({ today, sales, products, batches, settings }) {
   };
 }
 
-function buildAlerts({ today, products, batches, supplies, settings, numbers }) {
+function buildAlerts({ today, products, batches, supplies, settings, numbers, safety }) {
   const out = [];
+  for (const c of safety?.openCorrective || []) out.push({ level: 'bad', tab: 'safety', text: `Open corrective action: ${String(c.what || '').slice(0, 70)}` });
+  for (const f of safety?.recentFails || []) {
+    if (f.kind === 'corrective') continue;
+    const b = batches.find(x => x.id === f.batch_id);
+    out.push({ level: 'bad', tab: 'safety', text: `${b ? b.code + ': ' : ''}${f.fails[0] || 'A check failed'}` });
+  }
+  for (const b of batches) {
+    const p = safety?.batches?.[b.id];
+    if (b.status === 'packed' && p && !p.released && b.remainingBags > 0) out.push({ level: 'warn', tab: 'safety', text: `${b.code} is in stock but its batch record isn’t released yet.` });
+  }
   if (!settings.live) out.push({ level: 'info', tab: 'stock', text: 'Shop isn’t using these numbers yet. Do a stocktake, then turn on live stock in Settings.' });
   // A whole flavour out gets one line, not one per bag size.
   const flavourOut = {};
@@ -438,6 +466,16 @@ const ACTIONS = {
     return { msg: 'Settings saved' };
   },
 
+  /* ---- food safety records ---- */
+  async 'fs-save'(c, b) {
+    const r = await saveRecord(c, b, fail);
+    const msg = r.pass === false ? 'Saved. A limit wasn’t met.' : r.pass === null && r.missing?.length ? 'Saved. Some parts still to do.' : 'Saved';
+    return { msg, record: r };
+  },
+  async 'fs-void'(c, b) { return voidRecord(c, b, fail); },
+  async 'fs-skip'(c, b) { return skipReminder(c, b, fail); },
+  async 'fs-settings'(c, b) { return saveFsSettings(c, b, fail); },
+
   async 'waitlist-remove'(c, b) {
     await c.query('DELETE FROM waitlist WHERE id = $1', [int(b.id)]);
     return { msg: 'Removed' };
@@ -502,6 +540,12 @@ export async function POST(request) {
     if (body.action === 'waitlist-send') return json(await waitlistSend(body));
     if (body.action === 'waitlist-list') return json(await waitlistList());
     if (body.action === 'sync-orders') return json(await syncOrders());
+    if (body.action === 'fs-print-link' || body.action === 'fs-export-link') {
+      const from = isDate(body.from) ? body.from : addDays(todayNZ(), -30), to = isDate(body.to) ? body.to : todayNZ();
+      const site = (process.env.SITE_URL || new URL(request.url).origin).replace(/\/+$/, '');
+      const param = body.action === 'fs-print-link' ? 'print' : 'export';
+      return json({ url: `${site}/api/boss?${param}=${encodeURIComponent(printToken(from, to))}` });
+    }
     if (body.action === 'test-alert') {
       const r = await sendMail({ subject: 'Test alert from your dashboard', html: wrapEmail('Alerts are working', ['<p>Low-stock and reorder alerts will arrive like this.</p>']), text: 'Alerts are working.' });
       if (!r.ok) fail(r.error);

@@ -130,6 +130,27 @@ const MIGRATIONS = [
     notified_at timestamptz,
     UNIQUE (email, flavour)
   );
+  `,
+  // 2 — food safety records (batch record, chiller, cleaning, calibration, corrective actions)
+  `
+  CREATE TABLE IF NOT EXISTS fs_records (
+    id         bigserial PRIMARY KEY,
+    kind       text NOT NULL,            -- batch | chiller | cleaning | calibration | corrective | skip
+    section    text,                     -- for batch records: receiving, slicing, marinate_start…
+    batch_id   int REFERENCES batches(id),
+    at         timestamptz NOT NULL,     -- when it was done
+    data       jsonb NOT NULL DEFAULT '{}',
+    pass       boolean,                  -- true ok · false limit failed · null unfinished / n.a.
+    result     jsonb NOT NULL DEFAULT '{}',   -- fails, notes, missing, worked-out values
+    initials   text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    replaces   bigint REFERENCES fs_records(id),   -- the version this one corrects
+    superseded boolean NOT NULL DEFAULT false,      -- a newer version exists
+    void       boolean NOT NULL DEFAULT false,
+    reason     text                                 -- why it was corrected or voided
+  );
+  CREATE INDEX IF NOT EXISTS fs_kind_at_idx ON fs_records (kind, at);
+  CREATE INDEX IF NOT EXISTS fs_batch_idx   ON fs_records (batch_id, section);
   `
 ];
 

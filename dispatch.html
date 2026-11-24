@@ -45,7 +45,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,2
   border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:var(--sab)}
 nav.tabs .in{display:flex;width:100%;max-width:680px}
 nav.tabs button{flex:1;height:var(--tab-h);border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:var(--faint);font:500 11px/1 'Barlow',sans-serif;letter-spacing:.02em;position:relative}
+  color:var(--faint);font:500 10.5px/1 'Barlow',sans-serif;letter-spacing:0;position:relative;min-width:0}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--ink)}
 nav.tabs button[aria-current="page"]::before{content:'';position:absolute;top:0;left:28%;right:28%;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
@@ -201,7 +201,7 @@ details.more[open]>summary::after{content:' −'}
 .sheet .sh-h h3{margin:6px 0 0;font:600 17px/1.2 'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase;flex:1}
 .sheet .sh-h .icon-btn{color:var(--muted);margin-top:4px}
 .sheet .sh-b{overflow:auto;padding:16px 16px calc(20px + var(--sab));-webkit-overflow-scrolling:touch}
-.sheet .sh-f{position:sticky;bottom:0;background:var(--bg);padding-top:14px}
+.sheet .sh-f{position:sticky;bottom:calc(-20px - var(--sab));background:var(--bg);padding:14px 0 calc(20px + var(--sab));margin-top:10px;box-shadow:0 -10px 14px -10px rgba(36,27,19,.18)}
 
 .toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + var(--sab) + 14px);transform:translate(-50%,20px);z-index:60;background:var(--ink);color:var(--cream);
   border-radius:12px;padding:12px 14px 12px 16px;font-size:14px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:.22s;max-width:calc(100% - 28px);box-shadow:0 8px 24px rgba(21,14,7,.25)}
@@ -209,6 +209,60 @@ details.more[open]>summary::after{content:' −'}
 .toast.bad{background:var(--bad)}
 .toast button{border:0;background:none;color:var(--gold);font:600 13px/1 'Oswald',sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:4px}
 
+
+/* ---------- safety records ---------- */
+.due{border-color:#e7c48b;background:#fdf6e9;padding:4px 14px}
+.due-it{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid rgba(154,97,20,.15)}
+.due-it:first-child{border-top:0}
+.due-it .main{flex:1;min-width:0}.due-it .t{font-weight:600}.due-it .d{font-size:12.5px;color:var(--warn)}
+.due-it .btn.quiet{min-height:36px;padding:0 4px;font-size:13px}
+.qlog{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-height:108px}
+.qlog:active{background:#fbf6ec}
+.qlog .ql-i{width:36px;height:36px;border-radius:10px;background:var(--gold-soft);color:var(--gold-2);display:grid;place-items:center;margin-bottom:6px}
+.qlog .ql-i svg{width:21px;height:21px}
+.qlog .ql-t{font:600 15px/1.2 'Oswald',sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.qlog .ql-s{font-size:12.5px;color:var(--muted);line-height:1.3}
+.qlog.warnb{border-color:#e9bfb6}.qlog.warnb .ql-i{background:var(--bad-soft);color:var(--bad)}.qlog.warnb .ql-s{color:var(--bad);font-weight:600}
+svg.spark{width:100%;height:auto;display:block;margin-bottom:6px}
+.tick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;margin-top:8px;font-size:15px;line-height:1.35}
+.tick .box{width:28px;height:28px;border-radius:8px;border:2px solid #cbbda3;display:grid;place-items:center;flex-shrink:0;color:transparent;transition:.15s}
+.tick .box svg{width:18px;height:18px}
+.tick.on{border-color:#c9a878;background:#fdf8ef}
+.tick.on .box{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
+.crit{display:inline-block;font:600 10px/1 'Barlow',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--bad);background:var(--bad-soft);padding:3px 6px;border-radius:6px;vertical-align:2px;margin-left:4px}
+.lim{font:500 11.5px/1 'Barlow',sans-serif;letter-spacing:0;text-transform:none;color:var(--faint)}
+.numrow{display:flex;align-items:center;gap:8px}.numrow .in{max-width:140px;font-size:17px;font-weight:600}
+.numrow .u{color:var(--muted);font-size:14px}
+.numrow.bad .in{border-color:var(--bad);background:#fdf3f1}.numrow.ok .in{border-color:#a9c4a2}
+.live{font-size:12.5px;font-weight:600;margin-left:auto}.live.ok{color:var(--ok)}.live.bad{color:var(--bad)}
+div.live{margin-top:8px;text-align:center}
+.bignum{display:flex;align-items:center;background:#fff;border:2px solid var(--line-2);border-radius:16px;overflow:hidden;height:84px}
+.bignum button{width:72px;height:100%;border:0;background:#faf6ee;font-size:28px}
+.bignum input{flex:1;min-width:0;border:0;text-align:right;font:600 44px/1 'Oswald',sans-serif;background:transparent;padding:0}
+.bignum input:focus{outline:none}.bignum .u{font:500 20px/1 'Oswald',sans-serif;color:var(--muted);padding:0 14px 0 4px}
+.bignum.ok{border-color:#86ad7e;background:#f6faf4}.bignum.bad{border-color:var(--bad);background:#fdf3f1}
+.info-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;background:var(--gold-soft);border-radius:10px;padding:11px 13px;margin-top:12px;font-size:14px}
+.info-row b{text-align:right}
+.clist{background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:6px 12px 8px}
+.cl-head,.cl-row{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;gap:6px}
+.cl-head{font:600 10.5px/1 'Oswald',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;padding:6px 0}
+.cl-row{padding:7px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.3}
+.mini{width:36px;height:36px;margin:0 auto;border-radius:9px;border:2px solid #cbbda3;background:#fff;color:transparent;display:grid;place-items:center}
+.mini svg{width:20px;height:20px}.mini.on{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
+span.mini{width:24px;height:24px;border-radius:7px;margin:0;flex-shrink:0}span.mini svg{width:15px;height:15px}span.mini.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.slices{background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:6px 10px}
+.sl-h,.sl-r{display:grid;grid-template-columns:22px 1fr 1fr 1fr 58px;gap:6px;align-items:center}
+.sl-h{font:600 10.5px/1 'Oswald',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 0;text-align:center}
+.sl-r{padding:4px 0;border-top:1px solid var(--line)}.sl-r .n{font-size:12px;color:var(--faint);text-align:center}
+.sl-r input{width:100%;height:38px;border:1px solid var(--line-2);border-radius:8px;text-align:center;font-size:16px;min-width:0;padding:0}
+.sl-r input:focus{outline:2px solid var(--gold);border-color:transparent}
+.loss{font:600 14px/1 'Oswald',sans-serif;text-align:center}.loss.ok{color:var(--ok)}.loss.bad{color:var(--bad)}
+.sdot{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;flex-shrink:0;font:600 12px/1 'Oswald',sans-serif;color:var(--faint);background:#fff}
+.sdot svg{width:16px;height:16px}.sdot.ok{background:var(--ok);border-color:var(--ok);color:#fff}.sdot.bad{background:var(--bad);border-color:var(--bad);color:#fff;font-size:15px}.sdot.part{background:var(--warn-soft);border-color:#e7c48b;color:var(--warn)}
+.rel{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:14px;color:var(--muted)}.rel.ok{color:var(--ink)}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.kv:first-child{border-top:0}.kv>span:last-child{text-align:right}
+.choices.days button{min-width:44px;padding:0 10px}
+.sheet .sh-h .back{margin:4px -4px 0 -6px;color:var(--ink)}
 /* ---------- login ---------- */
 #login{max-width:380px;margin:9vh auto 0}
 #login .card{padding:22px}
@@ -243,12 +297,13 @@ details.more[open]>summary::after{content:' −'}
   <button data-tab="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h11v10h-11z"/><path d="M13.5 10h4l3 3.2v3.3h-7"/><circle cx="6.5" cy="17.8" r="1.8"/><circle cx="17" cy="17.8" r="1.8"/></svg>Orders<span class="badge hide" id="shipBadge"></span></button>
   <button data-tab="stock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>Stock</button>
   <button data-tab="batches"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 8.5 4.5-8.5 4.5L3.5 8z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5"/><path d="m3.5 16.5 8.5 4 8.5-4"/></svg>Batches</button>
+  <button data-tab="safety"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19.5 6v5.6c0 4.4-3.1 8.1-7.5 9.2-4.4-1.1-7.5-4.8-7.5-9.2V6z"/><path d="m8.8 12.2 2.3 2.3 4.3-4.6"/></svg>Safety<span class="badge hide" id="fsBadge"></span></button>
   <button data-tab="numbers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20.5h18"/><path d="M6 20.5v-7M11 20.5V6.5M16 20.5v-10M20.5 20.5V3.5" /></svg>Numbers</button>
 </div></nav>
 
 <div class="scrim hide" id="scrim"></div>
 <div class="sheet hide" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
-  <div class="sh-h"><h3 id="shTitle"></h3><button class="icon-btn" data-do="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="sh-h"><button class="icon-btn back hide" id="shBack" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><h3 id="shTitle"></h3><button class="icon-btn" data-do="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="sh-b" id="shBody"></div>
 </div>
 <div class="toast" id="toast" role="status"><span id="toastText"></span><button id="toastAct" class="hide"></button></div>
@@ -278,7 +333,13 @@ const ago = iso => {
 };
 const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
-const TITLES = { today: 'Today', orders: 'Orders', stock: 'Stock', batches: 'Batches', numbers: 'Numbers' };
+const TITLES = { today: 'Today', orders: 'Orders', stock: 'Stock', batches: 'Batches', safety: 'Safety', numbers: 'Numbers' };
+const ICON = {
+  temp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 4.5a2 2 0 0 1 4 0v9.3a4 4 0 1 1-4 0z"/><path d="M12 10v6"/></svg>',
+  clean: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20l1.5-7h7L17 20"/><path d="M10 13V5a2 2 0 0 1 4 0v8"/></svg>',
+  gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.5 17a8 8 0 1 1 15 0"/><path d="m12 13 3.5-4"/><circle cx="12" cy="13.5" r="1.3"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 21 19.5H3z"/><path d="M12 10v4.5M12 17.2v.1"/></svg>'
+};
 const STATUS = { marinating: 'Marinating', drying: 'Drying', ready: 'Ready to pack', packed: 'Packed', closed: 'Closed' };
 const STEP = { marinating: 0, drying: 1, ready: 2, packed: 3, closed: 3 };
 const AUTO_USE = { '': 'Not automatic', 'raw-kg': 'Per kg of raw meat', 'bag-50': 'Each 50 g bag', 'bag-100': 'Each 100 g bag', 'bag-200': 'Each 200 g bag', 'bag-100+': 'Each 100 g and 200 g bag', 'bag-any': 'Every bag' };
@@ -318,6 +379,7 @@ async function loadAll(first) {
   const okBoss = await loadBoss();
   if (okBoss === false) { state.loading = false; $('#refresh').classList.remove('spin'); return; }
   showApp(); render();
+  if (state.data) loadSafety();
   await loadOrders();
   $('#refresh').classList.remove('spin'); state.loading = false;
   // Catch any paid orders the webhook missed, then refresh if it found some.
@@ -345,7 +407,9 @@ function render() {
   if (state.tab === 'orders') { v.innerHTML = viewOrders(); return; }
   if (state.noDb) { v.innerHTML = setupCard(); return; }
   if (!state.data) { v.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
-  v.innerHTML = { today: viewToday, stock: viewStock, batches: viewBatches, numbers: viewNumbers }[state.tab]();
+  v.innerHTML = { today: viewToday, stock: viewStock, batches: viewBatches, safety: viewSafety, numbers: viewNumbers }[state.tab]();
+  const fsN = (state.data.safety?.due.length || 0) + (state.data.safety?.openCorrective.length || 0);
+  $('#fsBadge').textContent = fsN; $('#fsBadge').classList.toggle('hide', !fsN);
 }
 
 function setupCard() {
@@ -362,7 +426,7 @@ function viewToday() {
   const bags = d.products.reduce((a, p) => a + Math.max(0, p.onHand), 0);
   const inProg = d.batches.filter(b => ['marinating', 'drying', 'ready'].includes(b.status));
   const fc = n.forecast;
-  let h = `<div class="hello">${D(d.today).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+  let h = `<div class="hello">${D(d.today).toLocaleDateString('en-NZ', { weekday: 'long', day: 'numeric', month: 'long' })}</div>${dueCard()}
   <div class="grid2">
     <button class="stat" data-tab-go="orders"><span class="k">To ship</span><span class="v">${toShip == null ? '…' : toShip}</span><span class="s">${toShip ? 'Posted orders waiting' : 'All caught up'}</span></button>
     <button class="stat" data-tab-go="numbers"><span class="k">Last 7 days</span><span class="v">${money0(n.d7.cents)}</span><span class="s">${plural(n.d7.units, 'bag')} sold</span></button>
@@ -529,6 +593,7 @@ function batchCard(b) {
     body = `<div class="steps">${[0, 1, 2, 3].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>
       <div class="steps-l">${['Marinate', 'Dry', 'Ready', 'Packed'].map((l, i) => `<span class="${i === step ? 'on' : ''}">${l}</span>`).join('')}</div>
       <div class="small muted mt">${n1(b.raw_kg)} kg raw${b.cut ? ' ' + esc(b.cut.toLowerCase()) : ''} · started ${shortDate(b.started_on)}${since}</div>
+      ${(() => { const p = state.data.safety?.batches?.[b.id]; return p ? `<button class="btn quiet sm" data-do="fs-batch" data-id="${b.id}" style="padding:0;min-height:30px;text-decoration:none;color:${p.failed.length ? 'var(--bad)' : 'var(--gold-2)'}">Safety record: ${p.failed.length ? 'check failed' : p.done + ' of ' + p.total + ' done'} ›</button>` : ''; })()}
       <div class="btns mt"><button class="btn sec2" data-do="batch" data-id="${b.id}">Details</button>
       <button class="btn" data-do="${next[1] === 'pack' ? 'pack' : 'advance'}" data-id="${b.id}" data-to="${next[1]}">${next[0]}</button></div>`;
   } else {
@@ -622,8 +687,9 @@ function viewNumbers() {
 
 /* ================================================================== SHEETS */
 let sheetOnClose = null;
-function openSheet(title, html, onMount) {
+function openSheet(title, html, onMount, back) {
   $('#shTitle').textContent = title; $('#shBody').innerHTML = html; $('#shBody').scrollTop = 0;
+  const bk = $('#shBack'); bk.classList.toggle('hide', !back); bk.onclick = back || null;
   $('#scrim').classList.remove('hide'); $('#sheet').classList.remove('hide');
   requestAnimationFrame(() => { $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); });
   document.body.style.overflow = 'hidden';
@@ -652,6 +718,7 @@ async function act(body, { close = true, btn, errEl } = {}) {
   if (close) closeSheet();
   toast(r.data.msg || 'Saved');
   await refreshBoss();
+  if (state.safety && String(body.action).startsWith('fs-')) await loadSafety();
   return r.data;
 }
 
@@ -765,6 +832,7 @@ function sheetPack(id) {
   const bbFrom = s => { const x = new Date(s + 'T12:00:00Z'); x.setUTCMonth(x.getUTCMonth() + months); return x.toISOString().slice(0, 10); };
   openSheet(`Pack ${b.code}`, `
     <p class="muted small" style="margin:0">${n1(b.raw_kg)} kg raw · ${esc(d.flavours.find(f => f.id === b.flavour)?.label)}</p>
+    ${(() => { const p = d.safety?.batches?.[b.id]; return p && !p.released ? `<div class="note" style="margin-top:10px">Its food safety record isn’t released yet (${p.done} of ${p.total} done). Bags go into stock, but finish the record before selling them. <button type="button" class="btn sm dark" data-do="fs-batch" data-id="${b.id}" style="margin-top:8px">Open record</button></div>` : ''; })()}
     <label class="f">Bags packed</label>
     ${d.sizes.map(z => `<div class="packrow"><div><b>${z.grams} g</b> <span class="muted small">${esc(z.label)}</span></div>${stepper('bag' + z.grams, 0)}</div>`).join('')}
     <div class="note info mt" id="packSum">Enter your bag counts.</div>
@@ -809,6 +877,7 @@ async function sheetBatch(id) {
     <div class="between"><span class="chip ${open ? 'gold' : b.status === 'closed' ? 'plain' : 'ok'}">${STATUS[b.status]}</span><span class="small muted">${b.cut ? esc(b.cut) + ' · ' : ''}started ${niceDate(b.started_on)}</span></div>
     <div class="grid3 mt">${fact('Raw', n1(b.raw_kg) + ' kg')}${fact('Dried', b.dried_kg ? n1(b.dried_kg) + ' kg' : '—')}${fact('Loss', b.lossPct != null ? b.lossPct + '%' : '—')}
       ${fact('Bags', b.packedBags || '—')}${fact('Left', b.packedBags ? b.remainingBags : '—')}${fact('Yield', b.yieldPct != null ? b.yieldPct + '%' : '—')}</div>
+    ${(() => { const p = d.safety?.batches?.[b.id]; return p ? `<button class="btn sec2 full mt" data-do="fs-batch" data-id="${b.id}" style="justify-content:space-between;text-transform:none;letter-spacing:0;font:600 15px/1 Barlow,sans-serif"><span>Food safety record</span><span class="chip ${p.released ? 'ok' : p.failed.length ? 'bad' : 'gold'}">${p.released ? 'Released' : p.failed.length ? 'Check failed' : p.done + ' of ' + p.total}</span></button>` : ''; })()}
     ${open ? `<div class="btns mt">${b.status !== 'ready' ? `<button class="btn sec2" data-do="advance" data-id="${b.id}" data-to="${b.status === 'marinating' ? 'drying' : 'ready'}">${b.status === 'marinating' ? 'Hung to dry' : 'Ready to pack'}</button>` : ''}<button class="btn" data-do="pack" data-id="${b.id}">Pack bags</button></div>` : ''}
 
     ${b.packedBags ? `<label class="f">Packed</label><div class="card mb0">${Object.entries(b.packed).map(([g, n]) =>
@@ -956,6 +1025,506 @@ async function sheetWaitlist() {
      <button class="btn quiet sm" data-do="waitlist-remove" data-id="${w.id}">Remove</button></div>`).join('')}</div>` : '<div class="card empty">Nobody on the list yet.</div>';
 }
 
+/* ================================================================== SAFETY
+   Food safety records: batch record (11 sections), fridge temps, cleaning,
+   calibration, corrective actions, in-app reminders, verifier printout.
+   The checks against your limits are done on the server; the colours you see
+   while typing are just a preview. */
+const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+const BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>';
+const KIND_LABEL = { chiller: 'Fridge temperature', cleaning: 'Cleaning', calibration: 'Calibration', corrective: 'Corrective action', skip: 'Not done', batch: 'Batch record' };
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+async function loadSafety() {
+  const r = await api('/api/boss?safety=1');
+  if (r.ok) { state.safety = r.data; if (state.tab === 'safety') render(); }
+  return r.ok;
+}
+async function ensureSafety() { if (!state.safety) await loadSafety(); return state.safety; }
+const FS = () => state.safety?.settings || { limits: {}, units: ['Chiller'], reminders: [] };
+const timeNow = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+const toLocalInput = iso => { const d = new Date(iso); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+const when = iso => new Date(iso).toLocaleString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const resultChip = r => r.kind === 'corrective' ? `<span class="chip ${r.data?.closed ? 'ok' : 'warn'}">${r.data?.closed ? 'Closed' : 'Open'}</span>`
+  : r.kind === 'skip' ? '<span class="chip plain">Not done</span>'
+  : r.pass === true ? '<span class="chip ok">Pass</span>' : r.pass === false ? '<span class="chip bad">Fail</span>' : '<span class="chip warn">Part done</span>';
+
+/* ---------- due reminders (Today + Safety) ---------- */
+function dueCard() {
+  const due = state.data?.safety?.due || [];
+  if (!due.length) return '';
+  return `<div class="card due">${due.map(d => `<div class="due-it"><div class="main"><div class="t">${esc(d.title)}</div>
+      <div class="d">${d.late < 60 ? 'Due now' : 'Due since ' + when(d.since)}</div></div>
+      <button class="btn sm" data-do="fs-log" data-kind="${d.kind}">Log</button>
+      <button class="btn quiet sm" data-do="fs-skip" data-id="${esc(d.id)}">Not done</button></div>`).join('')}</div>`;
+}
+
+/* ---------- Safety tab ---------- */
+function viewSafety() {
+  const d = state.data, sv = state.safety;
+  if (!sv) { loadSafety(); return '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; }
+  const s = sv.settings;
+  let h = '';
+  if (!s.initials) h += `<div class="note" style="margin-bottom:12px">Add your initials in <b>Safety settings</b> first. They sign every record, like on paper. <button class="btn sm dark" data-do="fs-settings" style="margin-top:8px">Add initials</button></div>`;
+  const due = dueCard();
+  if (due) h += `<div class="sec" style="margin-top:2px"><h2>Due now</h2></div>${due}`;
+
+  const lastOf = k => sv.records.find(r => r.kind === k && !r.void);
+  const lc = lastOf('chiller'), lcl = lastOf('cleaning'), lca = lastOf('calibration');
+  const openCA = d.safety.openCorrective.length;
+  h += `<div class="sec"${due ? '' : ' style="margin-top:2px"'}><h2>Log a check</h2></div>
+  <div class="grid2">
+    <button class="qlog" data-do="fs-log" data-kind="chiller"><span class="ql-i">${ICON.temp}</span><span class="ql-t">Fridge temp</span><span class="ql-s">${lc ? `${esc(lc.data.readingC)} °C · ${ago(lc.at)}` : 'Not logged yet'}</span></button>
+    <button class="qlog" data-do="fs-log" data-kind="cleaning"><span class="ql-i">${ICON.clean}</span><span class="ql-t">Cleaning</span><span class="ql-s">${lcl ? ago(lcl.at) : 'Not logged yet'}</span></button>
+    <button class="qlog" data-do="fs-log" data-kind="calibration"><span class="ql-i">${ICON.gauge}</span><span class="ql-t">Calibration</span><span class="ql-s">${lca ? ago(lca.at) : 'Not logged yet'}</span></button>
+    <button class="qlog ${openCA ? 'warnb' : ''}" data-do="fs-log" data-kind="corrective"><span class="ql-i">${ICON.alert}</span><span class="ql-t">Corrective action</span><span class="ql-s">${openCA ? plural(openCA, 'open record') : 'When something goes wrong'}</span></button>
+  </div>`;
+
+  if (sv.chillerTrend.length > 1) h += `<div class="sec"><h2>Fridge temperatures</h2><span class="small muted">last ${sv.chillerTrend.length}</span></div><div class="card">${spark(sv.chillerTrend, s.limits.chillerMax)}</div>`;
+
+  const open = d.batches.filter(b => b.status !== 'closed').slice(0, 8);
+  h += `<div class="sec"><h2>Batch records</h2></div>`;
+  h += open.length ? `<div class="card flush list">${open.map(b => {
+    const p = d.safety.batches[b.id] || { done: 0, total: 11, failed: [] };
+    const chip = p.released ? '<span class="chip ok">Released</span>' : p.failed.length ? '<span class="chip bad">Check failed</span>' : `<span class="chip gold">${p.total - p.done} to go</span>`;
+    return `<button class="it" data-do="fs-batch" data-id="${b.id}"><span class="main"><span class="t">${esc(b.code)} · ${esc(flavourLabel(b.flavour))}</span>
+      <span class="d">${STATUS[b.status]} · ${p.done} of ${p.total} sections</span><div class="bar ${p.failed.length ? 'bad' : p.released ? 'ok' : ''}" style="margin-top:7px"><i style="width:${p.done / p.total * 100}%"></i></div></span>
+      <span class="end">${chip}</span>${CHEV}</button>`;
+  }).join('')}</div>` : '<div class="card empty">Start a batch in Batches and its record shows up here.</div>';
+
+  if (openCA) h += `<div class="sec"><h2>Open corrective actions</h2></div><div class="card flush list">${d.safety.openCorrective.map(c =>
+    `<button class="it" data-do="fs-record" data-id="${c.id}"><span class="dot bad"></span><span class="main"><span class="t">${esc(String(c.what || '').slice(0, 80))}</span><span class="d">${when(c.at)}</span></span>${CHEV}</button>`).join('')}</div>`;
+
+  const f = state.fsFilter || 'all';
+  const list = sv.records.filter(r => f === 'all' || r.kind === f).slice(0, 40);
+  h += `<div class="sec"><h2>Log book</h2></div>
+    <div class="choices" style="margin-bottom:10px">${[['all', 'All'], ['chiller', 'Fridge'], ['cleaning', 'Cleaning'], ['calibration', 'Calibration'], ['corrective', 'Corrective'], ['skip', 'Not done']].map(([k, l]) =>
+      `<button data-fsfilter="${k}" aria-pressed="${f === k}">${l}</button>`).join('')}</div>`;
+  h += list.length ? `<div class="card flush list">${list.map(logRow).join('')}</div>` : '<div class="card empty">Nothing logged yet.</div>';
+
+  h += `<div class="sec"><h2>Records and settings</h2></div><div class="card flush list">
+    <button class="it" data-do="fs-print"><span class="main"><span class="t">Records for your verifier</span><span class="d">Print or save as PDF, any date range</span></span>${CHEV}</button>
+    <button class="it" data-do="fs-reminders"><span class="main"><span class="t">Reminders</span><span class="d">${s.remindersOn ? plural(s.reminders.filter(r => r.enabled).length, 'reminder') + ' on' : 'Turned off'}</span></span>${CHEV}</button>
+    <button class="it" data-do="fs-settings"><span class="main"><span class="t">Safety settings</span><span class="d">Initials ${esc(s.initials || 'not set')} · fridges · limits</span></span>${CHEV}</button>
+    <button class="it" data-do="fs-backup"><span class="main"><span class="t">Back up everything</span><span class="d">Download all records as a file to keep</span></span>${CHEV}</button>
+  </div>`;
+  return h;
+}
+const flavourLabel = id => state.data.flavours.find(f => f.id === id)?.label || id;
+
+function logRow(r) {
+  let t = KIND_LABEL[r.kind], d = '';
+  if (r.kind === 'chiller') { t = `${r.data.readingC} °C · ${esc(r.data.unit || 'Fridge')}`; d = r.data.action ? 'Action: ' + esc(r.data.action) : ''; }
+  if (r.kind === 'cleaning') d = Object.keys(r.data.areas || {}).filter(k => r.data.areas[k]?.cleaned || r.data.areas[k]?.sanitised).map(esc).join(', ');
+  if (r.kind === 'calibration') { const e = state.safety.schema.calibration.find(c => c.id === r.data.equipment); t = e ? e.label : 'Calibration'; d = e ? `${esc(e.check)} · ${r.data.reading} vs ${r.data.reference} ${e.unit}` : ''; }
+  if (r.kind === 'corrective') { t = esc(String(r.data.what || '').slice(0, 70)); d = r.code ? 'Batch ' + esc(r.code) : ''; }
+  if (r.kind === 'skip') { t = esc(r.data.title); d = 'Reason: ' + esc(r.data.reason); }
+  return `<button class="it" data-do="fs-record" data-id="${r.id}"><span class="main"><span class="t">${t}</span><span class="d">${d ? d + ' · ' : ''}${when(r.at)} · ${esc(r.initials || '')}${r.replaces ? ' · corrected' : ''}</span></span>
+    <span class="end">${resultChip(r)}</span></button>`;
+}
+
+function spark(pts, limit) {
+  const W = 320, H = 86, pad = 8;
+  const vals = pts.map(p => p.c);
+  const lo = Math.min(0, ...vals) - 0.5, hi = Math.max(limit + 1.5, ...vals) + 0.5;
+  const x = i => pad + i * (W - 2 * pad) / Math.max(1, pts.length - 1);
+  const y = v => H - pad - (v - lo) / (hi - lo) * (H - 2 * pad);
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.c).toFixed(1)}`).join('');
+  const last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" class="spark" role="img" aria-label="Recent fridge temperatures">
+    <rect x="0" y="0" width="${W}" height="${y(limit).toFixed(1)}" fill="rgba(154,51,36,.06)"/>
+    <line x1="0" x2="${W}" y1="${y(limit).toFixed(1)}" y2="${y(limit).toFixed(1)}" stroke="#9a3324" stroke-dasharray="4 4" stroke-width="1"/>
+    <text x="${W - 4}" y="${(y(limit) - 4).toFixed(1)}" text-anchor="end" font-size="10" fill="#9a3324">${limit} °C limit</text>
+    <path d="${path}" fill="none" stroke="#b9873c" stroke-width="2" stroke-linejoin="round"/>
+    ${pts.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.c).toFixed(1)}" r="${i === pts.length - 1 ? 4 : 2.6}" fill="${p.c > limit ? '#9a3324' : '#3d6a37'}"/>`).join('')}
+  </svg><div class="between small muted"><span>Latest ${last.c} °C · ${ago(last.at)}</span><span>${vals.filter(v => v > limit).length ? `<b class="bad-t">${vals.filter(v => v > limit).length} over</b>` : 'All within limit'}</span></div>`;
+}
+
+/* ---------- generic form, driven by the schema from the server ---------- */
+function limitFor(f) {
+  if (!f.limit) return null;
+  const L = FS().limits; const k = f.limit.max ?? f.limit.min; const v = L[k];
+  return v == null ? null : { max: f.limit.max ? v : null, min: f.limit.min ? v : null, strict: !!f.limit.strict };
+}
+function optionsFor(f) {
+  if (f.options === 'units') return FS().units.map(u => [u, u]);
+  if (f.options === 'calibration') return state.safety.schema.calibration.map(c => [c.id, `${c.label}: ${c.check}`]);
+  return f.options.map(o => [o, o]);
+}
+function fieldHtml(f, v) {
+  const id = 'f-' + f.k;
+  switch (f.type) {
+    case 'text': return `<label class="f" for="${id}">${esc(f.label)}</label><input class="in" id="${id}" data-k="${f.k}" value="${esc(v ?? '')}" placeholder="${esc(f.placeholder || '')}">`;
+    case 'area': return `<div class="${f.failOnly ? 'fail-only hide' : ''}" data-wrap="${f.k}"><label class="f" for="${id}">${esc(f.label)}</label><textarea class="in" id="${id}" data-k="${f.k}" placeholder="${esc(f.placeholder || '')}">${esc(v ?? '')}</textarea></div>`;
+    case 'time': return `<label class="f" for="${id}">${esc(f.label)}</label><input class="in" type="time" id="${id}" data-k="${f.k}" value="${esc(v ?? '')}">`;
+    case 'info': return `<div class="info-row"><span class="muted">${esc(f.label)}</span><b data-info="${f.k}">—</b></div>`;
+    case 'choice': {
+      const opts = optionsFor(f);
+      return `<label class="f">${esc(f.label)}</label><div class="choices" data-k="${f.k}" data-choice>${opts.map(([val, l]) => `<button type="button" data-v="${esc(val)}" aria-pressed="${String(v) === String(val)}">${esc(l)}</button>`).join('')}</div>`;
+    }
+    case 'tick': return `<button type="button" class="tick ${v === true ? 'on' : ''}" data-k="${f.k}" data-tick aria-pressed="${v === true}"><span class="box">${TICK}</span><span class="lbl">${esc(f.label)}${f.critical ? ' <span class="crit">Critical</span>' : ''}</span></button>`;
+    case 'num': {
+      const L = limitFor(f);
+      const lim = L ? `${L.max != null ? (L.strict ? 'below ' : '≤ ') + L.max : '≥ ' + L.min}${f.unit && f.unit !== '°C' ? ' ' + f.unit : f.unit ? ' °C' : ''}` : '';
+      if (f.big) return `<label class="f">${esc(f.label)}${lim ? ` <span class="lim">limit ${lim}</span>` : ''}</label>
+        <div class="bignum" data-numwrap="${f.k}"><button type="button" data-nudge="-0.5" aria-label="Lower">−</button>
+        <input data-k="${f.k}" inputmode="decimal" value="${esc(v ?? '')}" placeholder="0.0"><span class="u">${esc(f.unit || '')}</span>
+        <button type="button" data-nudge="0.5" aria-label="Higher">+</button></div><div class="live" data-live="${f.k}"></div>`;
+      return `<label class="f" for="${id}">${esc(f.label)}${lim ? ` <span class="lim">limit ${lim}</span>` : ''}</label>
+        <div class="numrow" data-numwrap="${f.k}"><input class="in" id="${id}" data-k="${f.k}" inputmode="${f.dec ? 'decimal' : 'numeric'}" value="${esc(v ?? '')}">${f.unit ? `<span class="u">${esc(f.unit)}</span>` : ''}<span class="live" data-live="${f.k}"></span></div>`;
+    }
+    case 'checklist': {
+      const val = v || {};
+      return `<label class="f">${esc(f.label)}</label><div class="clist" data-k="${f.k}" data-checklist>
+        <div class="cl-head"><span></span>${f.cols.map(c => `<span>${esc(c)}</span>`).join('')}</div>
+        ${f.options.map(o => `<div class="cl-row" data-area="${esc(o)}"><span class="cl-l">${esc(o)}</span>
+          <button type="button" class="mini ${val[o]?.cleaned ? 'on' : ''}" data-col="cleaned" aria-label="Cleaned">${TICK}</button>
+          <button type="button" class="mini ${val[o]?.sanitised ? 'on' : ''}" data-col="sanitised" aria-label="Sanitised">${TICK}</button></div>`).join('')}
+        <button type="button" class="btn quiet sm" data-allclean style="margin-top:4px">Tick both for everything</button></div>`;
+    }
+    case 'slices': {
+      const rows = (v && v.length ? v : []).concat(Array.from({ length: Math.max(0, 10 - (v?.length || 0)) }, () => ({})));
+      return `<label class="f">${esc(f.label)} <span class="lim">${FS().limits.releaseLossPct != null ? 'release at ≥ ' + FS().limits.releaseLossPct + '% loss' : 'no release threshold set yet'}</span></label>
+        <div class="slices" data-k="${f.k}" data-slices><div class="sl-h"><span>#</span><span>Thick mm</span><span>Raw g</span><span>Dry g</span><span>Loss</span></div>
+        ${rows.map((r, i) => sliceRow(r, i)).join('')}</div>
+        <button type="button" class="btn quiet sm" data-addslice>Add a slice (validation batch)</button>`;
+    }
+  }
+  return '';
+}
+const sliceRow = (r, i) => `<div class="sl-r"><span class="n">${i + 1}</span><input inputmode="decimal" data-s="thick" value="${esc(r.thick ?? '')}"><input inputmode="decimal" data-s="raw" value="${esc(r.raw ?? '')}"><input inputmode="decimal" data-s="dry" value="${esc(r.dry ?? '')}"><span class="loss">—</span></div>`;
+
+function readForm(root, fields) {
+  const data = {};
+  for (const f of fields) {
+    if (f.type === 'info') continue;
+    if (f.type === 'tick') data[f.k] = $(`[data-tick][data-k="${f.k}"]`, root)?.classList.contains('on') || false;
+    else if (f.type === 'choice') data[f.k] = $(`[data-choice][data-k="${f.k}"] [aria-pressed="true"]`, root)?.dataset.v ?? '';
+    else if (f.type === 'checklist') {
+      const out = {};
+      $$('.cl-row', root).forEach(r => { const c = $('[data-col=cleaned]', r).classList.contains('on'), s = $('[data-col=sanitised]', r).classList.contains('on'); if (c || s) out[r.dataset.area] = { cleaned: c, sanitised: s }; });
+      data[f.k] = out;
+    } else if (f.type === 'slices') {
+      data[f.k] = $$('.sl-r', root).map(r => ({ thick: $('[data-s=thick]', r).value.trim(), raw: $('[data-s=raw]', r).value.trim(), dry: $('[data-s=dry]', r).value.trim() }))
+        .filter(r => r.thick || r.raw || r.dry).map(r => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v === '' ? null : Number(v)])));
+    } else {
+      const el = $(`[data-k="${f.k}"]`, root); if (!el) continue;
+      const v = el.value.trim();
+      data[f.k] = f.type === 'num' ? (v === '' ? null : Number(v.replace(',', '.'))) : v;
+    }
+  }
+  return data;
+}
+
+/** Live colours and worked-out values while filling in. Server re-checks on save. */
+function liveCheck(root, fields, ctx = {}) {
+  const data = readForm(root, fields);
+  let anyFail = false;
+  for (const f of fields.filter(f => f.type === 'num' && f.limit)) {
+    const L = limitFor(f), v = data[f.k], out = $(`[data-live="${f.k}"]`, root), wrap = $(`[data-numwrap="${f.k}"]`, root);
+    if (!out || !L) continue;
+    let st = '';
+    if (v != null && !Number.isNaN(v)) st = (L.max != null && (L.strict ? v >= L.max : v > L.max)) || (L.min != null && v < L.min) ? 'bad' : 'ok';
+    if (st === 'bad') anyFail = true;
+    out.className = 'live ' + st; out.textContent = st === 'ok' ? 'Within limit' : st === 'bad' ? 'Over the limit' : '';
+    wrap?.classList.toggle('bad', st === 'bad'); wrap?.classList.toggle('ok', st === 'ok');
+  }
+  // Calibration: tolerance check.
+  if (ctx.kind === 'calibration') {
+    const e = state.safety.schema.calibration.find(c => c.id === data.equipment);
+    const box = $('#calInfo', root);
+    if (e && box) {
+      const tol = e.tol.pct ? Math.abs(data.reference || 0) * e.tol.pct / 100 : e.tol.abs;
+      const has = data.reading != null && data.reference != null;
+      const bad = has && Math.abs(data.reading - data.reference) > tol + 1e-9;
+      anyFail = anyFail || bad;
+      box.innerHTML = `${esc(e.freq)} · tolerance ± ${Math.round(tol * 10) / 10} ${esc(e.unit)}${has ? ` · <b class="${bad ? 'bad-t' : 'ok-t'}">${bad ? 'Out of tolerance' : 'In tolerance'}</b>` : ''}`;
+    }
+  }
+  const S = ctx.sections || {};
+  const kg = Number(S.slicing?.data?.trimmedKg) || ctx.rawKg || null;
+  const R = FS().recipe || { salt: 40, vinegar: 100, worcestershire: 60, spice: 66.7 };
+  const at = $('[data-at]', root)?.value;
+  const set = (k, t) => { const el = $(`[data-info="${k}"]`, root); if (el) el.innerHTML = t; };
+  if (ctx.section === 'marinate_start') {
+    if (kg) set('targets', `Salt ${Math.round(kg * R.salt)} g · vinegar ${Math.round(kg * R.vinegar)} mL · L&amp;P ${Math.round(kg * R.worcestershire)} mL`);
+    const out = $('[data-live="saltG"]', root);
+    if (kg && data.saltG != null && out) {
+      const pk = Math.round(data.saltG / kg * 10) / 10, bad = pk < FS().limits.saltMinPerKg;
+      anyFail = anyFail || bad;
+      out.className = 'live ' + (bad ? 'bad' : 'ok'); out.textContent = `${pk} g/kg${bad ? ' · below ' + FS().limits.saltMinPerKg : ''}`;
+    }
+  }
+  const hrs = (fromKey) => S[fromKey]?.at && at ? Math.round((new Date(at) - new Date(S[fromKey].at)) / 36e5 * 10) / 10 : null;
+  if (ctx.section === 'marinate_end') { const h = hrs('marinate_start'); if (h != null) { const bad = h < FS().limits.marinateMinH; anyFail = anyFail || bad; set('hours', `<span class="${bad ? 'bad-t' : 'ok-t'}">${h} hours</span>`); } else set('hours', 'Save the start first'); }
+  if (ctx.section === 'drying_end') { const h = hrs('drying_start'); set('hours', h != null ? `${h} hours` : '—'); }
+  if (ctx.section === 'spice' && data.tubBefore != null && data.tubAfter != null) {
+    const net = data.tubBefore - data.tubAfter - (data.fallOff || 0), skg = data.seasonedKg || kg;
+    set('perKg', skg ? `${Math.round(net)} g · ${Math.round(net / skg * 10) / 10} g/kg <span class="muted">(target ${R.spice})</span>` : `${Math.round(net)} g`);
+  }
+  if (ctx.section === 'post' && kg && data.finalKg) set('yield', `${Math.round(data.finalKg / kg * 1000) / 10}%`);
+  if (ctx.section === 'slices') {
+    const thr = FS().limits.releaseLossPct;
+    $$('.sl-r', root).forEach(r => {
+      const raw = parseFloat($('[data-s=raw]', r).value), dry = parseFloat($('[data-s=dry]', r).value), o = $('.loss', r);
+      if (raw > 0 && !Number.isNaN(dry)) { const l = Math.round((raw - dry) / raw * 1000) / 10; const bad = thr != null && l < thr; anyFail = anyFail || bad; o.textContent = l + '%'; o.className = 'loss ' + (thr == null ? '' : bad ? 'bad' : 'ok'); }
+      else { o.textContent = '—'; o.className = 'loss'; }
+    });
+  }
+  $$('.fail-only', root).forEach(el => el.classList.toggle('hide', !anyFail && !$('textarea', el).value));
+  return anyFail;
+}
+
+/**
+ * Open a record form. opts: { kind, section, batchId, existing, prefill, back }
+ */
+async function sheetFsForm(opts) {
+  const sv = await ensureSafety(); if (!sv) { toast('Couldn’t load the records', true); return; }
+  const { kind, section, batchId, existing } = opts;
+  let fields, title, note = '', ctx = { kind, section };
+  if (kind === 'batch') {
+    const sec = sv.schema.batch.find(s => s.key === section);
+    fields = sec.fields; title = `${sec.no}. ${sec.title}`;
+    note = [sec.ccp ? `<span class="chip bad">${esc(sec.ccp)}</span>` : '', sec.note ? `<span class="small muted">${esc(sec.note)}</span>` : ''].filter(Boolean).join(' ');
+    ctx.sections = opts.sections || {}; ctx.rawKg = state.data.batches.find(b => b.id === batchId)?.raw_kg;
+  } else { fields = sv.schema.logs[kind].fields; title = sv.schema.logs[kind].title; }
+  const remember = sv.remember[section || kind] || {};
+  const base = existing ? existing.data : { ...Object.fromEntries(fields.filter(f => f.remember && remember[f.k]).map(f => [f.k, remember[f.k]])), ...(opts.prefill || {}) };
+  if (kind === 'chiller' && !base.unit) base.unit = FS().units[0];
+  const needInitials = !FS().initials;
+  const bcode = batchId ? state.data.batches.find(b => b.id === batchId)?.code : null;
+
+  openSheet(title, `
+    ${bcode ? `<div class="between" style="margin-bottom:4px"><span class="code">${esc(bcode)}</span>${note}</div>` : note ? `<div style="margin-bottom:4px">${note}</div>` : ''}
+    ${existing ? `<div class="note info" style="margin:6px 0 4px">You’re correcting a saved record. The original is kept, with your reason.</div>` : ''}
+    ${needInitials ? `<label class="f">Your initials</label><input class="in" data-initials maxlength="8" placeholder="MB" style="text-transform:uppercase"><p class="hint">Signs every record, like on paper. Saved for next time.</p>` : ''}
+    ${kind === 'calibration' ? '' : ''}
+    ${fields.map(f => fieldHtml(f, base[f.k])).join('')}
+    ${kind === 'calibration' ? `<div class="hint" id="calInfo"></div>` : ''}
+    ${kind === 'corrective' ? `<label class="f">Batch (if a batch is affected)</label><select class="in" data-batch><option value="">No batch</option>${state.data.batches.map(b => `<option value="${b.id}" ${String(b.id) === String(batchId || existing?.batch_id || '') ? 'selected' : ''}>${esc(b.code)} · ${esc(flavourLabel(b.flavour))}</option>`).join('')}</select>` : ''}
+    <label class="f">When</label><input class="in" type="datetime-local" data-at value="${existing ? toLocalInput(existing.at) : timeNow()}">
+    ${existing ? `<label class="f">What changed and why</label><input class="in" data-reason placeholder="Typed 35 instead of 3.5">` : ''}
+    <div class="err"></div>
+    <div class="sh-f"><button class="btn full" data-save>${existing ? 'Save correction' : 'Save'}${FS().initials ? ` · ${esc(FS().initials)}` : ''}</button></div>`, root => {
+    const update = () => liveCheck(root, fields, ctx);
+    // Calibration: fill in the reference for the chosen check.
+    if (kind === 'calibration') root.addEventListener('click', e => {
+      const b = e.target.closest('[data-choice][data-k="equipment"] button'); if (!b) return;
+      setTimeout(() => { const eq = sv.schema.calibration.find(c => c.id === b.dataset.v); const ref = $('[data-k="reference"]', root); if (eq && eq.reference != null && !existing) ref.value = eq.reference; update(); });
+    });
+    root.addEventListener('input', update); root.addEventListener('click', () => setTimeout(update));
+    update();
+    const btn = $('[data-save]', root);
+    btn.onclick = async () => {
+      const err = $('.err', root); err.textContent = '';
+      const data = readForm(root, fields);
+      // Unticked boxes: confirm before saving them as "not done".
+      const unticked = fields.filter(f => f.type === 'tick' && !f.optional && !data[f.k]);
+      if (unticked.length && !btn.dataset.armed) {
+        const crit = unticked.filter(f => f.critical).length;
+        err.textContent = crit ? `${plural(crit, 'critical check')} not ticked. That will record a failed limit.` : `${plural(unticked.length, 'box')} not ticked. They’ll be saved as not done.`;
+        arm(btn, 'Tap again to save anyway', 'btn danger full'); return;
+      }
+      if (btn.dataset.armed) delete btn.dataset.armed;
+      if (needInitials) {
+        const ini = $('[data-initials]', root).value.trim();
+        if (!ini) { err.textContent = 'Add your initials first.'; return; }
+        const r = await post({ action: 'fs-settings', initials: ini });
+        if (!r.ok) { err.textContent = r.data.error; return; }
+        state.safety.settings.initials = ini.toUpperCase();
+      }
+      const body = { action: 'fs-save', kind, section, batchId: kind === 'corrective' ? ($('[data-batch]', root).value || null) : batchId, data,
+        at: new Date($('[data-at]', root).value).toISOString(), replaces: existing?.id, reason: $('[data-reason]', root)?.value };
+      btn.disabled = true;
+      const r = await post(body);
+      btn.disabled = false;
+      if (!r.ok) { err.textContent = r.data.error || 'Couldn’t save that.'; return; }
+      const rec = r.data.record;
+      await Promise.all([loadSafety(), loadBoss()]); render();
+      if (rec.pass === false && kind !== 'corrective' && !(data.action || '').trim()) {
+        toast('Saved. A limit wasn’t met.', true);
+        // Straight into the corrective action, filled in with what failed.
+        closeSheet();
+        setTimeout(() => sheetFsForm({ kind: 'corrective', batchId: kind === 'batch' ? batchId : null,
+          prefill: { what: rec.fails.join('; '), limit: kind === 'batch' ? title : KIND_LABEL[kind], found: 'Routine check' } }), 280);
+        return;
+      }
+      toast(r.data.msg || 'Saved', rec.pass === false);
+      if (opts.back) opts.back(); else closeSheet();
+    };
+  }, opts.back);
+}
+
+/* ---------- one batch's record ---------- */
+async function sheetFsBatch(batchId) {
+  openSheet('Batch record', '<div class="skel" style="height:300px"></div>');
+  await ensureSafety();
+  const r = await api('/api/boss?record=' + batchId);
+  if (!r.ok) { $('#shBody').innerHTML = `<div class="err">${esc(r.data.error || 'Couldn’t load it.')}</div>`; return; }
+  const { sections: S, release, progress, corrective, history } = r.data;
+  const b = state.data.batches.find(x => x.id === batchId);
+  const days = [...new Set(state.safety.schema.batch.map(s => s.day))];
+  const icon = (s) => { const x = S[s.key]; if (!x) return `<span class="sdot">${s.no}</span>`; if (x.pass === false) return '<span class="sdot bad">!</span>'; if (x.pass === null) return '<span class="sdot part">…</span>'; return `<span class="sdot ok">${TICK}</span>`; };
+  const back = () => sheetFsBatch(batchId);
+  $('#shTitle').textContent = `${b.code} · Batch record`;
+  $('#shBody').innerHTML = `
+    <div class="between"><span class="btitle" style="margin:0">${esc(flavourLabel(b.flavour))} · ${n1(b.raw_kg)} kg</span>${progress.released ? '<span class="chip ok">Released</span>' : progress.failed.length ? '<span class="chip bad">Check failed</span>' : `<span class="chip gold">${progress.done} of ${progress.total}</span>`}</div>
+    <div class="bar ${progress.failed.length ? 'bad' : progress.released ? 'ok' : ''}" style="margin:10px 0 4px"><i style="width:${progress.done / progress.total * 100}%"></i></div>
+    ${days.map(day => `<label class="f">${esc(day)}</label><div class="card flush list mb0">${state.safety.schema.batch.filter(s => s.day === day && s.key !== 'release').map(s => {
+      const x = S[s.key];
+      const sub = x ? `${when(x.at)} · ${esc(x.initials || '')}${x.result?.fails?.length ? ' · <b class="bad-t">' + esc(x.result.fails[0]) + '</b>' : x.result?.missing?.length ? ' · ' + esc(x.result.missing[0]) : ''}` : (s.ccp ? esc(s.ccp) : 'Not done yet');
+      return `<button class="it" data-do="fs-section" data-id="${batchId}" data-section="${s.key}">${icon(s)}<span class="main"><span class="t">${esc(s.title)}</span><span class="d">${sub}</span></span>${CHEV}</button>`;
+    }).join('')}</div>`).join('')}
+    <label class="f">Release for sale</label>
+    <div class="card mb0">${S.release ? `<div class="row"><span class="sdot ok">${TICK}</span><div><b>Released</b><div class="small muted">${when(S.release.at)} · ${esc(S.release.initials)}</div></div></div>` :
+      `${release.map(c => `<div class="rel ${c.ok ? 'ok' : ''}"><span class="mini ${c.ok ? 'on' : ''}">${TICK}</span><span>${esc(c.label)}</span></div>`).join('')}
+       <button class="btn full mt" data-do="fs-release" data-id="${batchId}" ${release.every(c => c.ok) ? '' : 'disabled'}>Release batch for sale · ${esc(FS().initials || '')}</button>
+       ${release.every(c => c.ok) ? '' : '<p class="hint">Everything above needs a tick first.</p>'}`}</div>
+    <label class="f">Corrective actions</label>
+    <div class="card flush list mb0">${corrective.length ? corrective.map(c => `<button class="it" data-do="fs-record" data-id="${c.id}"><span class="main"><span class="t">${esc(String(c.data.what || '').slice(0, 80))}</span><span class="d">${when(c.at)}</span></span>${resultChip(c)}</button>`).join('') : '<div class="empty">None for this batch.</div>'}</div>
+    <button class="btn sec2 full mt" data-do="fs-log" data-kind="corrective" data-batch="${batchId}">Log a corrective action</button>
+    ${history.length ? `<p class="hint mt">${plural(history.length, 'earlier version')} kept for this batch. They show on the verifier printout.</p>` : ''}`;
+  state.fsBatchCtx = { batchId, sections: S, back };
+}
+
+/* ---------- one saved record ---------- */
+async function sheetFsRecord(id) {
+  await ensureSafety();
+  let r = state.safety.records.find(x => x.id === id);
+  if (!r) { await loadSafety(); r = state.safety.records.find(x => x.id === id); }
+  if (!r) { toast('Couldn’t find that record', true); return; }
+  const fields = r.kind === 'skip' ? [] : state.safety.schema.logs[r.kind].fields;
+  const val = (f) => {
+    const v = r.data[f.k];
+    if (f.type === 'tick') return v ? '<b class="ok-t">Yes</b>' : '<b class="bad-t">No</b>';
+    if (f.type === 'checklist') return Object.entries(v || {}).map(([k, x]) => `${esc(k)}: ${x.cleaned ? 'cleaned' : ''}${x.cleaned && x.sanitised ? ' + ' : ''}${x.sanitised ? 'sanitised' : ''}`).join('<br>') || '—';
+    if (f.type === 'choice' && f.options === 'calibration') { const e = state.safety.schema.calibration.find(c => c.id === v); return e ? esc(`${e.label}: ${e.check}`) : '—'; }
+    return v == null || v === '' ? '<span class="faint">—</span>' : esc(v) + (f.unit ? ' ' + esc(f.unit) : '');
+  };
+  openSheet(KIND_LABEL[r.kind], `
+    <div class="between"><span class="small muted">${when(r.at)} · ${esc(r.initials || '')}${r.code ? ' · ' + esc(r.code) : ''}</span>${resultChip(r)}</div>
+    ${(r.result?.fails || []).map(f => `<div class="note" style="margin-top:10px;background:var(--bad-soft);color:var(--bad)"><b>${esc(f)}</b></div>`).join('')}
+    <div class="card mt">${r.kind === 'skip' ? `<b>${esc(r.data.title)}</b><p class="muted" style="margin:6px 0 0">Not done: ${esc(r.data.reason)}</p>` :
+      fields.map(f => `<div class="kv"><span class="muted">${esc(f.label)}</span><span>${val(f)}</span></div>`).join('')}</div>
+    ${r.replaces ? `<p class="hint">This corrects an earlier entry: ${esc(r.reason || '')}</p>` : ''}
+    ${r.kind !== 'skip' ? `<button class="btn sec2 full mt" data-do="fs-correct" data-id="${r.id}">${r.kind === 'corrective' && !r.data.closed ? 'Update or close' : 'Correct this record'}</button>` : ''}
+    <label class="f">Not valid?</label>
+    <div class="row"><input class="in" data-void-reason placeholder="Entered twice by mistake" style="flex:1"><button class="btn danger sm" style="min-height:46px" data-do="fs-void" data-id="${r.id}">Remove</button></div>
+    <p class="hint">Removed records are kept and marked “not valid” on the printout, the same as one line through on paper.</p>`);
+}
+
+/* ---------- reminders ---------- */
+function sheetFsReminders() {
+  const s = FS();
+  const list = JSON.parse(JSON.stringify(s.reminders));
+  const sched = r => r.freq === 'monthly' ? `Monthly on the ${r.monthDay}${['st', 'nd', 'rd'][((r.monthDay + 90) % 100 - 10) % 10 - 1] || 'th'} · ${r.time}`
+    : `${r.days.length === 7 ? 'Every day' : r.days.map(d => DAYS[d - 1]).join(', ')} · ${r.time}`;
+  const draw = () => {
+    $('#shBody').innerHTML = `
+      <div class="card"><div class="switch"><div><b>Show reminders in the app</b><div class="small muted">Due checks show on Today and Safety until you log them or mark them not done.</div></div><input type="checkbox" data-master ${s.remindersOn ? 'checked' : ''}></div></div>
+      <div class="card flush list">${list.map((r, i) => `<div class="it"><span class="main" data-edit="${i}" style="cursor:pointer"><span class="t">${esc(r.title)}</span><span class="d">${esc(KIND_LABEL[r.kind])} · ${esc(sched(r))}</span></span>
+        <label class="switch" style="border:0;padding:0"><input type="checkbox" data-en="${i}" ${r.enabled ? 'checked' : ''} aria-label="On or off"></label></div>`).join('')}</div>
+      <button class="btn sec2 full" data-add>${PLUS} Add a reminder</button>
+      <div class="err"></div>
+      <div class="sh-f"><button class="btn full" data-savereminders>Save reminders</button></div>`;
+    const root = $('#shBody');
+    $$('[data-en]', root).forEach(c => c.onchange = () => { list[+c.dataset.en].enabled = c.checked; });
+    $('[data-master]', root).onchange = e => { s.remindersOn = e.target.checked; };
+    $$('[data-edit]', root).forEach(el => el.onclick = () => edit(+el.dataset.edit));
+    $('[data-add]', root).onclick = () => { list.push({ id: 'r' + Date.now(), title: 'Fridge temperature check', kind: 'chiller', freq: 'daily', days: [1, 2, 3, 4, 5, 6, 7], time: '12:00', monthDay: 1, enabled: true }); edit(list.length - 1); };
+    $('[data-savereminders]', root).onclick = e => act({ action: 'fs-settings', remindersOn: s.remindersOn, reminders: list }, { btn: e.target, errEl: $('.err', root) }).then(x => x && loadSafety());
+  };
+  const edit = i => {
+    const r = list[i];
+    $('#shBody').innerHTML = `
+      <label class="f">Name</label><input class="in" data-t value="${esc(r.title)}">
+      <label class="f">What to log</label>${choiceHtml('kind', [['chiller', 'Fridge temp'], ['cleaning', 'Cleaning'], ['calibration', 'Calibration']], r.kind)}
+      <label class="f">How often</label>${choiceHtml('freq', [['daily', 'Daily'], ['weekly', 'Weekly'], ['monthly', 'Monthly']], r.freq)}
+      <div data-daysbox><label class="f">On these days</label><div class="choices days">${DAYS.map((d, k) => `<button type="button" data-day="${k + 1}" aria-pressed="${r.days.includes(k + 1)}">${d}</button>`).join('')}</div></div>
+      <div data-mdbox><label class="f">Day of the month</label>${stepper('monthDay', r.monthDay || 1, 1)}</div>
+      <label class="f">Time</label><input class="in" type="time" data-time value="${esc(r.time)}">
+      <div class="btns mt2"><button class="btn sec2" data-back>Back</button><button class="btn" data-ok>Done</button></div>
+      <button class="btn quiet full" data-del style="color:var(--bad)">Delete this reminder</button>`;
+    const root = $('#shBody');
+    const sync = () => { const f = pick(root, 'freq'); $('[data-daysbox]', root).classList.toggle('hide', f === 'monthly'); $('[data-mdbox]', root).classList.toggle('hide', f !== 'monthly'); };
+    root.addEventListener('click', e => { const d = e.target.closest('[data-day]'); if (d) d.setAttribute('aria-pressed', d.getAttribute('aria-pressed') !== 'true'); setTimeout(sync); });
+    sync();
+    $('[data-back]', root).onclick = draw;
+    $('[data-del]', root).onclick = () => { list.splice(i, 1); draw(); };
+    $('[data-ok]', root).onclick = () => {
+      Object.assign(r, { title: $('[data-t]', root).value.trim() || 'Check', kind: pick(root, 'kind'), freq: pick(root, 'freq'),
+        days: $$('[data-day][aria-pressed="true"]', root).map(b => +b.dataset.day), monthDay: +$('[name=monthDay]', root).value || 1, time: $('[data-time]', root).value || '09:00' });
+      if (r.freq !== 'monthly' && !r.days.length) r.days = [1, 2, 3, 4, 5, 6, 7];
+      draw();
+    };
+  };
+  openSheet('Reminders', ''); draw();
+}
+
+/* ---------- safety settings ---------- */
+function sheetFsSettings() {
+  const s = FS(), L = s.limits;
+  const lim = (k, label, hint, dec) => `<div class="packrow"><div><b>${label}</b><div class="small muted">${hint}</div></div><input class="in" style="text-align:center" inputmode="${dec ? 'decimal' : 'numeric'}" data-lim="${k}" value="${L[k] ?? ''}"></div>`;
+  openSheet('Safety settings', `
+    <label class="f">Your initials</label><input class="in" data-ini value="${esc(s.initials)}" maxlength="8" placeholder="MB" style="text-transform:uppercase">
+    <p class="hint">Signs every record.</p>
+    <label class="f">Fridges and chillers you log</label><input class="in" data-units value="${esc(s.units.join(', '))}" placeholder="Biltong chiller, Walk-in">
+    <p class="hint">Separate with commas. These become the buttons on the fridge temp form.</p>
+    <label class="f">Limits from your food control plan</label>
+    <div class="card mb0">
+      ${lim('chillerMax', 'Chiller', '°C, at or below', true)}
+      ${lim('saltMinPerKg', 'Salt (CCP 1)', 'g per kg, at least')}
+      ${lim('marinateMinH', 'Marinating (CCP 1)', 'hours, at least', true)}
+      ${lim('thickMax', 'Thickest slice', 'mm, at most', true)}
+      ${lim('awMax', 'Water activity (CCP 2)', 'below', true)}
+      ${lim('releaseLossPct', 'Release threshold', '% weight loss, from validation', true)}
+    </div>
+    <p class="hint">Leave the release threshold empty until your lab validation gives you the number. Change limits only when your plan changes.</p>
+    <div class="err"></div>
+    <div class="sh-f"><button class="btn full" data-savefs>Save</button></div>`, root => {
+    $('[data-savefs]', root).onclick = e => act({ action: 'fs-settings', initials: $('[data-ini]', root).value, units: $('[data-units]', root).value.split(','),
+      limits: Object.fromEntries($$('[data-lim]', root).map(i => [i.dataset.lim, i.value.trim()])) }, { btn: e.target, errEl: $('.err', root) }).then(x => x && loadSafety());
+  });
+}
+
+/* ---------- verifier printout / backup ---------- */
+function sheetFsPrint() {
+  const today = state.data.today;
+  const from = new Date(D(today).getTime() - 30 * 864e5).toISOString().slice(0, 10);
+  openSheet('Records for your verifier', `
+    <p class="muted small" style="margin:0">Opens a clean, printable copy in Safari: batch records, fridge, cleaning and calibration logs, corrective actions, and any corrections with their reasons. Use Share → Print, or save it as a PDF.</p>
+    <div class="grid2"><div><label class="f">From</label><input class="in" type="date" data-from value="${from}"></div><div><label class="f">To</label><input class="in" type="date" data-to value="${today}"></div></div>
+    <div class="choices mt">${[[7, 'Last 7 days'], [30, 'Last 30 days'], [90, 'Last 90 days'], [365, 'Last year']].map(([n, l]) => `<button type="button" data-range="${n}">${l}</button>`).join('')}</div>
+    <div class="err"></div>
+    <button class="btn full mt2" data-open>Open printable records</button>
+    <p class="hint">The link works for 15 minutes.</p>`, root => {
+    root.addEventListener('click', e => { const b = e.target.closest('[data-range]'); if (b) $('[data-from]', root).value = new Date(D(today).getTime() - b.dataset.range * 864e5).toISOString().slice(0, 10); });
+    $('[data-open]', root).onclick = async e => {
+      const w = window.open('', '_blank');
+      const r = await post({ action: 'fs-print-link', from: $('[data-from]', root).value, to: $('[data-to]', root).value });
+      if (!r.ok) { if (w) w.close(); $('.err', root).textContent = r.data.error || 'Couldn’t make the link.'; return; }
+      if (w) w.location = r.data.url; else location.href = r.data.url;
+    };
+  });
+}
+async function fsBackup() {
+  const w = window.open('', '_blank');
+  const r = await post({ action: 'fs-export-link' });
+  if (!r.ok) { if (w) w.close(); toast(r.data.error || 'Couldn’t make the backup', true); return; }
+  if (w) w.location = r.data.url; else location.href = r.data.url;
+}
+
+function sheetFsSkip(id) {
+  const rem = FS().reminders.find(r => r.id === id) || state.data.safety.due.find(d => d.id === id);
+  openSheet('Not done', `<p class="muted" style="margin:0 0 4px">${esc(rem?.title || 'Check')}. A gap with a reason is a record. A blank isn’t.</p>
+    <label class="f">Why</label>${choiceHtml('why', [['No production today', 'No production today'], ['Day off', 'Day off'], ['Fridge empty', 'Fridge empty'], ['Other', 'Other']], 'No production today')}
+    <input class="in mt" data-other placeholder="Add detail (optional)">
+    <div class="err"></div><button class="btn full mt" data-ok>Save</button>`, root => {
+    $('[data-ok]', root).onclick = e => { const why = pick(root, 'why'), extra = $('[data-other]', root).value.trim();
+      act({ action: 'fs-skip', reminderId: id, reason: extra ? `${why}: ${extra}` : why }, { btn: e.target, errEl: $('.err', root) }).then(x => x && loadSafety()); };
+  });
+}
+
 /* ================================================================== EVENTS */
 document.addEventListener('click', async e => {
   const t = e.target;
@@ -964,7 +1533,13 @@ document.addEventListener('click', async e => {
   const seg = t.closest('[data-seg]'); if (seg && seg.closest('#view')) { state.stockSeg = seg.dataset.seg; render(); return; }
   const per = t.closest('[data-period]'); if (per) { state.period = per.dataset.period; render(); return; }
   const ship = t.closest('[data-ship]'); if (ship) { shipAction(ship); return; }
-  const ch = t.closest('.choices button'); if (ch) { $$('button', ch.parentElement).forEach(b => b.setAttribute('aria-pressed', b === ch)); return; }
+  const flt = t.closest('[data-fsfilter]'); if (flt) { state.fsFilter = flt.dataset.fsfilter; render(); return; }
+  const tk = t.closest('[data-tick]'); if (tk) { tk.classList.toggle('on'); tk.setAttribute('aria-pressed', tk.classList.contains('on')); return; }
+  const mini = t.closest('button.mini'); if (mini) { mini.classList.toggle('on'); return; }
+  const allc = t.closest('[data-allclean]'); if (allc) { const on = !$$('.clist .mini', allc.parentElement).every(m => m.classList.contains('on')); $$('.clist .mini', allc.closest('.clist')).forEach(m => m.classList.toggle('on', on)); return; }
+  const adds = t.closest('[data-addslice]'); if (adds) { const box = $('[data-slices]', adds.parentElement); if ($$('.sl-r', box).length < 20) box.insertAdjacentHTML('beforeend', sliceRow({}, $$('.sl-r', box).length)); return; }
+  const ndg = t.closest('[data-nudge]'); if (ndg) { const i = $('input', ndg.parentElement); const v = parseFloat(i.value || '4') + +ndg.dataset.nudge; i.value = Math.round(v * 10) / 10; i.dispatchEvent(new Event('input', { bubbles: true })); return; }
+  const ch = t.closest('.choices button'); if (ch && !ch.closest('.days')) { $$('button', ch.parentElement).forEach(b => b.setAttribute('aria-pressed', b === ch)); return; }
   const st = t.closest('.stepper button'); if (st) {
     const i = $('input', st.parentElement); const min = +i.dataset.min || 0;
     i.value = Math.max(min, (parseInt(i.value, 10) || 0) + +st.dataset.step); i.dispatchEvent(new Event('input', { bubbles: true })); return;
@@ -1005,6 +1580,42 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'logout': closeSheet(); logout(''); break;
+    case 'fs-log': {
+      const open = () => sheetFsForm({ kind: el.dataset.kind, batchId: el.dataset.batch ? +el.dataset.batch : null });
+      if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(open, 270); } else open();
+      break;
+    }
+    case 'fs-skip': sheetFsSkip(el.dataset.id); break;
+    case 'fs-batch': if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetFsBatch(id), 270); } else sheetFsBatch(id); break;
+    case 'fs-section': {
+      const c = state.fsBatchCtx, ex = c.sections[el.dataset.section];
+      // A finished section opens as a correction; a part-done one just carries on.
+      sheetFsForm({ kind: 'batch', section: el.dataset.section, batchId: id, sections: c.sections, back: c.back,
+        existing: ex && ex.pass !== null ? ex : null, prefill: ex && ex.pass === null ? ex.data : null, });
+      break;
+    }
+    case 'fs-release': {
+      if (!arm(el, 'Tap again to release')) break;
+      el.disabled = true;
+      const r = await post({ action: 'fs-save', kind: 'batch', section: 'release', batchId: id, data: {} });
+      el.disabled = false;
+      if (!r.ok) { toast(r.data.error, true); break; }
+      toast('Batch released for sale'); await Promise.all([loadSafety(), loadBoss()]); render(); sheetFsBatch(id);
+      break;
+    }
+    case 'fs-record': if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetFsRecord(id), 270); } else sheetFsRecord(id); break;
+    case 'fs-correct': { const r = state.safety.records.find(x => x.id === id); closeSheet(); setTimeout(() => sheetFsForm({ kind: r.kind, existing: r, batchId: r.batch_id }), 270); break; }
+    case 'fs-void': {
+      const reason = $('[data-void-reason]').value.trim();
+      if (!reason) { $('[data-void-reason]').focus(); toast('Say why it’s not valid first', true); break; }
+      if (!arm(el, 'Sure?')) break;
+      if (await act({ action: 'fs-void', id, reason })) loadSafety();
+      break;
+    }
+    case 'fs-reminders': sheetFsReminders(); break;
+    case 'fs-settings': sheetFsSettings(); break;
+    case 'fs-print': sheetFsPrint(); break;
+    case 'fs-backup': fsBackup(); break;
   }
 });
 document.addEventListener('keydown', e => {

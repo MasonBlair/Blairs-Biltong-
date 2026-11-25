@@ -276,6 +276,9 @@ span.mini{width:24px;height:24px;border-radius:7px;margin:0;flex-shrink:0}span.m
 .pp-blank{color:#c9bca6}.pp-y{color:var(--ok)}.pp-n{color:var(--bad)}.pp-ok{color:var(--ok);font-weight:700}.pp-bad{color:var(--bad);font-weight:700}
 .pp-note{font-size:13.5px;background:var(--gold-soft);border-radius:8px;padding:8px 10px;margin:6px 0}
 .pp-t{font-size:13px;margin:4px 0}.pp-t th,.pp-t td{text-align:center!important;padding:5px 2px}
+.al{gap:10px}.al-go{background:none;border:0;padding:0;text-align:left;flex:1;min-width:0}
+.al-btn{min-height:34px;flex-shrink:0}.btn.quiet.al-btn{text-decoration:none;color:var(--gold-2);font-weight:600;padding:0 6px}
+.al-noted{opacity:.6}
 /* ---------- login ---------- */
 #login{max-width:380px;margin:9vh auto 0}
 #login .card{padding:22px}
@@ -448,9 +451,11 @@ function viewToday() {
     <button class="stat" data-tab-go="numbers"><span class="k">Next batch</span><span class="v ${fc?.overdue ? 'warn-t' : ''}" style="${fc ? 'font-size:21px;padding-top:4px' : ''}">${fc ? (fc.overdue ? 'Start now' : niceDate(fc.startBy)) : '—'}</span><span class="s">${fc ? `Stock lasts ~${fc.daysLeft} days` : 'Needs a few weeks of sales'}</span></button>
   </div>`;
 
-  if (d.alerts.length) {
-    h += `<div class="sec"><h2>Needs attention</h2></div><div class="card flush list">${d.alerts.slice(0, 8).map(a =>
-      `<button class="it" data-tab-go="${a.tab === 'supplies' ? 'stock' : a.tab}" ${a.tab === 'supplies' ? 'data-seg="supplies"' : ''}><span class="dot ${a.level}"></span><span class="main"><span class="d" style="color:var(--ink);font-size:14px">${esc(a.text)}</span></span>${CHEV}</button>`).join('')}</div>`;
+  const shown = d.alerts.filter(a => !a.snoozedUntil), noted = d.alerts.filter(a => a.snoozedUntil);
+  if (shown.length || noted.length) {
+    h += `<div class="sec"><h2>Needs attention</h2>${noted.length ? `<button class="link" data-do="show-noted">${state.showNoted ? 'Hide' : 'Show'} ${noted.length} noted</button>` : ''}</div>`;
+    const list = shown.slice(0, 10).concat(state.showNoted ? noted : []);
+    h += list.length ? `<div class="card flush list">${list.map(alertRow).join('')}</div>` : '<div class="card empty">All clear.</div>';
   }
 
   if (inProg.length) {
@@ -470,6 +475,20 @@ function activityList(rows) {
       <span class="d">${esc(m.reasonLabel)}${m.code ? ' · ' + esc(m.code) : ''}${who ? ' · ' + who : ''}${m.note ? ' · ' + esc(m.note) : ''}</span></span>
       <span class="end"><span class="tiny faint">${ago(m.at)}</span>${canUndo ? `<br><button class="btn quiet sm" style="min-height:26px;padding:0;font-size:12.5px" data-do="undo" data-id="${m.id}">Undo</button>` : ''}</span></div>`;
   }).join('')}</div>`;
+}
+
+
+/* ---------- needs-attention rows: tap to go there, or deal with it in place ---------- */
+function alertRow(a) {
+  const go = `data-tab-go="${a.tab === 'supplies' ? 'stock' : a.tab}" ${a.tab === 'supplies' ? 'data-seg="supplies"' : ''}`;
+  let actions = '';
+  if (a.snoozedUntil) actions = `<button class="btn quiet sm al-btn" data-do="alert-unsnooze" data-key="${esc(a.key)}">Show</button>`;
+  else if (a.kind === 'reorder') actions = `<button class="btn sec2 sm al-btn" data-do="supply-ordered" data-id="${a.supplyId}">Ordered</button>`;
+  else if (a.kind === 'onorder') actions = `<button class="btn sm al-btn" data-do="supply-arrived" data-id="${a.supplyId}">Arrived</button>`;
+  else if (!a.fixed) actions = `<button class="btn quiet sm al-btn" data-do="alert-snooze" data-key="${esc(a.key)}">Noted</button>`;
+  const sub = a.snoozedUntil ? `<span class="d">Noted · back ${new Date(a.snoozedUntil).toLocaleDateString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short' })} if still true</span>` : '';
+  return `<div class="it al ${a.snoozedUntil ? 'al-noted' : ''}"><span class="dot ${a.level}"></span>
+    <button class="main al-go" ${go}><span class="d" style="color:var(--ink);font-size:14px">${esc(a.text)}</span>${sub}</button>${actions}</div>`;
 }
 
 /* ================================================================== ORDERS */
@@ -577,10 +596,12 @@ function viewSupplies() {
     h += `<div class="sec"><h2>${label}</h2></div><div class="card flush list">${rows.map(s => {
       const counted = s.on_hand > 0 || s.cost_cents != null || s.reorder_at != null;
       let chip = '', cls = 'ok', pct = 100;
+      const onOrd = state.data.settings.onOrder?.[s.id];
+      if (onOrd) chip = '<span class="chip gold">On order</span>';
       if (s.on_hand < 0) { chip = '<span class="chip plain">Count needed</span>'; cls = 'bad'; pct = 0; }
       else if (s.reorder_at != null) {
         pct = Math.min(100, s.on_hand / Math.max(1, s.reorder_at * 2) * 100);
-        if (s.on_hand <= s.reorder_at) { chip = '<span class="chip warn">Reorder</span>'; cls = 'warn'; }
+        if (s.on_hand <= s.reorder_at) { if (!onOrd) chip = '<span class="chip warn">Reorder</span>'; cls = 'warn'; }
       } else if (!counted) chip = '<span class="chip plain">Not set up</span>';
       return `<button class="it" data-do="supply" data-id="${s.id}"><span class="main"><span class="t">${esc(s.name)}</span>
         <span class="d">${fmtQty(s.on_hand)} ${esc(s.unit)}${s.reorder_at != null ? ` · reorder at ${fmtQty(s.reorder_at)}` : ''}</span>
@@ -1019,7 +1040,10 @@ async function sheetSupply(id) {
   const s = state.data.supplies.find(x => x.id === id);
   openSheet(s.name, `
     <div class="between"><div><div class="big">${fmtQty(s.on_hand)}</div><div class="small muted">${esc(s.unit)} on hand${s.cost_cents != null ? ` · ${costTxt(s.cost_cents)} per ${esc(singular(s.unit))}` : ''}</div></div>
-      ${s.reorder_at != null && s.on_hand <= s.reorder_at ? '<span class="chip warn">Reorder</span>' : ''}</div>
+      ${state.data.settings.onOrder?.[s.id] ? '<span class="chip gold">On order</span>' : s.reorder_at != null && s.on_hand <= s.reorder_at ? '<span class="chip warn">Reorder</span>' : ''}</div>
+    ${state.data.settings.onOrder?.[s.id]
+      ? `<div class="note mt">On order since ${new Date(state.data.settings.onOrder[s.id]).toLocaleDateString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short' })}. When it arrives, log it below as Received.</div>`
+      : `<button class="btn sec2 full mt" data-do="supply-ordered" data-id="${s.id}">I’ve ordered more</button>`}
     <div class="seg mt" id="mvSeg"><button type="button" data-mv="received" aria-pressed="true">Received</button><button type="button" data-mv="used" aria-pressed="false">Used</button><button type="button" data-mv="count" aria-pressed="false">Count</button></div>
     <div id="mvBox"></div>
     <div class="err" id="mvErr"></div>
@@ -1878,6 +1902,27 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'fs-paper': sheetPaper(id); break;
+    case 'show-noted': state.showNoted = !state.showNoted; render(); break;
+    case 'alert-snooze': {
+      el.disabled = true;
+      const key = el.dataset.key;
+      const r = await post({ action: 'alert-snooze', key, days: 3 });
+      if (!r.ok) { el.disabled = false; toast(r.data.error, true); break; }
+      await refreshBoss();
+      toast('Hidden for 3 days', false, { label: 'A week', fn: async () => { await post({ action: 'alert-snooze', key, days: 7 }); toast('Hidden for a week'); refreshBoss(); } });
+      break;
+    }
+    case 'alert-unsnooze': await act({ action: 'alert-snooze', key: el.dataset.key, undo: true }, { close: false }); break;
+    case 'supply-ordered': {
+      el.disabled = true;
+      const r = await post({ action: 'supply-ordered', id });
+      if (!r.ok) { el.disabled = false; toast(r.data.error, true); break; }
+      if ($('#sheet').classList.contains('on')) closeSheet();
+      await refreshBoss();
+      toast(r.data.msg + '. You’ll get a reminder to log it.', false, { label: 'Undo', fn: async () => { await post({ action: 'supply-ordered', id, cancel: true }); refreshBoss(); } });
+      break;
+    }
+    case 'supply-arrived': sheetSupply(id); break;
     case 'fs-reminders': sheetFsReminders(); break;
     case 'fs-settings': sheetFsSettings(); break;
     case 'fs-print': sheetFsPrint(); break;

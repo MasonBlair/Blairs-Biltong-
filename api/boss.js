@@ -241,44 +241,50 @@ function buildNumbers({ today, sales, products, batches, settings, money = [] })
 
 function buildAlerts({ today, products, batches, supplies, settings, numbers, safety }) {
   const out = [];
-  for (const c of safety?.openCorrective || []) out.push({ level: 'bad', tab: 'safety', text: `Open corrective action: ${String(c.what || '').slice(0, 70)}` });
+  for (const c of safety?.openCorrective || []) out.push({ key: `ca:${c.id}`, fixed: true, level: 'bad', tab: 'safety', text: `Open corrective action: ${String(c.what || '').slice(0, 70)}` });
   for (const f of safety?.recentFails || []) {
     if (f.kind === 'corrective') continue;
     const b = batches.find(x => x.id === f.batch_id);
-    out.push({ level: 'bad', tab: 'safety', text: `${b ? b.code + ': ' : ''}${f.fails[0] || 'A check failed'}` });
+    out.push({ key: `fail:${f.id}`, fixed: true, level: 'bad', tab: 'safety', text: `${b ? b.code + ': ' : ''}${f.fails[0] || 'A check failed'}` });
   }
   for (const b of batches) {
     const p = safety?.batches?.[b.id];
-    if (b.status === 'packed' && p && !p.released && b.remainingBags > 0) out.push({ level: 'warn', tab: 'safety', text: `${b.code} is in stock but its batch record isn’t released yet.` });
+    if (b.status === 'packed' && p && !p.released && b.remainingBags > 0) out.push({ key: `unrel:${b.id}`, level: 'warn', tab: 'safety', text: `${b.code} is in stock but its batch record isn’t released yet.` });
   }
-  if (!settings.live) out.push({ level: 'info', tab: 'stock', text: 'Shop isn’t using these numbers yet. Do a stocktake, then turn on live stock in Settings.' });
+  if (!settings.live) out.push({ key: 'notlive', level: 'info', tab: 'stock', text: 'Shop isn’t using these numbers yet. Do a stocktake, then turn on live stock in Settings.' });
   // A whole flavour out gets one line, not one per bag size.
   const flavourOut = {};
   for (const p of products) flavourOut[p.flavour] = (flavourOut[p.flavour] ?? true) && (p.hidden || p.onHand <= 0);
   for (const [f, out_] of Object.entries(flavourOut)) {
-    if (out_ && settings.live) out.push({ level: 'warn', tab: 'stock', text: `${meta.FLAVOURS[f]?.label || f} is sold out in every size.` });
+    if (out_ && settings.live) out.push({ key: `soldout:${f}`, level: 'warn', tab: 'stock', text: `${meta.FLAVOURS[f]?.label || f} is sold out in every size.` });
   }
   for (const p of products) {
     if (p.hidden) continue;
-    if (p.onHand < 0) out.push({ level: 'bad', tab: 'stock', text: `${p.label} shows ${p.onHand}. Do a stocktake to fix the count.` });
-    else if (p.onHand === 0 && settings.live && !flavourOut[p.flavour]) out.push({ level: 'bad', tab: 'stock', text: `${p.label} is sold out on the shop.` });
-    else if (p.onHand <= p.lowAt && !(flavourOut[p.flavour] && settings.live)) out.push({ level: 'warn', tab: 'stock', text: `${p.label}: ${p.onHand} left.` });
+    if (p.onHand < 0) out.push({ key: `neg:${p.sku}`, level: 'bad', tab: 'stock', text: `${p.label} shows ${p.onHand}. Do a stocktake to fix the count.` });
+    else if (p.onHand === 0 && settings.live && !flavourOut[p.flavour]) out.push({ key: `out:${p.sku}`, level: 'bad', tab: 'stock', text: `${p.label} is sold out on the shop.` });
+    else if (p.onHand <= p.lowAt && !(flavourOut[p.flavour] && settings.live)) out.push({ key: `low:${p.sku}`, level: 'warn', tab: 'stock', text: `${p.label}: ${p.onHand} left.` });
     for (const l of p.lots) {
       if (!l.bestBefore || l.qty <= 0) continue;
       const d = daysBetween(today, l.bestBefore);
-      if (d < 0) out.push({ level: 'bad', tab: 'stock', text: `${l.qty} × ${p.label} from ${l.code} passed best-before (${l.bestBefore}).` });
-      else if (d <= settings.bestBeforeWarnDays) out.push({ level: 'warn', tab: 'stock', text: `${l.qty} × ${p.label} from ${l.code} best-before in ${d} days.` });
+      if (d < 0) out.push({ key: `bbpast:${p.sku}:${l.code}`, level: 'bad', tab: 'stock', text: `${l.qty} × ${p.label} from ${l.code} passed best-before (${l.bestBefore}).` });
+      else if (d <= settings.bestBeforeWarnDays) out.push({ key: `bb:${p.sku}:${l.code}`, level: 'warn', tab: 'stock', text: `${l.qty} × ${p.label} from ${l.code} best-before in ${d} days.` });
     }
   }
   for (const s of supplies) {
-    if (s.reorder_at != null && s.on_hand <= s.reorder_at) out.push({ level: 'warn', tab: 'supplies', text: `Reorder ${s.name}: ${fmt(s.on_hand)} ${s.unit} left.` });
+    const ord = settings.onOrder?.[s.id];
+    if (ord) out.push({ key: `onorder:${s.id}`, kind: 'onorder', supplyId: s.id, level: 'info', tab: 'supplies',
+      text: `${s.name} on order since ${new Date(ord).toLocaleDateString('en-NZ', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Pacific/Auckland' })}. Log it when it arrives.` });
+    else if (s.reorder_at != null && s.on_hand <= s.reorder_at) out.push({ key: `reorder:${s.id}`, kind: 'reorder', supplyId: s.id, level: 'warn', tab: 'supplies', text: `Reorder ${s.name}: ${fmt(s.on_hand)} ${s.unit} left.` });
   }
   for (const b of batches) {
     if (b.status === 'drying' && b.drying_on && daysBetween(b.drying_on, today) >= 4)
-      out.push({ level: 'info', tab: 'batches', text: `${b.code} has been drying ${daysBetween(b.drying_on, today)} days. Check it and move it on.` });
-    if (b.status === 'ready') out.push({ level: 'info', tab: 'batches', text: `${b.code} is ready to pack.` });
+      out.push({ key: `drying:${b.id}`, level: 'info', tab: 'batches', text: `${b.code} has been drying ${daysBetween(b.drying_on, today)} days. Check it and move it on.` });
+    if (b.status === 'ready') out.push({ key: `ready:${b.id}`, level: 'info', tab: 'batches', text: `${b.code} is ready to pack.` });
   }
-  if (numbers.forecast?.overdue) out.push({ level: 'warn', tab: 'numbers', text: `At this pace you’ll run out around ${numbers.forecast.runOut}. Start a batch now.` });
+  if (numbers.forecast?.overdue) out.push({ key: 'forecast', level: 'warn', tab: 'numbers', text: `At this pace you’ll run out around ${numbers.forecast.runOut}. Start a batch now.` });
+  // "Noted" alerts stay hidden until their snooze runs out; they come back if it's still true.
+  const now = Date.now(), snoozed = settings.snoozed || {};
+  for (const a of out) if (!a.fixed && snoozed[a.key] && Date.parse(snoozed[a.key]) > now) a.snoozedUntil = snoozed[a.key];
   const rank = { bad: 0, warn: 1, info: 2 };
   return out.sort((a, b) => rank[a.level] - rank[b.level]);
 }
@@ -461,6 +467,9 @@ const ACTIONS = {
       qty = qty - s.on_hand;
       if (!qty) return { msg: 'Count matched' };
       await moveSupply(c, { id, qty, reason: 'correction', note: 'Counted' });
+      // Counting more than before after an order = it's arrived.
+      const st = await getSettings(c);
+      if (qty > 0 && st.onOrder?.[id]) { const onOrder = { ...st.onOrder }; delete onOrder[id]; await setSettings(c, { onOrder }); }
       return { msg: 'Count saved' };
     }
     if (reason === 'used') qty = -Math.abs(qty);
@@ -472,6 +481,10 @@ const ACTIONS = {
       else if (num(b.totalCost) != null) cost = num(b.totalCost) * 100 / qty;
     }
     await moveSupply(c, { id, qty, reason, costCents: cost, note: clean(b.note) });
+    if (reason === 'received') {
+      const st = await getSettings(c);
+      if (st.onOrder?.[id]) { const onOrder = { ...st.onOrder }; delete onOrder[id]; await setSettings(c, { onOrder }); }
+    }
     return { msg: 'Saved' };
   },
 
@@ -528,6 +541,27 @@ const ACTIONS = {
   async 'fs-void'(c, b) { return voidRecord(c, b, fail); },
   async 'fs-skip'(c, b) { return skipReminder(c, b, fail); },
   async 'fs-settings'(c, b) { return saveFsSettings(c, b, fail); },
+
+  /* ---- needs-attention list ---- */
+  async 'alert-snooze'(c, b) {
+    const key = String(b.key || '').slice(0, 80); if (!key) fail('Missing alert');
+    const days = Math.min(30, Math.max(1, int(b.days) || 3));
+    const s = await getSettings(c);
+    const now = Date.now();
+    const snoozed = Object.fromEntries(Object.entries(s.snoozed || {}).filter(([, t]) => Date.parse(t) > now));
+    if (b.undo) delete snoozed[key]; else snoozed[key] = new Date(now + days * 864e5).toISOString();
+    await setSettings(c, { snoozed });
+    return { msg: b.undo ? 'Showing it again' : `Hidden for ${days === 7 ? 'a week' : days + ' days'}` };
+  },
+  async 'supply-ordered'(c, b) {
+    const id = int(b.id);
+    const { rows: [x] } = await c.query('SELECT name FROM supplies WHERE id = $1', [id]); if (!x) fail('Unknown supply');
+    const s = await getSettings(c);
+    const onOrder = { ...(s.onOrder || {}) };
+    if (b.cancel) delete onOrder[id]; else onOrder[id] = new Date().toISOString();
+    await setSettings(c, { onOrder });
+    return { msg: b.cancel ? 'No longer on order' : `${x.name} marked as ordered` };
+  },
 
   async 'waitlist-remove'(c, b) {
     await c.query('DELETE FROM waitlist WHERE id = $1', [int(b.id)]);

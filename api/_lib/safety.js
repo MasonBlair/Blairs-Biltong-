@@ -27,7 +27,8 @@ export const FS_DEFAULTS = {
   },
   // Per kg of trimmed raw meat. Vinegar is weighed (g); Lea & Perrins measured (mL).
   // Spice blend = coriander + pepper (60:40), plus chilli for Dry Heat once set.
-  recipe: { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null }
+  // spiceOnMeat: what should actually stay on the meat after spicing (g per kg), measured Nov 2026.
+  recipe: { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null, spiceOnMeat: 50 }
 };
 
 export const FS_REMINDER_DEFAULTS = [
@@ -247,7 +248,7 @@ export function evaluate(kind, section, data, at, settings, ctx = {}) {
     if (section === 'spice') {
       const net = (num(data.tubBefore) ?? 0) - (num(data.tubAfter) ?? 0) - (num(data.fallOff) ?? 0);
       const skg = num(data.seasonedKg) ?? kg;
-      if (num(data.tubBefore) != null && num(data.tubAfter) != null && skg) derived.perKg = `${Math.round(net)} g net · ${r1(net / skg)} g/kg (target ${r1(spicePerKg(recipe, ctx.flavour))})`;
+      if (num(data.tubBefore) != null && num(data.tubAfter) != null && skg) derived.perKg = `${Math.round(net)} g net · ${r1(net / skg)} g/kg (target ${r1(recipe.spiceOnMeat ?? spicePerKg(recipe, ctx.flavour))} g/kg on the meat)`;
     }
     if (section === 'drying_end' && S.drying_start?.at) derived.hours = `${r1((new Date(at) - new Date(S.drying_start.at)) / 3.6e6)} hours`;
     if (section === 'slices') {

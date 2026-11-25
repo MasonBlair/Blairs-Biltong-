@@ -1339,7 +1339,7 @@ function liveCheck(root, fields, ctx = {}) {
   if (ctx.section === 'drying_end') { const h = hrs('drying_start'); set('hours', h != null ? `${h} hours` : '—'); }
   if (ctx.section === 'spice' && data.tubBefore != null && data.tubAfter != null) {
     const net = data.tubBefore - data.tubAfter - (data.fallOff || 0), skg = data.seasonedKg || kg;
-    set('perKg', skg ? `${Math.round(net)} g · ${Math.round(net / skg * 10) / 10} g/kg <span class="muted">(target ${Math.round(((R.coriander || 0) + (R.pepper || 0) + (ctx.flavour === 'dryheat' ? R.chilli || 0 : 0)) * 10) / 10})</span>` : `${Math.round(net)} g`);
+    set('perKg', skg ? `${Math.round(net)} g · ${Math.round(net / skg * 10) / 10} g/kg <span class="muted">(target ${R.spiceOnMeat ?? Math.round(((R.coriander || 0) + (R.pepper || 0) + (ctx.flavour === 'dryheat' ? R.chilli || 0 : 0)) * 10) / 10} g/kg on the meat)</span>` : `${Math.round(net)} g`);
   }
   if (ctx.section === 'post' && kg && data.finalKg) set('yield', `${Math.round(data.finalKg / kg * 1000) / 10}%`);
   if (ctx.section === 'slices') {
@@ -1612,7 +1612,7 @@ function sheetFsSkip(id) {
 
 /* ================================================================== RECIPE CALCULATOR
    Trimmed weight in → everything to weigh out for the marinade and spice mix. */
-const RECIPE_DEFAULT = { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null };
+const RECIPE_DEFAULT = { salt: 40, vinegar: 100, worcestershire: 60, coriander: 40, pepper: 26.7, chilli: null, spiceOnMeat: 50 };
 const recipeNow = () => ({ ...RECIPE_DEFAULT, ...(state.safety?.settings?.recipe || {}) });
 function recipeLines(kg, flavour) {
   const R = recipeNow(), x = v => Math.round(kg * v);
@@ -1647,12 +1647,13 @@ async function sheetRecipe(pre = {}) {
       out.innerHTML = `
         <label class="f">Marinade <span class="lim">meat fully submerged</span></label>${r.marinade.map(row).join('')}
         <label class="f">Spice mix <span class="lim">${r.spiceTotal.toLocaleString('en-NZ')} g blend · applied the next morning</span></label>${r.spice.map(row).join('')}
+        ${r.R.spiceOnMeat ? `<div class="info-row"><span class="muted">Aim to leave on the meat</span><b>${Math.round(kg * r.R.spiceOnMeat).toLocaleString('en-NZ')} g <span class="muted small">(${r.R.spiceOnMeat} g/kg)</span></b></div>` : ''}
         <p class="hint">Per kg: salt ${r.R.salt} g · vinegar ${r.R.vinegar} g · Lea &amp; Perrins ${r.R.worcestershire} mL · coriander ${r.R.coriander} g · pepper ${r.R.pepper} g${flavour === 'dryheat' ? ` · chilli ${r.R.chilli ?? 'not set'}${r.R.chilli ? ' g' : ''}` : ''}. Salt critical limit ${FS().limits.saltMinPerKg ?? 30} g/kg.</p>
         ${pre.batchId ? `<button class="btn sec2 full mt" data-do="fs-section" data-id="${pre.batchId}" data-section="marinate_start" data-fromrecipe="1">Record it in the batch record</button>` : ''}`;
     };
     const R = recipeNow();
     const ed = (k, label, unit) => `<div class="packrow"><div><b>${label}</b><div class="small muted">${unit} per kg</div></div><input class="in" style="text-align:center" inputmode="decimal" data-rk="${k}" value="${R[k] ?? ''}"></div>`;
-    $('#recipeEdit', root).innerHTML = `${ed('salt', 'Salt', 'g')}${ed('vinegar', 'Malt vinegar', 'g')}${ed('worcestershire', 'Lea & Perrins', 'mL')}${ed('coriander', 'Coriander seed', 'g')}${ed('pepper', 'Black pepper', 'g')}${ed('chilli', 'Chilli (Dry Heat)', 'g')}
+    $('#recipeEdit', root).innerHTML = `${ed('salt', 'Salt', 'g')}${ed('vinegar', 'Malt vinegar', 'g')}${ed('worcestershire', 'Lea & Perrins', 'mL')}${ed('coriander', 'Coriander seed', 'g')}${ed('pepper', 'Black pepper', 'g')}${ed('chilli', 'Chilli (Dry Heat)', 'g')}${ed('spiceOnMeat', 'Spice left on the meat', 'g target')}
       <p class="hint">Change these only when your recipe and food control plan change. Salt can’t go below the ${FS().limits.saltMinPerKg ?? 30} g/kg critical limit.</p>
       <div class="err"></div><button class="btn sec2 full mt" data-saverecipe>Save recipe</button>`;
     $('[data-saverecipe]', root).onclick = async e => {

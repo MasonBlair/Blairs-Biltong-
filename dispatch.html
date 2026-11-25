@@ -266,6 +266,16 @@ span.mini{width:24px;height:24px;border-radius:7px;margin:0;flex-shrink:0}span.m
 .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}.kv:first-child{border-top:0}.kv>span:last-child{text-align:right}
 .choices.days button{min-width:44px;padding:0 10px}
 .sheet .sh-h .back{margin:4px -4px 0 -6px;color:var(--ink)}
+
+.pp{background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:4px 14px 12px}
+.pp-top{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:10px 0}.pp-top>div{display:flex;flex-direction:column;gap:2px}
+.pp-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:14px -14px 4px;padding:8px 14px;background:#f2ece1;font:600 12.5px/1.2 'Oswald',sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.pp-sig{font:500 11.5px/1 'Barlow',sans-serif;letter-spacing:0;text-transform:none;color:var(--muted);white-space:nowrap}
+.pp-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dotted var(--line-2);font-size:14px}
+.pp-row>span:first-child{color:var(--muted)}.pp-row>span:last-child{text-align:right}
+.pp-blank{color:#c9bca6}.pp-y{color:var(--ok)}.pp-n{color:var(--bad)}.pp-ok{color:var(--ok);font-weight:700}.pp-bad{color:var(--bad);font-weight:700}
+.pp-note{font-size:13.5px;background:var(--gold-soft);border-radius:8px;padding:8px 10px;margin:6px 0}
+.pp-t{font-size:13px;margin:4px 0}.pp-t th,.pp-t td{text-align:center!important;padding:5px 2px}
 /* ---------- login ---------- */
 #login{max-width:380px;margin:9vh auto 0}
 #login .card{padding:22px}
@@ -951,7 +961,8 @@ async function sheetBatch(id) {
     <div class="between"><span class="chip ${open ? 'gold' : b.status === 'closed' ? 'plain' : 'ok'}">${STATUS[b.status]}</span><span class="small muted">${b.cut ? esc(b.cut) + ' · ' : ''}started ${niceDate(b.started_on)}</span></div>
     <div class="grid3 mt">${fact('Raw', n1(b.raw_kg) + ' kg')}${fact('Dried', b.dried_kg ? n1(b.dried_kg) + ' kg' : '—')}${fact('Loss', b.lossPct != null ? b.lossPct + '%' : '—')}
       ${fact('Bags', b.packedBags || '—')}${fact('Left', b.packedBags ? b.remainingBags : '—')}${fact('Yield', b.yieldPct != null ? b.yieldPct + '%' : '—')}</div>
-    ${(() => { const p = d.safety?.batches?.[b.id]; return p ? `<button class="btn sec2 full mt" data-do="fs-batch" data-id="${b.id}" style="justify-content:space-between;text-transform:none;letter-spacing:0;font:600 15px/1 Barlow,sans-serif"><span>Food safety record</span><span class="chip ${p.released ? 'ok' : p.failed.length ? 'bad' : 'gold'}">${p.released ? 'Released' : p.failed.length ? 'Check failed' : p.done + ' of ' + p.total}</span></button>` : ''; })()}
+    ${(() => { const p = d.safety?.batches?.[b.id]; return p ? `<button class="btn sec2 full mt" data-do="fs-batch" data-id="${b.id}" style="justify-content:space-between;text-transform:none;letter-spacing:0;font:600 15px/1 Barlow,sans-serif"><span>Food safety record</span><span class="chip ${p.released ? 'ok' : p.failed.length ? 'bad' : 'gold'}">${p.released ? 'Released' : p.failed.length ? 'Check failed' : p.done + ' of ' + p.total}</span></button>
+      <button class="btn sec2 full mt" data-do="fs-paper" data-id="${b.id}">View as paper record</button>` : ''; })()}
     ${open ? `<div class="btns mt">${b.status !== 'ready' ? `<button class="btn sec2" data-do="advance" data-id="${b.id}" data-to="${b.status === 'marinating' ? 'drying' : 'ready'}">${b.status === 'marinating' ? 'Hung to dry' : 'Ready to pack'}</button>` : ''}<button class="btn" data-do="pack" data-id="${b.id}">Pack bags</button></div>` : ''}
 
     ${b.packedBags ? `<label class="f">Packed</label><div class="card mb0">${Object.entries(b.packed).map(([g, n]) =>
@@ -1454,6 +1465,7 @@ async function sheetFsBatch(batchId) {
   $('#shBody').innerHTML = `
     <div class="between"><span class="btitle" style="margin:0">${esc(flavourLabel(b.flavour))} · ${n1(b.raw_kg)} kg</span>${progress.released ? '<span class="chip ok">Released</span>' : progress.failed.length ? '<span class="chip bad">Check failed</span>' : `<span class="chip gold">${progress.done} of ${progress.total}</span>`}</div>
     <div class="bar ${progress.failed.length ? 'bad' : progress.released ? 'ok' : ''}" style="margin:10px 0 4px"><i style="width:${progress.done / progress.total * 100}%"></i></div>
+    <button class="btn sec2 full mt" data-do="fs-paper" data-id="${batchId}">View as paper record</button>
     ${days.map(day => `<label class="f">${esc(day)}</label><div class="card flush list mb0">${state.safety.schema.batch.filter(s => s.day === day && s.key !== 'release').map(s => {
       const x = S[s.key];
       const sub = x ? `${when(x.at)} · ${esc(x.initials || '')}${x.result?.fails?.length ? ' · <b class="bad-t">' + esc(x.result.fails[0]) + '</b>' : x.result?.missing?.length ? ' · ' + esc(x.result.missing[0]) : ''}` : (s.ccp ? esc(s.ccp) : 'Not done yet');
@@ -1469,6 +1481,96 @@ async function sheetFsBatch(batchId) {
     <button class="btn sec2 full mt" data-do="fs-log" data-kind="corrective" data-batch="${batchId}">Log a corrective action</button>
     ${history.length ? `<p class="hint mt">${plural(history.length, 'earlier version')} kept for this batch. They show on the verifier printout.</p>` : ''}`;
   state.fsBatchCtx = { batchId, sections: S, back };
+}
+
+
+/* ---------- the batch record laid out like the paper form, to copy across ---------- */
+async function sheetPaper(batchId) {
+  openSheet('Copy to paper', '<div class="skel" style="height:320px"></div>', null, () => sheetFsBatch(batchId));
+  await ensureSafety();
+  const r = await api('/api/boss?record=' + batchId);
+  if (!r.ok) { $('#shBody').innerHTML = `<div class="err">${esc(r.data.error || 'Couldn’t load it.')}</div>`; return; }
+  const S = r.data.sections, b = state.data.batches.find(x => x.id === batchId);
+  const schema = state.safety.schema.batch;
+  const dt = iso => iso ? new Date(iso).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' }) : '';
+  const tm = iso => iso ? new Date(iso).toLocaleTimeString('en-NZ', { hour: 'numeric', minute: '2-digit' }).replace(' ', '').toLowerCase() : '';
+  const blank = '<span class="pp-blank">—</span>';
+  const val = (f, v) => {
+    if (v === undefined || v === null || v === '') return blank;
+    if (f.type === 'tick') return v ? '<b class="pp-y">Y</b>' : '<b class="pp-n">N</b>';
+    return `<b>${esc(v)}${f.unit ? ' ' + esc(f.unit) : ''}</b>`;
+  };
+  const row = (label, v, pass) => `<div class="pp-row"><span>${label}</span><span>${v}${pass === true ? ' <span class="pp-ok">✓</span>' : pass === false ? ' <span class="pp-bad">✗</span>' : ''}</span></div>`;
+  const L = FS().limits;
+  const within = (v, max) => v == null || v === '' ? null : Number(v) <= max;
+  const signed = x => x ? `<span class="pp-sig">${esc(x.initials || '')} · ${dt(x.at)} ${tm(x.at)}</span>` : '<span class="pp-sig">Not done yet</span>';
+  const head = (no, title, x, ccp) => `<div class="pp-h"><span>${no}&nbsp;&nbsp;${esc(title)}${ccp ? ` <span class="crit">${ccp}</span>` : ''}</span>${signed(x)}</div>`;
+  const fieldsOf = k => schema.find(x => x.key === k).fields;
+  const plain = (k, skip = []) => { const x = S[k]; return fieldsOf(k).filter(f => !['info', 'slices'].includes(f.type) && !skip.includes(f.k)).map(f => {
+    const v = x?.data?.[f.k]; const lim = f.limit ? L[f.limit.max] : null;
+    return row(esc(f.label), val(f, v), lim != null && f.type === 'num' ? within(v, lim) : f.type === 'tick' && x ? v === true : undefined);
+  }).join(''); };
+  const d = k => S[k]?.result?.derived || {};
+
+  // §3 marinating: start + finish together, like the paper.
+  const ms = S.marinate_start, me = S.marinate_end;
+  const sl = d('slices').slices || [];
+  const packed = b.packed || {};
+
+  $('#shBody').innerHTML = `
+    <p class="hint" style="margin:0 0 10px">Laid out in the same order as the paper form. Blanks are steps not recorded yet.</p>
+    <div class="pp">
+      <div class="pp-top"><div><span class="muted small">Batch no.</span><b>${esc(b.code)}</b></div><div><span class="muted small">Date started</span><b>${dt(b.started_on + 'T12:00')}</b></div>
+        <div><span class="muted small">Product</span><b>${esc(flavourLabel(b.flavour))}</b></div><div><span class="muted small">Pack</span><b>${Object.keys(packed).length ? Object.keys(packed).map(g => g + ' g').join(', ') : '—'}</b></div></div>
+
+      ${head(1, 'Receiving', S.receiving)}${plain('receiving')}
+      ${head(2, 'Trimming and slicing', S.slicing)}${plain('slicing')}${S.slicing ? row('Time done', `<b>${tm(S.slicing.at)}</b>`) : ''}
+
+      ${head(3, 'Marinating', ms || me, 'CCP 1')}
+      ${ms?.result?.derived?.targets ? `<div class="pp-note">Targets: ${esc(ms.result.derived.targets)}</div>` : ''}
+      ${row('Salt, actual weighed', val({ unit: 'g' }, ms?.data?.saltG), ms ? (ms.result?.derived?.saltPerKg ?? 99) >= L.saltMinPerKg : undefined)}
+      ${ms?.result?.derived?.saltPerKg != null ? row('Salt per kg', `<b>${ms.result.derived.saltPerKg} g/kg</b>`) : ''}
+      ${row('Malt vinegar, actual weighed', val({ unit: 'g' }, ms?.data?.vinegarG))}
+      ${row('Lea &amp; Perrins, actual', val({ unit: 'mL' }, ms?.data?.worcMl))}
+      ${row('Meat fully submerged at start', val({ type: 'tick' }, ms?.data?.submerged), ms ? ms.data.submerged === true : undefined)}
+      ${row('Start: date / time', ms ? `<b>${dt(ms.at)} · ${tm(ms.at)}</b>` : blank)}
+      ${row('Start: chiller', val({ unit: '°C' }, ms?.data?.chillerC), ms ? within(ms.data.chillerC, L.chillerMax) : undefined)}
+      ${row('Finish: date / time', me ? `<b>${dt(me.at)} · ${tm(me.at)}</b>` : blank)}
+      ${row('Finish: chiller', val({ unit: '°C' }, me?.data?.chillerC), me ? within(me.data.chillerC, L.chillerMax) : undefined)}
+      ${row('Total marinating time', me?.result?.derived?.hours ? `<b>${esc(me.result.derived.hours)}</b>` : blank, me ? me.pass !== false : undefined)}
+      ${row('Meat still fully submerged at finish', val({ type: 'tick' }, me?.data?.stillSubmerged), me ? me.data.stillSubmerged === true : undefined)}
+
+      ${head(4, 'Spice application', S.spice)}${plain('spice')}
+      ${S.spice?.data?.tubBefore != null && S.spice?.data?.tubAfter != null ? row('Taken from tub', `<b>${Math.round(S.spice.data.tubBefore - S.spice.data.tubAfter)} g</b>`) : ''}
+      ${d('spice').perKg ? row('Net on meat ÷ kg', `<b>${esc(d('spice').perKg)}</b>`) : ''}
+
+      ${head(5, 'Drying', S.drying_start || S.drying_end, 'CCP 2')}${plain('drying_start')}
+      ${row('Start: date / time', S.drying_start ? `<b>${dt(S.drying_start.at)} · ${tm(S.drying_start.at)}</b>` : blank)}
+      ${row('Mid-cycle check', S.drying_end?.data?.midCheck ? `<b>${esc(S.drying_end.data.midCheck)}</b>` : blank)}
+      ${row('Finish: date / time', S.drying_end ? `<b>${dt(S.drying_end.at)} · ${tm(S.drying_end.at)}</b>` : blank)}
+      ${row('Total drying time', d('drying_end').hours ? `<b>${esc(d('drying_end').hours)}</b>` : blank)}
+
+      ${head(6, 'Sample slices and water activity', S.slices, 'CCP 2')}
+      ${row('Release threshold', L.releaseLossPct != null ? `<b>${L.releaseLossPct}% weight loss</b>` : blank)}
+      ${sl.length ? `<table class="t pp-t"><tr><th>#</th><th>mm</th><th>Raw g</th><th>Dry g</th><th>Loss</th><th></th></tr>${sl.map(x => `<tr><td>${x.no}</td><td>${x.thick ?? ''}</td><td>${x.raw ?? ''}</td><td>${x.dry ?? ''}</td><td>${x.loss != null ? x.loss + '%' : ''}</td><td>${x.pass == null ? '' : x.pass ? '<span class="pp-ok">✓</span>' : '<span class="pp-bad">✗</span>'}</td></tr>`).join('')}</table>` : row('Slices', blank)}
+      ${row('Method', val({}, S.slices?.data?.method))}
+      ${row('Result', S.slices?.data?.aw != null ? `<b>${S.slices.data.aw} aw</b>` : S.slices?.data?.method === 'Weight loss' && S.slices.pass === true ? '<b>All slices at or above threshold</b>' : blank, S.slices ? S.slices.pass === true ? true : S.slices.pass === false ? false : undefined : undefined)}
+
+      ${head(7, 'Post-drying assessment', S.post)}${plain('post')}${d('post').yield ? row('Yield vs trimmed weight', `<b>${esc(d('post').yield)}</b>`) : ''}
+
+      ${head(8, 'Packaging and labelling', S.packing)}${plain('packing')}
+      ${row('Best before', b.best_before ? `<b>${dt(b.best_before + 'T12:00')}</b>` : blank)}
+      ${[50, 100, 200].map(g => row(`${g} g packs`, packed[g] ? `<b>${packed[g]}</b>` : blank)).join('')}
+      ${row('Packed date', b.packed_on ? `<b>${dt(b.packed_on + 'T12:00')}</b>` : blank)}
+
+      ${head(9, 'Release', S.release)}
+      ${(r.data.release || []).map(c => row(esc(c.label), c.ok ? '<span class="pp-ok">✓</span>' : blank)).join('')}
+      ${row('Released for sale', S.release ? `<b>${esc(S.release.initials)} · ${dt(S.release.at)}</b>` : blank)}
+
+      ${head(10, 'Notes and corrective actions', null).replace('Not done yet', '')}
+      ${b.notes ? `<div class="pp-note">${esc(b.notes)}</div>` : ''}
+      ${(r.data.corrective || []).map(c => `<div class="pp-note"><b>${dt(c.at)}:</b> ${esc(c.data.what || '')}${c.data.immediate ? ' · Action: ' + esc(c.data.immediate) : ''}${c.data.decision ? ' · ' + esc(c.data.decision) : ''}</div>`).join('') || (!b.notes ? row('Notes', blank) : '')}
+    </div>`;
 }
 
 /* ---------- one saved record ---------- */
@@ -1775,6 +1877,7 @@ document.addEventListener('click', async e => {
       if ($('#sheet').classList.contains('on')) { closeSheet(); setTimeout(() => sheetRecipe(pre), 270); } else sheetRecipe(pre);
       break;
     }
+    case 'fs-paper': sheetPaper(id); break;
     case 'fs-reminders': sheetFsReminders(); break;
     case 'fs-settings': sheetFsSettings(); break;
     case 'fs-print': sheetFsPrint(); break;
